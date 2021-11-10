@@ -1,0 +1,161 @@
+*{
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+}
+
+body, html{
+    height: 100%;
+    width: 100%;
+}
+
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+    background: #24292f;
+}
+
+.header .logo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: auto 10px;
+    height: 100%;
+    font-family: Comic Sans MS, Comic Sans, cursive;
+}
+
+.header .logo h1 a{
+    color: #ffffff;
+}
+
+.header .right-header{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.header .right-header .notification{
+    position: relative;
+    height: 100%;
+    width: 50px;
+}
+
+.header .right-header .notification a{
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 200%;
+    color: white;
+}
+
+.header .right-header .notification .count{
+    position: absolute;
+    top: 8px;
+    right: 0;
+    height: 10px;
+    width: 10px;
+    background-color: #f44336;
+    border-radius: 5px;
+}
+
+.header .right-header .user ul{
+    height: 100%;
+    margin: auto 15px;
+    list-style-type: none;
+    color: #ffffff;
+}
+
+.main-box{
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    width: 100%;
+}
+
+/**/
+.main-box .nav-box{
+    background-color: rgb(17,24,39);
+}
+
+.main-box .nav{
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    flex-direction: column;
+    position: sticky;
+    top:50px;
+    left: 0;
+    width: 70px;
+    height: 500px;
+    /*background-color: rgb(17,24,39);*/
+    background-color: #0d1421;
+    transition: .3s;
+
+}
+
+.main-box .nav .icon{
+    position: relative;
+    height: 50px;
+    width: 85%;
+    margin: 9px;
+    border-radius: 5px;
+    transition: .3s;
+    color: white;
+}
+
+.main-box .nav .icon i{
+    font-size: 200%;
+    position: absolute;
+    left: 10px;
+    top: 8px
+}
+
+.icon:nth-child(1)::after,
+.icon:nth-child(4)::after,
+.icon:nth-child(7)::after{
+    content: '';
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: rgb(55,65,81);
+    position: absolute;
+    bottom: -10px
+}
+
+.icon span{
+    position: relative;
+    top: 25%;
+    left: 25%;
+    font-size: 15px;
+    opacity: 0;
+    transition: .1s;
+}
+
+.nav:hover{
+    width: 300px;
+}
+
+.icon:hover{
+    color: white;
+    background-color: rgb(55,65,81);
+}
+
+.nav:hover span{
+    opacity: 1;
+}
+
+.icon:hover{
+    color:#fff;
+}
+
+
+.container{
+    height: 100%;
+    width: 100%;
+    background: #59699b;
+}

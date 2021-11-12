@@ -9,8 +9,6 @@ from cunyzero.models import User
 class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)] )
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()] )
     password = PasswordField('Password',validators=[DataRequired()] )
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password') ])
@@ -21,15 +19,11 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError("That username is taken, Please choose a different one.")
 
-    def validate_email(self, email):
-        address = User.query.filter_by(email=email.data).first()
-        if address:
-            raise ValidationError("That email is taken, Please choose a different one.")
 
 class LoginForm(FlaskForm):
 
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()] )
+    username = StringField('Username',
+                        validators=[DataRequired()] )
     password = PasswordField('Password',validators=[DataRequired()])
     # remember by cookie
     remember = BooleanField('Remember Me')
@@ -38,8 +32,7 @@ class LoginForm(FlaskForm):
 class UpdateAccountForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)] )
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()] )
+    password = PasswordField('Password', validators=[DataRequired()])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png']) ])
     submit = SubmitField('Update')
 

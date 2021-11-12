@@ -1,9 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
 from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm
-from cunyzero.models import User, Post
+from cunyzero.models import *
 from flask_login import login_user, current_user, logout_user, login_required
+from flask_user import roles_required, SQLAlchemyAdapter, UserManager, UserMixin
 import secrets
+import random
 import os
 from PIL import Image
 
@@ -21,6 +23,12 @@ posts = [
         'date_posted': 'April 21, 2018'
     },
 
+    {
+        'author':  "12",
+        'title': 'Blog Post 2',
+        'content': 'Second Post Content',
+        'date_posted': 'April 21, 2018'
+    },
 ]
 
 @app.route('/')
@@ -37,7 +45,10 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        user = User(username=form.username.data, password=hashed_password)
+        visitor = Visitor(ownerId=random.randint(10000000, 20000000))
+        user.ownerId = visitor.ownerId
+        db.session.add(visitor)
         db.session.add(user)
         db.session.commit()
 
@@ -53,7 +64,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             flash('Login Successful!', 'success')
@@ -61,7 +72,7 @@ def login():
 
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
-            flash('Login Unsuccessful. Please check email and password!', 'danger')
+            flash('Login Unsuccessful. Please check username and password!', 'danger')
     return render_template("login.html", title="Login", form=form)
 
 @app.route('/logout/', methods=['GET', 'POST'])
@@ -93,15 +104,16 @@ def account():
         if form.picture.data:
             picture_file = save_picture(form.picture.data)
             current_user.image_file = picture_file
-
+        if form.password.data:
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            current_user.password = hashed_password
         current_user.username = form.username.data
-        current_user.email = form.email.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
     elif request.method == 'GET':
         form.username.data = current_user.username
-        form.email.data = current_user.email
+
 
     image_file = url_for('static', filename= "profile_pics/" + current_user.image_file)
     return render_template("account.html", title="Account",

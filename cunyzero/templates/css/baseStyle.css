@@ -1,0 +1,221 @@
+*{
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+}
+
+:root {
+    --bg-color: white;
+    --x: 84;
+    --y: 75;
+    --size: 128;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  background: var(--bg-color, #fff);
+  font-family: Comic Sans MS;
+}
+
+body, .boxes, .jelly{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+.boxes{
+  z-index: 2;
+  flex-direction: row;
+}
+
+/* cover on body */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:#fff;
+  opacity: .3;
+}
+
+/*.boxes {*/
+/*  counter-reset: number;*/
+/*  display: flex;*/
+/*  flex-direction: row;*/
+/*}*/
+
+
+.jelly {
+    font-size: 20px;
+    overflow: hidden;
+    width: 20vw;
+    height: 20vw;
+    min-width: 5em;
+    min-height: 5em;
+    /*动画时间*/
+    transition: .5s all ease;
+    background: var(--color);
+    border: 0 solid transparent;
+    /*允许您以特定的方式定义匹配某个区域的特定元素*/
+    box-sizing: border-box;
+    /*圆*/
+    border-radius: 50%;
+    margin: 1vw;
+    opacity: .7;
+    --dx: calc(var(--size) - var(--x));
+    --dy: calc(var(--size) - var(--y));
+}
+
+
+/*body:not([style]) .boxes div:first-child,*/
+.jelly:hover {
+  opacity: 1;
+  cursor: pointer;
+  border: calc(2px + .85vw) solid rgba(255, 255, 255, .5);
+  transition:
+    .5s background-color ease,
+    .2s border ease;
+
+  border-radius:
+    calc(var(--x) / var(--size) * 100%) 
+    calc(var(--dx) / var(--size) * 100%)
+    calc(var(--dx) / var(--size) * 100%) 
+    calc(var(--x) / var(--size) * 100%) /
+    calc(var(--y) / var(--size) * 100%) 
+    calc(var(--y) / var(--size) * 100%) 
+    calc(var(--dy) / var(--size) * 100%) 
+    calc(var(--dy) / var(--size) * 100%) 
+}
+
+
+/*body:not([style]) .boxes div:first-child:after,*/
+/*.boxes div:after {*/
+/*  content: 'nihao';*/
+/*  color: rgba(255, 255, 255, 0);*/
+/*  font-size: calc(1vw + 1.2em);*/
+/*  font-weight: 200;*/
+/*  transition: all .2s ease;*/
+/*  transition-delay: .1s;*/
+/*  transform: translate3d(0, -.5em, 0);*/
+/*}*/
+
+/*body:not([style]) .boxes div:first-child:after,*/
+/*.boxes div:hover:after {*/
+/*  color: rgba(255, 255, 255, .7);*/
+/*  transform: translate3d(0, 0, 0);*/
+/*}*/
+
+.login-form-box{
+    display: none;
+    /*width: 380px;*/
+    /*height: 240px;*/
+    width: 25vw;
+    height: 16vw;
+    /*margin:150px auto;*/
+    position: relative;
+    background: #fff;
+    padding: 10px;
+    border-radius: 30px;
+    overflow: hidden;
+    transition: .5s;
+    border: 10px solid #5581f1;
+}
+
+.btn-box{
+    width: 280px;
+    margin: 35px auto;
+    position: relative;
+    background: #ffcb52;
+    border-radius: 30px;
+}
+
+.login-btn{
+    background: transparent;
+    width: 60px;
+    display: flex;
+    float: left;
+    margin: 0 5px;
+    padding: 5px 0;
+    cursor: pointer;
+    border: 0;
+    outline: none;
+    position: relative;
+    font-size: 13px;
+    justify-content: center;
+}
+
+.btn-box:after {
+    content: "";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+/* IE6、7 专有 */
+.btn-box {
+    *zoom: 1;
+}
+
+#btn-cover{
+    top:0;
+    left: 0;
+    position: absolute;
+    width: 70px;
+    height: 100%;
+    background: linear-gradient(to right, #facd68, #fc76b3);
+    border-radius: 30px;
+    transition: .5s;
+}
+
+.login-form{
+    top: 80px;
+    width: 280px;
+    position: absolute;
+    transition: .5s;
+}
+
+.input-field{
+    width: 100%;
+    padding: 10px 0;
+    margin: 5px 0;
+    border-left: 0;
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 1px solid #999;
+    outline: none;
+    background: transparent;
+}
+
+.submit-btn{
+    width: 50%;
+    padding: 5px 30px;
+    cursor: pointer;
+    display: flex;
+    margin: 10px auto;
+    background: linear-gradient(to left, #C165DD, #B588F7);
+    border:0;
+    outline: none;
+    border-radius: 30px;
+    justify-content: center;
+}
+
+#student-login{
+    left: 60px;
+}
+
+#instructor-login{
+    left: 460px;
+}
+
+#admin-login{
+    left: 460px;
+}
+
+#visitor-login{
+    left: 460px;
+}

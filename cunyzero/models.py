@@ -16,14 +16,55 @@ def load_user(user_id):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
+
     posts = db.relationship('Post', backref='author', lazy=True)
-    # This runs a query on the Post table to find posts of the user_id
+    role = db.Column(db.String(30), nullable=False, default='Visitor')
+    ownerId = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), db.ForeignKey('admin.ownerId'))
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.image_file}')"
+        return f"User('{self.username}')"
+
+class Admin(db.Model): #Admin.user, User.adminOwner
+    ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+    user = db.relationship('User', backref='adminOwner', lazy=True)
+
+    def __repr__(self):
+        return f"Admin('{self.ownerId}')"
+
+class Visitor(db.Model):
+    ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
+    user = db.relationship('User', backref='visitorOwner', lazy=True)
+    applications = db.relationship('Application', backref='applicant', lazy=True)
+
+    def __repr__(self):
+        return f"Visitor('{self.ownerId}')"
+
+class Application(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
+    intro = db.Column(db.Text, nullable=False) # self introduction
+    visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
+    program_name = db.Column(db.String(20), db.ForeignKey('program.name'), nullable=False)
+
+    # for student only
+    GPA = db.Column(db.Integer, unique=False, nullable=False, default=0)
+
+    # For registrar Use
+    justification = db.Column(db.Text, nullable=False, default='')
+    approval = db.Column(db.Boolean,  default=None)   # None: waiting for registrar to make decision
+
+
+class Program(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(20), unique=True, nullable=False)
+    capacity = db.Column(db.Integer, nullable=False, default=5)
+    enrolled_total = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"Program('{self.id}', '{self.name}', '{self.enrolled_total}', '{self.capacity}')"
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)

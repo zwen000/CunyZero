@@ -9,6 +9,7 @@ import random
 import os
 from PIL import Image
 
+
 posts = [
     {
         'author':  'Corey Schafer',

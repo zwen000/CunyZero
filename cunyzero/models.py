@@ -2,6 +2,7 @@ from cunyzero import db, login_manager
 from datetime import datetime
 from flask_login import UserMixin
 
+
 # is_authenticated, return true if valid credentials are provided
 # is_active,
 # is_anonymous
@@ -10,7 +11,6 @@ from flask_login import UserMixin
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
 
 
 class User(db.Model, UserMixin):
@@ -26,12 +26,14 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"User('{self.username}')"
 
-class Admin(db.Model): #Admin.user, User.adminOwner
+
+class Admin(db.Model):  # Admin.user, User.adminOwner
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
     user = db.relationship('User', backref='adminOwner', lazy=True)
 
     def __repr__(self):
         return f"Admin('{self.ownerId}')"
+
 
 class Visitor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
@@ -41,11 +43,12 @@ class Visitor(db.Model):
     def __repr__(self):
         return f"Visitor('{self.ownerId}')"
 
+
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
-    intro = db.Column(db.Text, nullable=False) # self introduction
+    intro = db.Column(db.Text, nullable=False)  # self introduction
     visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
     program_name = db.Column(db.String(20), db.ForeignKey('program.name'), nullable=False)
 
@@ -54,7 +57,7 @@ class Application(db.Model):
 
     # For registrar Use
     justification = db.Column(db.Text, nullable=False, default='')
-    approval = db.Column(db.Boolean,  default=None)   # None: waiting for registrar to make decision
+    approval = db.Column(db.Boolean, default=None)  # None: waiting for registrar to make decision
 
 
 class Program(db.Model):
@@ -65,6 +68,7 @@ class Program(db.Model):
 
     def __repr__(self):
         return f"Program('{self.id}', '{self.name}', '{self.enrolled_total}', '{self.capacity}')"
+
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)

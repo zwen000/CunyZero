@@ -3,9 +3,19 @@
   <component name="ChangeListManager">
     <list default="true" id="946ec4de-3c9e-4aa9-9a56-f23562d92583" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/database.db" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/database.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cunyzero/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cunyzero/routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cunyzero/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/static/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/static/main.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/static/uicons-regular-rounded.css" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/static/uicons-regular-rounded.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/admin-warning.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/layout.html" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/templates/layout.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/templates/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/templates/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/webfonts/uicons-regular-rounded.eot" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/static/webfonts/uicons-regular-rounded.eot" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/webfonts/uicons-regular-rounded.woff" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/static/webfonts/uicons-regular-rounded.woff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cunyzero/templates/webfonts/uicons-regular-rounded.woff2" beforeDir="false" afterPath="$PROJECT_DIR$/cunyzero/static/webfonts/uicons-regular-rounded.woff2" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +43,17 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="1af3e2b5-bf31-47d4-bfd4-5ecf6d00ffd7" />
+        <option name="url" value="https://github.com/zwen000/CunyZero.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="showPreview" value="true" />
+  </component>
   <component name="ProjectId" id="20jwMJRZVs3qMbqEMUgz0Oqa99c" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
@@ -45,8 +66,14 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="js.buildTools.gulp.gulp_package_dir" value="" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/cunyzero/static" />
     <property name="nodejs.jest.jest_package" value="" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
+    <property name="settings.editor.selected.configurable" value="database.data.views" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\LUN QU\OneDrive\Documents\GitHub\CunyZero\cunyzero\static" />
+    </key>
   </component>
   <component name="RunManager" selected="Python.run">
     <configuration name="CunyZero" type="PythonConfigurationType" factoryName="Python">
@@ -119,14 +146,28 @@
       <workItem from="1636571260414" duration="3312000" />
       <workItem from="1636664042325" duration="4868000" />
       <workItem from="1636730225244" duration="7295000" />
-      <workItem from="1636750543667" duration="14560000" />
+      <workItem from="1636750543667" duration="15278000" />
+      <workItem from="1636816249578" duration="4588000" />
+      <workItem from="1636820893491" duration="8043000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/CunyZero$run.coverage" NAME="run Coverage Results" MODIFIED="1636769031007" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/CunyZero$run.coverage" NAME="run Coverage Results" MODIFIED="1636824335592" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

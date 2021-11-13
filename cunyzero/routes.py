@@ -36,14 +36,14 @@ highest_GPA_student = [
     }
 ]
 
-# posts = [
-#     {
-#         'author':  'Corey Schafer',
-#         'title': 'Blog Post 1',
-#         'content': 'First Post Content',
-#         'date_posted': 'April 20, 2018'
-#     }
-# ]
+posts = [
+    {
+        'author':  'Corey Schafer',
+        'title': 'Blog Post 1',
+        'content': 'First Post Content',
+        'date_posted': 'April 20, 2018'
+    }
+]
 
 @app.route('/')
 @app.route('/home')
@@ -62,6 +62,7 @@ def register():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, password=hashed_password)
         visitor = Visitor(ownerId=random.randint(10000000, 20000000))
+        user.id = visitor.ownerId
         user.ownerId = visitor.ownerId
         db.session.add(visitor)
         db.session.add(user)
@@ -133,3 +134,8 @@ def account():
     image_file = url_for('static', filename= "profile_pics/" + current_user.image_file)
     return render_template("account.html", title="Account",
                            image_file=image_file, form=form)
+
+
+@app.route('/application/', methods=['GET', 'POST'])
+def application():
+    return render_template("visitor-application.html", title="Visitor-Application")

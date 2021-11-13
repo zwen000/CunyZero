@@ -18,8 +18,6 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
-
-    posts = db.relationship('Post', backref='author', lazy=True)
     role = db.Column(db.String(30), nullable=False, default='Visitor')
     ownerId = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), db.ForeignKey('admin.ownerId'),
                         db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
@@ -38,7 +36,7 @@ class Admin(db.Model):  # Admin.user, User.adminOwner
         return f"Admin('{self.ownerId}')"
 
 
-class Visitor(db.Model):
+class Visitor(db.Model): #Vistior.user, user.visitorOwner, Application.applicant, Visitor.applications
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
     user = db.relationship('User', backref='visitorOwner', lazy=True)
     applications = db.relationship('Application', backref='applicant', lazy=True)
@@ -49,6 +47,8 @@ class Visitor(db.Model):
 
 class Student(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
     warning = db.Column(db.Integer, nullable=False, default=0)
     honor = db.Column(db.Integer, nullable=False, default=0)
     status = db.Column(db.String(20), default=None)  # suspended, graduated, etc.
@@ -87,6 +87,7 @@ class Application(db.Model):
     intro = db.Column(db.Text, nullable=False)  # self introduction
     visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
     program_name = db.Column(db.String(20), db.ForeignKey('program.name'), nullable=False)
+    type = db.Column(db.String(20), nullable=False)
 
     # for student only
     GPA = db.Column(db.Integer, unique=False, nullable=False, default=0)
@@ -94,6 +95,8 @@ class Application(db.Model):
     # For registrar Use
     justification = db.Column(db.Text, nullable=False, default='')
     approval = db.Column(db.Boolean, default=None)  # None: waiting for registrar to make decision
+    def __repr__(self):
+        return f"Application('{self.id}', '{self.type}', '{self.visitor_id}')"
 
 
 class Program(db.Model):

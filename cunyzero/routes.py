@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
-from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm
 from cunyzero.models import *
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_user import roles_required, SQLAlchemyAdapter, UserManager, UserMixin
@@ -62,7 +62,6 @@ def register():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, password=hashed_password)
         visitor = Visitor(ownerId=random.randint(10000000, 20000000))
-        user.id = visitor.ownerId
         user.ownerId = visitor.ownerId
         db.session.add(visitor)
         db.session.add(user)
@@ -138,4 +137,13 @@ def account():
 
 @app.route('/application/', methods=['GET', 'POST'])
 def application():
-    return render_template("visitor-application.html", title="Visitor-Application")
+    form = ApplicationForm()
+    if form.validate_on_submit():
+        application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
+                                  lastname=form.firstname.data, intro=form.intro.data,
+                                  type=form.application_type.data, GPA=form.GPA.data)
+        db.session.add(application)
+        db.session.commit()
+        flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
+        return redirect(url_for('application'))
+    return render_template("application.html", title="Visitor-Application", form=form)

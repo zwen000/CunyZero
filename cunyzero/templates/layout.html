@@ -8,7 +8,6 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
-    <link rel="stylesheet" href="../static/uicons-regular-rounded.css">
 
     {% if title %}
         <title>Cuny Zero - {{ title }}</title>
@@ -46,7 +45,6 @@
                         <span class="nav-item nav-link" id="split"> | </span>
                         {% if current_user.is_authenticated %}
                             {% if current_user.role == 'Visitor' %}
-                                <a class="nav-item nav-link" href="#">News</a>
                                 <a class="nav-item nav-link" href="{{ url_for('application') }}">Enrollment</a>
                                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                             {% else %}
@@ -63,6 +61,7 @@
         </nav>
     </header>
 
+{#    message of login#}
     <main role="main" class="container">
         <div class="row">
             <div class="col-md-12">

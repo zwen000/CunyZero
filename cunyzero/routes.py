@@ -9,33 +9,47 @@ import random
 import os
 from PIL import Image
 
-
-posts = [
+highest_rate_course = [
     {
-        'author':  'Corey Schafer',
-        'title': 'Blog Post 1',
-        'content': 'First Post Content',
-        'date_posted': 'April 20, 2018'
-    },
-    {
-        'author':  'Jane doe',
-        'title': 'Blog Post 2',
-        'content': 'Second Post Content',
-        'date_posted': 'April 21, 2018'
-    },
-
-    {
-        'author':  "12",
-        'title': 'Blog Post 2',
-        'content': 'Second Post Content',
-        'date_posted': 'April 21, 2018'
-    },
+        'course_name': 'csc 32200',
+        'instructor': 'Prof. X',
+        'status': 'Current',
+        'rate': '5 star'
+    }
 ]
+
+lowest_rate_course = [
+    {
+        'course_name': 'csc 33200',
+        'instructor': 'Prof. Y',
+        'Status': 'Finished',
+        'rate': '0 star'
+    }
+]
+
+highest_GPA_student = [
+    {
+        'student': 'Corey Schafer',
+        'major_in': 'Computer Science',
+        'status': 'senior',
+        'gpa': '4.0'
+    }
+]
+
+# posts = [
+#     {
+#         'author':  'Corey Schafer',
+#         'title': 'Blog Post 1',
+#         'content': 'First Post Content',
+#         'date_posted': 'April 20, 2018'
+#     }
+# ]
 
 @app.route('/')
 @app.route('/home')
 def home():
-    return render_template("home.html", posts=posts)
+    return render_template("home.html", highest_rate_course=highest_rate_course, lowest_rate_course=lowest_rate_course,
+                           highest_GPA_student=highest_GPA_student)
 
 
 @app.route('/register/', methods=['GET', 'POST'])

@@ -174,7 +174,7 @@ class GraduationApplication(db.Model):
 class Waitlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     courseId = db.Column(db.Integer,db.ForeignKey('course.id'), nullable=False)
-    studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
+    studentId = db.Column(db.Integer,db.ForeignKey('students.ownerId'),nullable = False)
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 

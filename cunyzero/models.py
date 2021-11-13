@@ -44,6 +44,7 @@ class Visitor(db.Model):
 
 class Student(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
+    programId = db.Column(db.Integer, db.ForeignKey('program.id'), unique=True, nullable=False)
     warning = db.Column(db.Integer, nullable = False, default=0)
     honor = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
@@ -174,7 +175,7 @@ class GraduationApplication(db.Model):
 class Waitlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     courseId = db.Column(db.Integer,db.ForeignKey('course.id'), nullable=False)
-    studentId = db.Column(db.Integer,db.ForeignKey('students.ownerId'),nullable = False)
+    studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 

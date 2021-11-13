@@ -53,7 +53,7 @@ class Student(db.Model):
     user = db.relationship('User', backref='studentOwner', lazy=True)
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
     application = db.relationship('GraduationApplication', backref='applicant', lazy=True)
-    warnings = db.relationship('Warning', backref='target', lazy=True)
+    warnings = db.relationship('Warning', backref='targetStudent', lazy=True)
     wait_list = db.relationship('Waitlist', backref='student', lazy=True)
     #complaints = db.relationship('Complaint', backref='target', lazy=True)
 
@@ -66,8 +66,7 @@ class Instructor(db.Model):
     status = db.Column(db.String(20), default=None)#fired, suspended, etc.
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
-    courses = db.relationship('InstructorCourse', backref='instructor', lazy=True)
-    warnings = db.relationship('Warning', backref='target', lazy=True)
+    warnings = db.relationship('Warning', backref='targetInstructor', lazy=True)
     complaints = db.relationship('Complaint', backref='target', lazy=True)
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
@@ -172,10 +171,10 @@ class GraduationApplication(db.Model):
     def __repr__(self):
         return '<GradApplication: >' % self.id
 
-class waitlist(db.Model):
+class Waitlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     courseId = db.Column(db.Integer,db.ForeignKey('course.id'), nullable=False)
-    studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
+    studentId = db.Column(db.Integer,db.ForeignKey('students.ownerId'),nullable = False)
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 

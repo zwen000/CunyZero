@@ -14,7 +14,7 @@
                     {{ form.application_type(class="form-control form-control-lg") }}
                 </div>
                 <div class="form-group col-md-3">
-                    <strong>{{ form.GPA.label(class="form-control-label") }}</strong>
+                    <strong>{{ form.GPA.label(class="form-control-label") }}</strong><small>(student only)</small>
                     {% if form.GPA.errors %}
                         {{ form.GPA(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">

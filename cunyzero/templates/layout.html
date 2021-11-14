@@ -30,12 +30,27 @@
                         <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
                         {% if current_user.is_authenticated %}
                             {% if current_user.role == 'Visitor' %}
-                                <a class="nav-item nav-link" href="#">Course Search</a>
-                                <a class="nav-item nav-link" href="#">Instructor Review</a>
-                            {% elif current_user.role == 'Student' %}
-                                <a class="nav-item nav-link" href="#">Course Search</a>
-                                <a class="nav-item nav-link" href="#">Course Enroll</a>
+                                <a class="nav-item nav-link" href="#">Course</a>
+                                <a class="nav-item nav-link" href="#">Instructor</a>
+                            {% elif current_user.role == 'Admin' %}
+                                <a class="nav-item nav-link" href="#">Course </a>
+                                <a class="nav-item nav-link" href="#">Student</a>
+                                <a class="nav-item nav-link" href="#">Instructor</a>
+                                <a class="nav-item nav-link" href="#">Complaint</a>
+                                <a class="nav-item nav-link" href="#">Warning</a>
+                                <a class="nav-item nav-link" href="#">Application</a>
+                                <a class="nav-item nav-link" href="#">System</a>
+                            {% elif current_user.role == 'Instructor' %}
+                                <a class="nav-item nav-link" href="#">Course</a>
+                                <a class="nav-item nav-link" href="#">Current Course</a>
                                 <a class="nav-item nav-link" href="#">Course History</a>
+                            {% elif current_user.role == 'Student' %}
+                                <a class="nav-item nav-link" href="#">Course</a>
+                                <a class="nav-item nav-link" href="#">Current Course</a>
+                                <a class="nav-item nav-link" href="#">Course History</a>
+                                <a class="nav-item nav-link" href="#">Graduation Apply</a>
+                                <a class="nav-item nav-link" href="#">Warning</a>
+                                <a class="nav-item nav-link" href="#">Complaint</a>
                             {% endif %}
 
                         {% endif %}

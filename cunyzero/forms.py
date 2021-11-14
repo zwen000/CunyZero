@@ -3,7 +3,7 @@ from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectField, DecimalField
 from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
-from cunyzero.models import User
+from cunyzero.models import *
 
 
 class RegistrationForm(FlaskForm):
@@ -28,10 +28,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class UpdateAccountForm(FlaskForm):
+    firstname = StringField('Firstname', validators=[DataRequired()])
+    lastname = StringField('Lastname', validators=[DataRequired()])
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)] )
     password = PasswordField('Password', validators=[DataRequired()])
-    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png']) ])
     submit = SubmitField('Update')
 
     def validate_username(self, username):

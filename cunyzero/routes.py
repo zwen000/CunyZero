@@ -116,13 +116,15 @@ def save_picture(form_picture):
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
-        if form.picture.data:
-            picture_file = save_picture(form.picture.data)
-            current_user.image_file = picture_file
+        # if form.picture.data:
+        #     picture_file = save_picture(form.picture.data)
+        #     current_user.image_file = picture_file
         if form.password.data:
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
             current_user.password = hashed_password
         current_user.username = form.username.data
+        current_user.firstname = form.firstname.data
+        current_user.lastname = form.lastname.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))

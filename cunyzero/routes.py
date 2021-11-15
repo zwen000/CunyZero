@@ -9,6 +9,9 @@ import random
 import os
 from PIL import Image
 
+def get_period():
+    return 1 # 2, 3, 4
+
 posts = [
     {
         'author':  'Corey Schafer',

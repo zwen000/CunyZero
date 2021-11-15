@@ -22,7 +22,8 @@ db.create_all()                                 # Create the new 'database.db' f
 user = User(username='admin', password=bcrypt.generate_password_hash('admin').decode('utf-8'), role='Admin')
 db.session.add(user)
 
-# admin = Admin()
-# db.session.add(admin)
+# programs creation
+program1 = Program(id=1, name="Bacholor of Computer Science")
+db.session.add(program1)
 
 db.session.commit()

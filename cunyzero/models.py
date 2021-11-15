@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
     ownerId = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), db.ForeignKey('admin.ownerId'), db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
 
     def __repr__(self):
-        return f"User('{self.username}')"
+        return f"User('{self.username}, {self.id}, {self.role}, {self.ownerId}')"
 
 class Admin(db.Model): #Admin.user, User.adminOwner
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
@@ -45,7 +45,7 @@ class Visitor(db.Model):
 class Student(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
     programId = db.Column(db.Integer, db.ForeignKey('program.id'), unique=True, nullable=False)
-    warning = db.Column(db.Integer, nullable = False, default=0)
+#    warning = db.Column(db.Integer, nullable = False, default=0)
     honor = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
@@ -63,7 +63,7 @@ class Student(db.Model):
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
-    warning = db.Column(db.Integer, nullable = False, default=0)
+#    warning = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#fired, suspended, etc.
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
@@ -77,11 +77,13 @@ class Application(db.Model):
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
     intro = db.Column(db.Text, nullable=False) # self introduction
+    type = db.Column(db.String(20), nullable=False) # instructor or student
     visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
-    program_name = db.Column(db.String(20), db.ForeignKey('program.name'), nullable=False)
+
 
     # for student only
-    GPA = db.Column(db.Integer, unique=False, nullable=False, default=0)
+    GPA = db.Column(db.Integer, unique=False, nullable=False, default=0) # only student applicant has a GPA
+    program_name = db.Column(db.String(20), db.ForeignKey('program.name')) # only student need to apply to a program
 
     # For registrar Use
     justification = db.Column(db.Text, nullable=False, default='')
@@ -91,7 +93,7 @@ class Application(db.Model):
 class Program(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20), unique=True, nullable=False)
-    capacity = db.Column(db.Integer, nullable=False, default=5)
+    capacity = db.Column(db.Integer, nullable=False, default=10)
     enrolled_total = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):

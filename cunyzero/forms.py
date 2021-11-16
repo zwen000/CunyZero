@@ -43,8 +43,7 @@ class UpdateAccountForm(FlaskForm):
 
 
 class ApplicationForm(FlaskForm):
-    application_type = SelectField('Application type', choices=[('1', 'Register as students'),
-                                                                ('2', 'Register as instructor')], default=1)
+    application_type = StringField('Application type')
     firstname = StringField('Firstname', validators=[DataRequired()])
     lastname = StringField('Lastname', validators=[DataRequired()])
     intro = StringField('Self-Description')

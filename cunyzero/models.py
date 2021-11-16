@@ -77,9 +77,8 @@ class Application(db.Model):
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
     intro = db.Column(db.Text, nullable=False) # self introduction
-    type = db.Column(db.String(20), nullable=False) # instructor or student
+    type = db.Column(db.String(20), nullable=False) # instructor or student or
     visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
-
 
     # for student only
     GPA = db.Column(db.Integer, unique=False, nullable=False, default=0) # only student applicant has a GPA

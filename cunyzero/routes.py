@@ -140,18 +140,37 @@ def account():
                            image_file=image_file, form=form)
 
 
-@app.route('/application/', methods=['GET', 'POST'])
+@app.route('/application/')
 def application():
+    return render_template("application.html", title="Visitor-Application")
+
+
+@app.route('/application/student', methods=['GET', 'POST'])
+def student_application():
     form = ApplicationForm()
     if form.validate_on_submit():
         visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
-                                            lastname=form.lastname.data, intro=form.intro.data,
-                                            type='Student Register', GPA=form.GPA.data, Program=form.program.data)
+                                          lastname=form.lastname.data, intro=form.intro.data,
+                                          type='Student', GPA=form.GPA.data, Program=form.program.data)
         db.session.add(visitor_application)
         db.session.commit()
         flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
         return redirect(url_for('application'))
-    return render_template("application.html", title="Visitor-Application", form=form)
+    return render_template("student-application.html", title="Visitor-Application", form=form)
+
+
+@app.route('/application/instructor', methods=['GET', 'POST'])
+def instructor_application():
+    form = ApplicationForm()
+    if form.validate_on_submit():
+        visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
+                                          lastname=form.lastname.data, intro=form.intro.data,
+                                          type='Instructor')
+        db.session.add(visitor_application)
+        db.session.commit()
+        flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
+        return redirect(url_for('application'))
+    return render_template("instructor-application.html", title="Visitor-Application", form=form)
 
 
 @app.route('/confirm/', methods=['GET', 'POST'])

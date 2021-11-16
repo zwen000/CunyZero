@@ -1,0 +1,65 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        <form method="POST", action="">
+            {{ form.hidden_tag() }} <!--CSRF token-->
+            <fieldset class="form-group">
+                <legend class="h2">Instructor Registration</legend>
+                <legend class="border-bottom mb-4 ">Current employ ID: {{ current_user.ownerId }} </legend>
+
+                <!-- Username input field setting -->
+                <div class="row">
+                <div class="form-select col-md-6">
+                    <strong>{{ form.application_type.label(class="form-control-label") }}</strong>
+                    <input class="form-control form-control-lg " type="text" placeholder="Register as Instructor" readonly>
+                </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-3">
+                        <strong>{{ form.firstname.label(class="form-control-label") }}</strong>
+                        {% if form.firstname.errors %}
+                            {{ form.firstname(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.firstname.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor%}
+                            </div>
+                        {% else %}
+                            {{ form.firstname(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-md-3">
+                        <strong>{{ form.lastname.label(class="form-control-label") }}</strong>
+                        {% if form.lastname.errors %}
+                            {{ form.lastname(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.lastname.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor%}
+                            </div>
+                        {% else %}
+                            {{ form.lastname(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <strong>{{ form.intro.label(class="form-control-label") }}:</strong> briefly talk about your role, experience, etc
+                    {% if form.intro.errors %}
+                            {{ form.intro(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.intro.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor%}
+                            </div>
+                        {% else %}
+                            {{ form.intro(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}

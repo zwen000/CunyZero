@@ -146,7 +146,7 @@ def application():
     if form.validate_on_submit():
         visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
                                             lastname=form.lastname.data, intro=form.intro.data,
-                                            type='Student Register', GPA=form.GPA.data)
+                                            type='Student Register', GPA=form.GPA.data, Program=form.program.data)
         db.session.add(visitor_application)
         db.session.commit()
         flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')

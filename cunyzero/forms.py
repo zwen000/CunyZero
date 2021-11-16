@@ -49,4 +49,5 @@ class ApplicationForm(FlaskForm):
     lastname = StringField('Lastname', validators=[DataRequired()])
     intro = StringField('Self-Description')
     GPA = DecimalField('GPA', validators=[Optional()])
+    program = StringField('Program', validators=[Optional()])
     submit = SubmitField('Send Application')

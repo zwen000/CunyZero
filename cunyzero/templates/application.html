@@ -2,7 +2,7 @@
 {% block content %}
     <div class="content-section">
         <form method="POST", action="">
-{#            {{ form.hidden_tag() }} <!--CSRF token-->#}
+            {{ form.hidden_tag() }} <!--CSRF token-->
             <fieldset class="form-group">
                 <legend class="h2">Instructor/Student Registration</legend>
                 <legend class="border-bottom mb-4 ">Current employ ID: {{ current_user.ownerId }} </legend>

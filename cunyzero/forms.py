@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
 from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectField, DecimalField
-from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
+from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, Optional
 from cunyzero.models import *
 
 
@@ -41,11 +41,12 @@ class UpdateAccountForm(FlaskForm):
             if user:
                 raise ValidationError("That username is taken, Please choose a different one.")
 
+
 class ApplicationForm(FlaskForm):
     application_type = SelectField('Application type', choices=[('1', 'Register as students'),
                                                                 ('2', 'Register as instructor')], default=1)
     firstname = StringField('Firstname', validators=[DataRequired()])
     lastname = StringField('Lastname', validators=[DataRequired()])
     intro = StringField('Self-Description')
-    GPA = DecimalField('GPA')
+    GPA = DecimalField('GPA', validators=[Optional()])
     submit = SubmitField('Send Application')

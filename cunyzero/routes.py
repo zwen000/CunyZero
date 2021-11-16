@@ -45,6 +45,7 @@ posts = [
     }
 ]
 
+
 @app.route('/')
 @app.route('/home')
 def home():
@@ -72,6 +73,7 @@ def register():
 
     return render_template("register.html", title="Register", form=form)
 
+
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -89,6 +91,7 @@ def login():
         else:
             flash('Login Unsuccessful. Please check username and password!', 'danger')
     return render_template("login.html", title="Login", form=form)
+
 
 @app.route('/logout/', methods=['GET', 'POST'])
 def logout():
@@ -111,6 +114,7 @@ def save_picture(form_picture):
     i.save(picture_path) #save the picture in picture_path
     return picture_fn
 
+
 @app.route('/account/', methods=['GET', 'POST'])
 @login_required
 def account():
@@ -131,7 +135,6 @@ def account():
     elif request.method == 'GET':
         form.username.data = current_user.username
 
-
     image_file = url_for('static', filename= "profile_pics/" + current_user.image_file)
     return render_template("account.html", title="Account",
                            image_file=image_file, form=form)
@@ -141,11 +144,17 @@ def account():
 def application():
     form = ApplicationForm()
     if form.validate_on_submit():
-        application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
-                                  lastname=form.firstname.data, intro=form.intro.data,
-                                  type=form.application_type.data, GPA=form.GPA.data)
-        db.session.add(application)
+        visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
+                                            lastname=form.lastname.data, intro=form.intro.data,
+                                            type='Student Register', GPA=form.GPA.data)
+        db.session.add(visitor_application)
         db.session.commit()
         flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
         return redirect(url_for('application'))
     return render_template("application.html", title="Visitor-Application", form=form)
+
+
+@app.route('/confirm/', methods=['GET', 'POST'])
+def confirm():
+    applications = Application.query.filter_by(approval=None)
+    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications)

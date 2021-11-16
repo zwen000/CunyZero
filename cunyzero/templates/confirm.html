@@ -1,0 +1,19 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        {% for application in applications %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <H4>Type: {{ application.type }}</H4>
+                    </div>
+                    <p class="article-content"><strong>Name:</strong>{{ application.firstname }} {{ application.lastname }}</p>
+                    <p class="article-content"><strong>Employ ID:</strong> {{ application.visitor_id }}</p>
+                    <p class="article-content"><strong>GPA:</strong> {{ application.GPA }}</p>
+                    <p class="article-content"><strong>intro:</strong> {{ application.intro }}</p>
+                </div>
+                <button class="btn btn-outline-info"> Confirm</button>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}

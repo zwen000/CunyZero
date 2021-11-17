@@ -1,0 +1,27 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        {% for application in applications %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <form method="POST", action="">
+                        {{ form.hidden_tag() }} <!--CSRF token-->
+                        <div class="form-group" style="display: none">
+                            {{ form.id.label(class="form-control-label") }}
+                            <input type="text" value={{ application.id }} readonly name="id">
+                        </div>
+                        <div class="article-metadata row">
+                            <H4 class="col-md-9 mr-4">Type: {{ application.type }}</H4>
+                                {{ form.accept(class="btn btn-outline-info col-md-1 ml-5") }}
+                                {{ form.reject(class="btn btn-outline-info col-md-1 ml-2") }}
+                        </div>
+                    </form>
+                    <p class="article-content"><strong>Name:</strong>{{ application.firstname }} {{ application.lastname }}</p>
+                    <p class="article-content"><strong>Employ ID:</strong> {{ application.visitor_id }}</p>
+                    <p class="article-content"><strong>GPA:</strong> {{ application.GPA }}</p>
+                    <p class="article-content"><strong>intro:</strong> {{ application.intro }}</p>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}

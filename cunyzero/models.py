@@ -72,14 +72,14 @@ class Instructor(db.Model):
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
 
+
 class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
     intro = db.Column(db.Text, nullable=False) # self introduction
-    type = db.Column(db.String(20), nullable=False) # instructor or student
+    type = db.Column(db.String(20), nullable=False) # instructor or student or
     visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
-
 
     # for student only
     GPA = db.Column(db.Integer, unique=False, nullable=False, default=0) # only student applicant has a GPA
@@ -99,6 +99,7 @@ class Program(db.Model):
     def __repr__(self):
         return f"Program('{self.id}', '{self.name}', '{self.enrolled_total}', '{self.capacity}')"
 
+
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -108,6 +109,7 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Post('{self.title}, {self.date_posted}')"
+
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -128,6 +130,7 @@ class Course(db.Model):
     def __repr__(self):
         return '<Course %r>' % self.course_name
 
+
 class StudentCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     courseId = db.Column(db.Integer, db.ForeignKey('course.id'),nullable=False)
@@ -140,6 +143,7 @@ class StudentCourse(db.Model):
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 
+
 class Period(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     period_num = db.Column(db.Integer, nullable = False)#periods passed
@@ -147,6 +151,7 @@ class Period(db.Model):
     
     def __repr__(self):
         return '<period: %r>' % self.period
+
 
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -156,12 +161,14 @@ class Complaint(db.Model):
     def __repr__(self):
         return '<complainer: %r, complainee: %r>' % (self.complainerId, self.targetId)
 
+
 class Warning(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable = False)
     message = db.Column(db.Text, nullable = False, default='')
     def __repr__(self):
         return '<Warning: %r>' % self.id
+
 
 class GraduationApplication(db.Model):
     id = db.Column(db.Integer, primary_key=True)

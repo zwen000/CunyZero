@@ -1,0 +1,7 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        <a class="nav-item nav-link" href="{{ url_for('student_application') }}">Register as Student</a>
+        <a class="nav-item nav-link" href="{{ url_for('instructor_application') }}">Register as Instructor</a>
+    </div>
+{% endblock content %}

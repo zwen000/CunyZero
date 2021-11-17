@@ -55,5 +55,6 @@ class ApplicationForm(FlaskForm):
 
 class ConfirmForm(FlaskForm):
     id = StringField('Application ID', validators=[DataRequired()])
+    justification = StringField('The reason to reject:')
     accept = SubmitField('Accept')
     reject = SubmitField('Reject')

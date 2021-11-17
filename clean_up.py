@@ -28,6 +28,8 @@ db.session.add(student)
 db.session.add(instructor)
 # programs creation
 program1 = Program(id=1, name="Bacholor of Computer Science")
+program2 = Program(id=2, name="Bacholor of Computer Engineering")
 db.session.add(program1)
+db.session.add(program2)
 
 db.session.commit()

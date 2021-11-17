@@ -12,8 +12,8 @@
                     <small>/{{ current_user.role }}</small>
                 </div>
                 <div class="media-content">
-                    <div>Employ ID: {{ current_user.ownerId }}</div>
-                    <div>Current Username: {{ current_user.username }}</div>
+                    <div>Employee ID: {{ current_user.ownerId }}</div>
+                    <div>Username: {{ current_user.username }}</div>
                     {% if current_user.role != 'Admin' %}
                         <div class="row ml-0">
                             <div class="mr-3">Status: {{ current_user.status }}senior</div>

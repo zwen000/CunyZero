@@ -2,8 +2,8 @@
 {% block content %}
     <div class="content-section">
         {% for application in applications %}
-            <article class="media content-section">
-                <div class="media-body">
+            <article class="media content-section col-md-12">
+                <div class="media-body" style="max-width: 100%">
                     <form method="POST", action="">
                         {{ form.hidden_tag() }} <!--CSRF token-->
                         <div class="form-group" style="display: none">
@@ -15,11 +15,22 @@
                                 {{ form.accept(class="btn btn-outline-info col-md-1 ml-5") }}
                                 {{ form.reject(class="btn btn-outline-info col-md-1 ml-2") }}
                         </div>
+                        <div class="row">
+                            <p class="article-content ml-3"><strong>Name:</strong> {{ application.firstname }} {{ application.lastname }}</p>
+                            <p class="article-content ml-3"><strong>Employ ID:</strong> {{ application.visitor_id }}</p>
+                        </div>
+                        {% if application.type=='Student' %}
+                            <div class="row">
+                                <p class="article-content ml-3"><strong>GPA:</strong> {{ application.GPA }}</p>
+                                <p class="article-content ml-3"><strong>Program:</strong> {{ application.program_name }}</p>
+                            </div>
+                        {% endif %}
+                        <p class="article-content" style="word-wrap: break-word"><strong>intro:</strong> {{ application.intro }}</p>
+                        <div class="form-group">
+                            <strong>{{ form.justification.label(class="form-control-label") }}</strong>
+                            {{ form.justification(class="form-control form-control-lg", value='') }}
+                        </div>
                     </form>
-                    <p class="article-content"><strong>Name:</strong>{{ application.firstname }} {{ application.lastname }}</p>
-                    <p class="article-content"><strong>Employ ID:</strong> {{ application.visitor_id }}</p>
-                    <p class="article-content"><strong>GPA:</strong> {{ application.GPA }}</p>
-                    <p class="article-content"><strong>intro:</strong> {{ application.intro }}</p>
                 </div>
             </article>
         {% endfor %}

@@ -190,15 +190,22 @@ def confirm():
         if form.accept.data:
             current_application = Application.query.get(form.id.data)
             current_application.approval = True
+            current_application.justification = form.justification.data
             db.session.commit()
             flash(f'Application with type ({current_application.type}) has been accepted!', 'success')
         if form.reject.data:
-            current_application = Application.query.get(form.id.data)
-            current_application.approval = False
-            db.session.commit()
-            flash(f'Application with type ({current_application.type}) has been rejected!', 'success')
-        redirect(url_for('confirm'))
 
-    return render_template("confirm.html", title="Application-confirm", applications=applications, form=form)
+            if form.justification.data != '':
+                current_application = Application.query.get(form.id.data)
+                current_application.approval = False
+                current_application.justification = form.justification.data
+                db.session.commit()
+                flash(f'Application with type ({current_application.type}) has been rejected!', 'success')
+                redirect(url_for('confirm'))
+            else:
+                flash(f'Please provide your reason!', 'danger')
+                redirect(url_for('confirm'))
+    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications, form=form)
+
 
 

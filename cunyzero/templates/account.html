@@ -1,7 +1,6 @@
 {% extends "layout.html"%}
 
 {% block content %}
-
     <!-- Business Card -->
     <div class="content-section">
         <div class="media">
@@ -30,81 +29,76 @@
             </div>
         </div>
     </div>
-    <div class="content-section">
-          <!-- FORM HERE -->
-        <form method="POST", action="", enctype="multipart/form-data">
-            {{ form.hidden_tag() }} <!--CSRF token-->
+    {% if current_user.role != 'Admin' %}
+        <div class="content-section">
+              <!-- FORM HERE -->
+            <form method="POST", action="", enctype="multipart/form-data">
+                {{ form.hidden_tag() }} <!--CSRF token-->
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">User Setting Update</legend>
+                    <div class="row">
+                        <div class="form-group col-md-3">
+                            {{ form.firstname.label(class="form-control-label") }}
+                            {% if form.firstname.errors %}
+                                {{ form.firstname(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.firstname.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                                </div>
+                            {% else %}
+                                {{ form.firstname(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group col-md-3">
+                            {{ form.lastname.label(class="form-control-label") }}
+                            {% if form.lastname.errors %}
+                                {{ form.lastname(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.lastname.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                                </div>
+                            {% else %}
+                                {{ form.lastname(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{ form.username.label(class="form-control-label") }}
 
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">User Setting Update</legend>
-
-                <div class="row">
-                    <div class="form-group col-md-3">
-                        {{ form.firstname.label(class="form-control-label") }}
-                        {% if form.firstname.errors %}
-                            {{ form.firstname(class="form-control form-control-lg is-invalid") }}
+                        {% if form.username.errors %}
+                            {{ form.username(class="form-control form-control-lg is-invalid") }}
                             <div class="invalid-feedback">
-                                {% for error in form.firstname.errors %}
+                                {% for error in form.username.errors %}
                                     <span>{{ error }}</span>
                                 {% endfor%}
                             </div>
                         {% else %}
-                            {{ form.firstname(class="form-control form-control-lg") }}
+                            {{ form.username(class="form-control form-control-lg") }}
                         {% endif %}
                     </div>
-                    <div class="form-group col-md-3">
-                        {{ form.lastname.label(class="form-control-label") }}
-                        {% if form.lastname.errors %}
-                            {{ form.lastname(class="form-control form-control-lg is-invalid") }}
+                    <div class="form-group">
+                        {{ form.password.label(class="form-control-label") }}
+
+                        {% if form.password.errors %}
+                            {{ form.password(class="form-control form-control-lg is-invalid") }}
                             <div class="invalid-feedback">
-                                {% for error in form.lastname.errors %}
+                                {% for error in form.password.errors %}
                                     <span>{{ error }}</span>
                                 {% endfor%}
                             </div>
                         {% else %}
-                            {{ form.lastname(class="form-control form-control-lg") }}
+                            {{ form.password(class="form-control form-control-lg") }}
                         {% endif %}
                     </div>
-                </div>
+                </fieldset>
                 <div class="form-group">
-                    {{ form.username.label(class="form-control-label") }}
-
-                    {% if form.username.errors %}
-                        {{ form.username(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.username.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                        </div>
-                    {% else %}
-                        {{ form.username(class="form-control form-control-lg") }}
-                    {% endif %}
-
+                    {{ form.submit(class="btn btn-outline-info") }}
                 </div>
-
-                <div class="form-group">
-                    {{ form.password.label(class="form-control-label") }}
-
-                    {% if form.password.errors %}
-                        {{ form.password(class="form-control form-control-lg is-invalid") }}
-                        <div class="invalid-feedback">
-                            {% for error in form.password.errors %}
-                                <span>{{ error }}</span>
-                            {% endfor%}
-                        </div>
-                    {% else %}
-                        {{ form.password(class="form-control form-control-lg") }}
-                    {% endif %}
-                </div>
-
-
-            </fieldset>
-
-            <div class="form-group">
-                {{ form.submit(class="btn btn-outline-info") }}
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    {% endif %}
 
 
 {% endblock content %}

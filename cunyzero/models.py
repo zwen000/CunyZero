@@ -45,7 +45,6 @@ class Visitor(db.Model):
 class Student(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
     programId = db.Column(db.Integer, db.ForeignKey('program.id'), unique=True, nullable=False)
-#    warning = db.Column(db.Integer, nullable = False, default=0)
     honor = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
@@ -63,7 +62,6 @@ class Student(db.Model):
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
-#    warning = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#fired, suspended, etc.
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
@@ -78,7 +76,7 @@ class Application(db.Model):
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
     intro = db.Column(db.Text, nullable=False) # self introduction
-    type = db.Column(db.String(20), nullable=False) # instructor or student or
+    type = db.Column(db.Enum("Instructor", "Student"), nullable=False)
     visitor_id = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), nullable=False)
 
     # for student only

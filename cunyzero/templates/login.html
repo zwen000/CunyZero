@@ -7,10 +7,8 @@
 
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Log In</legend>
-
                 <div class="form-group">
                     {{ form.username.label(class="form-control-label") }}
-
                     {% if form.username.errors %}
                         {{ form.username(class="form-control form-control-lg is-invalid") }}
                         <div class="invalid-feedback">
@@ -21,7 +19,6 @@
                     {% else %}
                         {{ form.username(class="form-control form-control-lg") }}
                     {% endif %}
-
                 </div>
 
                 <div class="form-group">

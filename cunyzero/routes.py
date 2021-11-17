@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
-from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm
+from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm, ConfirmForm
 from cunyzero.models import *
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_user import roles_required, SQLAlchemyAdapter, UserManager, UserMixin
@@ -81,6 +81,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
+        print(form.submit.data)
         user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
@@ -151,7 +152,7 @@ def student_application():
     if form.validate_on_submit():
         visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
-                                          type='Student', GPA=form.GPA.data, Program=form.program.data)
+                                          type='Student', GPA=form.GPA.data, program_name=form.program.data)
         db.session.add(visitor_application)
         db.session.commit()
         flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
@@ -176,4 +177,19 @@ def instructor_application():
 @app.route('/confirm/', methods=['GET', 'POST'])
 def confirm():
     applications = Application.query.filter_by(approval=None)
-    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications)
+    form = ConfirmForm()
+    if form.validate_on_submit():
+        if form.accept.data:
+            current_application = Application.query.get(form.id.data)
+            current_application.approval = True
+            db.session.commit()
+            flash(f'Application with type ({current_application.type}) has been accepted!', 'success')
+        if form.reject.data:
+            current_application = Application.query.get(form.id.data)
+            current_application.approval = False
+            db.session.commit()
+            flash(f'Application with type ({current_application.type}) has been rejected!', 'success')
+        redirect(url_for('confirm'))
+    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications, form=form)
+
+

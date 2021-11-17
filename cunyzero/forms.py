@@ -27,6 +27,7 @@ class LoginForm(FlaskForm):
     remember = BooleanField('Remember Me')
     submit = SubmitField('Login')
 
+
 class UpdateAccountForm(FlaskForm):
     firstname = StringField('Firstname', validators=[DataRequired()])
     lastname = StringField('Lastname', validators=[DataRequired()])
@@ -50,3 +51,9 @@ class ApplicationForm(FlaskForm):
     GPA = DecimalField('GPA', validators=[Optional()])
     program = StringField('Program', validators=[Optional()])
     submit = SubmitField('Send Application')
+
+
+class ConfirmForm(FlaskForm):
+    id = StringField('Application ID', validators=[DataRequired()])
+    accept = SubmitField('Accept')
+    reject = SubmitField('Reject')

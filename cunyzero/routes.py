@@ -177,6 +177,11 @@ def instructor_application():
 @app.route('/confirm/', methods=['GET', 'POST'])
 def confirm():
     applications = Application.query.filter_by(approval=None)
+    form = []
+    for i in applications:
+        f = ConfirmForm()
+        f.id = i.id
+        form.append(f)
     form = ConfirmForm()
     if form.validate_on_submit():
         if form.accept.data:

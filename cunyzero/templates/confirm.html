@@ -6,9 +6,9 @@
                 <div class="media-body" style="max-width: 100%">
                     <form method="POST", action="">
                         {{ form.hidden_tag() }} <!--CSRF token-->
-                        <div class="form-group" style="display: none">
+                        <div class="form-group" style="display: none" >
                             {{ form.id.label(class="form-control-label") }}
-                            <input type="text" value={{ application.id }} readonly name="id">
+                            {{ form.id(class="form-control-label", value=application.id) }}
                         </div>
                         <div class="article-metadata row">
                             <H4 class="col-md-9 mr-4">Type: {{ application.type }}</H4>

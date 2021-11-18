@@ -145,7 +145,7 @@ class StudentCourse(db.Model):
     gpa = db.Column(db.Float,nullable = True)
     rating = db.Column(db.Integer, nullable = True)
     review = db.Column(db.Text, nullable = True)
-    waiting = db.Column(db.Bool,nullable = False, default=False)
+    waiting = db.Column(db.Boolean,nullable = False, default=False)
 
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)

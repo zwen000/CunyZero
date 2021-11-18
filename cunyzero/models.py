@@ -87,6 +87,9 @@ class Application(db.Model):
     justification = db.Column(db.Text, nullable=False, default='')
     approval = db.Column(db.Boolean,  default=None)   # None: waiting for registrar to make decision
 
+    def __repr__(self):
+        return f"Application({self.id}, {self.firstname}, {self.lastname}, {self.approval})"
+
 
 class Program(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -48,8 +48,8 @@ class UpdateAccountForm(FlaskForm):
 class ApplicationForm(FlaskForm):
     firstname = StringField('Firstname', validators=[DataRequired()])
     lastname = StringField('Lastname', validators=[DataRequired()])
-    intro = TextAreaField('Self-Description')
-    GPA = DecimalField('GPA', validators=[Optional()])
+    intro = TextAreaField('Self-Description', default="", validators=[Length(0, 300)])
+    GPA = DecimalField('GPA', validators=[DataRequired()])
     program = QuerySelectMultipleField(
         'Program',
         #allow_blank=True,
@@ -62,6 +62,6 @@ class ApplicationForm(FlaskForm):
 
 class ConfirmForm(FlaskForm):
     id = StringField('Application ID', validators=[DataRequired()])
-    justification = StringField('Give A Justification:')
+    justification = StringField('Give A Justification: ')
     accept = SubmitField('Accept')
     reject = SubmitField('Reject')

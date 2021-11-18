@@ -141,43 +141,63 @@ def account():
                            image_file=image_file, form=form)
 
 
+@login_required
 @app.route('/application/')
 def application():
     return render_template("application.html", title="Visitor-Application")
 
 
+@login_required
 @app.route('/application/student', methods=['GET', 'POST'])
 def student_application():
     form = ApplicationForm()
-    if form.validate_on_submit():
-        visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
-                                          lastname=form.lastname.data, intro=form.intro.data,
-                                          type='Student', GPA=form.GPA.data, program_name=form.program.data)
-        db.session.add(visitor_application)
-        db.session.commit()
-        flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
+    application = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
+    if application:
+        flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
-    return render_template("student-application.html", title="Visitor-Application", form=form)
+    if form.validate_on_submit():
+
+        selected_program = None
+        for i in form.program.data:
+            selected_program = i.name
+        application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
+                                          lastname=form.lastname.data, intro=form.intro.data,
+                                          type='Student', GPA=float(form.GPA.data), program_name=selected_program)
+        db.session.add(application)
+        db.session.commit()
+        flash(f'Your application with id: {current_user.ownerId} is submitted successfully!', 'success')
+        return redirect(url_for('application'))
+
+    return render_template("student-application.html", title="Student Application", form=form)
 
 
+@login_required
 @app.route('/application/instructor', methods=['GET', 'POST'])
 def instructor_application():
     form = ApplicationForm()
+    application = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
+    if application:
+        flash(f'You have an application processing!', 'danger')
+        return redirect(url_for('application'))
     if form.validate_on_submit():
-        visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
+        application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
                                           type='Instructor')
-        db.session.add(visitor_application)
+        db.session.add(application)
         db.session.commit()
-        flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
+        flash(f'Your application id: {current_user.ownerId} is submitted successfully!', 'success')
         return redirect(url_for('application'))
-    return render_template("instructor-application.html", title="Visitor-Application", form=form)
+    return render_template("instructor-application.html", title="Instructor Application", form=form)
 
 
+# Admin only
+@login_required
 @app.route('/confirm/', methods=['GET', 'POST'])
 def confirm():
     applications = Application.query.filter_by(approval=None)
     form = ConfirmForm()
+    if current_user.role != "Admin":
+        return redirect(url_for('home'))
     if form.validate_on_submit():
         if form.accept.data:
             current_application = Application.query.get(form.id.data)
@@ -186,6 +206,7 @@ def confirm():
             db.session.commit()
             flash(f'Application with type ({current_application.type}) has been accepted!', 'success')
         if form.reject.data:
+
             if form.justification.data != '':
                 current_application = Application.query.get(form.id.data)
                 current_application.approval = False
@@ -197,5 +218,6 @@ def confirm():
                 flash(f'Please provide your reason!', 'danger')
                 redirect(url_for('confirm'))
     return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications, form=form)
+
 
 

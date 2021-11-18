@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms.fields import StringField, PasswordField, SubmitField, BooleanField, SelectField, DecimalField
+from wtforms import *
+from wtforms.fields import *
+from wtforms_sqlalchemy.fields import *
 from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, Optional
 from cunyzero.models import *
 
@@ -44,17 +46,22 @@ class UpdateAccountForm(FlaskForm):
 
 
 class ApplicationForm(FlaskForm):
-    application_type = StringField('Application type')
     firstname = StringField('Firstname', validators=[DataRequired()])
     lastname = StringField('Lastname', validators=[DataRequired()])
-    intro = StringField('Self-Description')
-    GPA = DecimalField('GPA', validators=[Optional()])
-    program = StringField('Program', validators=[Optional()])
+    intro = TextAreaField('Self-Description', default="", validators=[Length(0, 300)])
+    GPA = DecimalField('GPA', validators=[DataRequired()])
+    program = QuerySelectMultipleField(
+        'Program',
+        #allow_blank=True,
+        query_factory = lambda: Program.query,
+        widget=widgets.Select(multiple=False),
+        get_label='name'
+    )
     submit = SubmitField('Send Application')
 
 
 class ConfirmForm(FlaskForm):
     id = StringField('Application ID', validators=[DataRequired()])
-    justification = StringField('Give A Justification:')
+    justification = StringField('Give A Justification: ')
     accept = SubmitField('Accept')
     reject = SubmitField('Reject')

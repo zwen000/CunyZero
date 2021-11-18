@@ -1,18 +1,28 @@
 {% extends "layout.html"%}
 {% block content %}
     <div class="content-section">
+
         <form method="POST", action="">
             {{ form.hidden_tag() }} <!--CSRF token-->
             <fieldset class="form-group">
                 <legend class="h2">Student Registration</legend>
-                <legend class="border-bottom mb-4 ">Current employ ID: {{ current_user.ownerId }} </legend>
+                <legend class="border-bottom mb-4 ">Visitor ID: {{ current_user.ownerId }} </legend>
 
                 <!-- Username input field setting -->
                 <div class="row">
-                <div class="form-select col-md-6">
-                    <strong>{{ form.application_type.label(class="form-control-label") }}</strong>
-                    <input class="form-control form-control-lg " type="text" placeholder="Register as Student" readonly>
-                </div>
+                    <div class="form-group col-md-6">
+                        <strong>{{ form.program.label(class="form-control-label") }}</strong>
+                        {% if form.program.errors %}
+                            {{ form.program(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.program.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor%}
+                            </div>
+                        {% else %}
+                            {{ form.program(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="row">
                     <div class="form-group col-md-3">
@@ -43,19 +53,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="form-group col-md-3">
-                        <strong>{{ form.program.label(class="form-control-label") }}</strong>
-                        {% if form.program.errors %}
-                            {{ form.program(class="form-control form-control-lg is-invalid") }}
-                            <div class="invalid-feedback">
-                                {% for error in form.program.errors %}
-                                    <span>{{ error }}</span>
-                                {% endfor%}
-                            </div>
-                        {% else %}
-                            {{ form.program(class="form-control form-control-lg") }}
-                        {% endif %}
-                    </div>
+
                     <div class="form-group col-md-3">
                         <strong>{{ form.GPA.label(class="form-control-label") }}</strong>
                         {% if form.GPA.errors %}

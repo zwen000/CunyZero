@@ -199,10 +199,10 @@ def application_list():
 
 
 @login_required
-@app.route('/application/<int:current_application_id>', methods=['GET', 'POST'])
-def application_confirm(current_application_id):
+@app.route('/application/<int:application_id>', methods=['GET', 'POST'])
+def application_confirm(application_id):
     form = ConfirmForm()
-    current_application = Application.query.get(current_application_id)
+    current_application = Application.query.get(application_id)
     if form.validate_on_submit():
         if form.accept.data:
             current_application.approval = True
@@ -210,7 +210,7 @@ def application_confirm(current_application_id):
             db.session.commit()
             flash(f'Application with type ({current_application.type}: {current_application.firstname}'
                   f' {current_application.lastname}) has been accepted!', 'success')
-            return redirect(url_for(''))
+            return redirect(url_for('application_list'))
         if form.reject.data:
             if form.justification.data != '':
                 current_application.approval = False
@@ -218,9 +218,10 @@ def application_confirm(current_application_id):
                 db.session.commit()
                 flash(f'Application with ({current_application.type}: {current_application.firstname}'
                       f' {current_application.lastname}) has been rejected!', 'success')
-                return redirect(url_for('confirm'))
+                return redirect(url_for('application_list'))
             else:
                 flash(f'Please provide your reason!', 'danger')
-                return redirect(url_for('confirm'))
-    return render_template("application-confirm.html", title="Application-Confirm", form=form, application=current_application)
+                return redirect(url_for('application_confirm'))
+    return render_template("application-confirm.html", title="Application-Confirm", form=form,
+                           application=current_application)
 

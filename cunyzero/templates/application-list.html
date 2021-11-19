@@ -1,0 +1,14 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        {% for application in applications %}
+            <article class="media content-section col-md-12">
+                <div class="media-body" style="max-width: 100%">
+                    <button class="btn btn-outline-info">
+                        <a href={{ url_for('application_confirm', current_application_id=application.id) }}>Detail</a>
+                    </button>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}

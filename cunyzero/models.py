@@ -54,11 +54,13 @@ class Student(db.Model):
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
     application = db.relationship('GraduationApplication', backref='applicant', lazy=True)
     warnings = db.relationship('Warning', backref='targetStudent', lazy=True)
-    wait_list = db.relationship('Waitlist', backref='student', lazy=True)
+    #wait_list = db.relationship('StudentCourse', backref='student', lazy=True)
     #complaints = db.relationship('Complaint', backref='target', lazy=True)
 
     def __repr__(self):
         return '<studentid: %r>' % self.ownerId
+    def getWaitList(self):#return courses student is waiting for
+        return StudentCourse.query.filterby(studentId=self.ownerId, waiting=True)
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
@@ -124,12 +126,15 @@ class Course(db.Model):
     capacity = db.Column(db.Integer, default=30)
     status = db.Column(db.String(20), nullable = True)#status like open, finished, cancelled, etc.
     
-    wait_list = db.relationship('Waitlist', backref='course', lazy=True)
+    #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
+    waitlist_capacity = db.Column(db.Integer, default=30)
     #gpa = db.Column(db.Float, nullable = True) # can be calculated with StudentCourse
     #rating = db.Column(db.Float, nullable = True)# ^
 
     def __repr__(self):
         return '<Course %r>' % self.course_name
+    def getWaitList(self):#return waitlist (studentcourse with waiting=true)
+        return StudentCourse.filter_by(courseId=self.id, waiting=True)
 
 
 class StudentCourse(db.Model):
@@ -140,6 +145,7 @@ class StudentCourse(db.Model):
     gpa = db.Column(db.Float,nullable = True)
     rating = db.Column(db.Integer, nullable = True)
     review = db.Column(db.Text, nullable = True)
+    waiting = db.Column(db.Boolean,nullable = False, default=False)
 
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)

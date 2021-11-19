@@ -1,0 +1,23 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        {% for application in applications %}
+            <article class="media content-section col-md-12">
+                <div class="media-body row" style="position: relative; align-items: center">
+                    <div class="col-md-3">
+                        Application: {{ application.type }}
+                    </div>
+                    <div class="col-md-3">
+                        Name: {{ application.firstname }} {{ application.lastname }}
+                    </div>
+                    <div class="col-md-3">
+                         Employ ID: {{ application.visitor_id }}
+                    </div>
+                    <button class="btn btn-outline-info float-right" style="position: absolute; right:10px;">
+                        <a href={{ url_for('application_confirm', application_id=application.id) }}>Detail</a>
+                    </button>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}

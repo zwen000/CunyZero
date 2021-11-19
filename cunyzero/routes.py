@@ -192,32 +192,36 @@ def instructor_application():
 
 # Admin only
 @login_required
-@app.route('/confirm/', methods=['GET', 'POST'])
-def confirm():
+@app.route('/application/list', methods=['GET', 'POST'])
+def application_list():
     applications = Application.query.filter_by(approval=None)
+    return render_template("application-list.html", title="Application-List", applications=applications)
+
+
+@login_required
+@app.route('/application/<int:application_id>', methods=['GET', 'POST'])
+def application_confirm(application_id):
     form = ConfirmForm()
-    if current_user.role != "Admin":
-        return redirect(url_for('home'))
+    current_application = Application.query.get(application_id)
     if form.validate_on_submit():
         if form.accept.data:
-            current_application = Application.query.get(form.id.data)
             current_application.approval = True
             current_application.justification = form.justification.data
             db.session.commit()
-            flash(f'Application with type ({current_application.type}) has been accepted!', 'success')
+            flash(f'Application with type ({current_application.type}: {current_application.firstname}'
+                  f' {current_application.lastname}) has been accepted!', 'success')
+            return redirect(url_for('application_list'))
         if form.reject.data:
-
             if form.justification.data != '':
-                current_application = Application.query.get(form.id.data)
                 current_application.approval = False
                 current_application.justification = form.justification.data
                 db.session.commit()
-                flash(f'Application with type ({current_application.type}) has been rejected!', 'success')
-                redirect(url_for('confirm'))
+                flash(f'Application with ({current_application.type}: {current_application.firstname}'
+                      f' {current_application.lastname}) has been rejected!', 'success')
+                return redirect(url_for('application_list'))
             else:
                 flash(f'Please provide your reason!', 'danger')
-                redirect(url_for('confirm'))
-    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications, form=form)
-
-
+                return redirect(url_for('application_confirm'))
+    return render_template("application-confirm.html", title="Application-Confirm", form=form,
+                           application=current_application)
 

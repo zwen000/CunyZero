@@ -190,47 +190,37 @@ def instructor_application():
     return render_template("instructor-application.html", title="Instructor Application", form=form)
 
 
-def list_validate_on_submit(forms):
-    for form in forms:
-        if form.validate_on_submit:
-            return form.validate_on_submit
-        else:
-            continue
-    return None;
-
 # Admin only
 @login_required
-@app.route('/confirm/', methods=['GET', 'POST'])
-def confirm():
+@app.route('/application/list', methods=['GET', 'POST'])
+def application_list():
     applications = Application.query.filter_by(approval=None)
-    forms = []
-    for current_application in applications:
-        form = ConfirmForm()
-        form.id.data = current_application.id
-        forms.append(form)
-        if form.validate_on_submit():
-            if form.accept.data:
-                current_application.approval = True
+    return render_template("application-list.html", title="Application-List", applications=applications)
+
+
+@login_required
+@app.route('/application/<int:current_application_id>', methods=['GET', 'POST'])
+def application_confirm(current_application_id):
+    form = ConfirmForm()
+    current_application = Application.query.get(current_application_id)
+    if form.validate_on_submit():
+        if form.accept.data:
+            current_application.approval = True
+            current_application.justification = form.justification.data
+            db.session.commit()
+            flash(f'Application with type ({current_application.type}: {current_application.firstname}'
+                  f' {current_application.lastname}) has been accepted!', 'success')
+            return redirect(url_for(''))
+        if form.reject.data:
+            if form.justification.data != '':
+                current_application.approval = False
                 current_application.justification = form.justification.data
                 db.session.commit()
-                flash(f'Application with type ({current_application.type}: {current_application.firstname}'
-                      f' {current_application.lastname}) has been accepted!', 'success')
+                flash(f'Application with ({current_application.type}: {current_application.firstname}'
+                      f' {current_application.lastname}) has been rejected!', 'success')
                 return redirect(url_for('confirm'))
-            if form.reject.data:
-                if form.justification.data != '':
-                    current_application.approval = False
-                    current_application.justification = form.justification.data
-                    db.session.commit()
-                    flash(f'Application with ({current_application.type}: {current_application.firstname}'
-                          f' {current_application.lastname}) has been rejected!', 'success')
-                    return redirect(url_for('confirm'))
-                else:
-                    flash(f'Please provide your reason!', 'danger')
-                    return redirect(url_for('confirm'))
-    index = len(forms)
-    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications, index=index,
-                           forms=forms)
-
-
-
+            else:
+                flash(f'Please provide your reason!', 'danger')
+                return redirect(url_for('confirm'))
+    return render_template("application-confirm.html", title="Application-Confirm", form=form, application=current_application)
 

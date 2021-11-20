@@ -156,7 +156,6 @@ def student_application():
         flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
     if form.validate_on_submit():
-
         selected_program = None
         for i in form.program.data:
             selected_program = i.name
@@ -192,10 +191,10 @@ def instructor_application():
 
 # Admin only
 @login_required
-@app.route('/application/list', methods=['GET', 'POST'])
+@app.route('/application/list')
 def application_list():
     applications = Application.query.filter_by(approval=None)
-    return render_template("application-list.html", title="Application-List", applications=applications)
+    return render_template("application-list.html", title="Application List", applications=applications)
 
 
 @login_required
@@ -222,6 +221,21 @@ def application_confirm(application_id):
             else:
                 flash(f'Please provide your reason!', 'danger')
                 return redirect(url_for('application_confirm'))
-    return render_template("application-confirm.html", title="Application-Confirm", form=form,
+    return render_template("application-confirm.html", title="Application Confirm", form=form,
                            application=current_application)
 
+
+# Admin only
+@login_required
+@app.route('/instructors/', methods=['GET', 'POST'])
+def instructor_list():
+    instructors = Instructor.query.all()
+    return render_template("instructor-list.html", title="Instructor List", instructors=instructors)
+
+
+# Admin only
+@login_required
+@app.route('/students/', methods=['GET', 'POST'])
+def student_list():
+    students = Student.query.all()
+    return render_template("student-list.html", title="Instructor List", students=students)

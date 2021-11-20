@@ -1,20 +1,20 @@
 {% extends "layout.html"%}
 {% block content %}
     <div class="content-section">
-        {% for application in applications %}
+        {% for instructor in instructors%}
             <article class="media content-section col-md-12">
                 <div class="media-body row" style="position: relative; align-items: center">
                     <div class="col-md-3">
-                        Application: {{ application.type }}
+                        Instructor: {{ instructor.firstname }} {{ instructor.lastname }}
                     </div>
                     <div class="col-md-3">
-                        Name: {{ application.firstname }} {{ application.lastname }}
+                        Employ ID:  {{ instructor.visitor_id }}
                     </div>
                     <div class="col-md-3">
-                         Employ ID: {{ application.visitor_id }}
+                        Status: {{ instructor.status }}
                     </div>
                     <button class="btn btn-outline-info float-right" style="position: absolute; right:10px;">
-                        <a style="text-decoration: none" href={{ url_for('application_confirm', application_id=application.id) }}>Detail</a>
+                        <a style="text-decoration: none" href={{ url_for('application_confirm', instructor_id=instructor.ownerId) }}>Detail</a>
                     </button>
                 </div>
             </article>

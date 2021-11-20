@@ -40,6 +40,7 @@
                                 <a class="nav-item nav-link" href="#">Warning</a>
                                 <a class="nav-item nav-link" href="{{ url_for('application_list') }}">Application</a>
                                 <a class="nav-item nav-link" href="#">System</a>
+                            {% elif current_user.role == 'Instructor' %}
                                 <a class="nav-item nav-link" href="#">Course</a>
                                 <a class="nav-item nav-link" href="#">Current Course</a>
                                 <a class="nav-item nav-link" href="#">Course History</a>

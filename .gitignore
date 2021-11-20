@@ -5,4 +5,5 @@ cunyzero/__pycache__/models.cpython-39.pyc
 cunyzero/__pycache__/routes.cpython-39.pyc
 database.db
 cunyzero/database.db
+.DS_Store
 *.pyc

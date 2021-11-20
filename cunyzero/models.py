@@ -46,11 +46,13 @@ class Visitor(db.Model):
 
 class Student(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
-    programId = db.Column(db.Integer, db.ForeignKey('program.id'), unique=True, nullable=False)
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
+    programId = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)
     honor = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
-    gpa = db.Column(db.Float, nullable = False, default=4.0)
+    gpa = db.Column(db.Float, nullable = False, default=0.0)
 
     user = db.relationship('User', backref='studentOwner', lazy=True)
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
@@ -67,6 +69,8 @@ class Student(db.Model):
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(20), default=None)#fired, suspended, etc.
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
     warnings = db.relationship('Warning', backref='targetInstructor', lazy=True)

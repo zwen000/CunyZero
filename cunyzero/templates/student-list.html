@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        {% for student in students%}
+            <article class="media content-section col-md-12">
+                <div class="media-body row" style="position: relative; align-items: center">
+                    <div class="col-md-3">
+                        Instructor: {{ student.firstname }} {{ student.lastname }}
+                    </div>
+                    <div class="col-md-3">
+                        Employ ID:  {{ student.ownerId }}
+                    </div>
+                    <div class="col-md-3">
+                        Status: {{ student.status }}
+                    </div>
+                    <button class="btn btn-outline-info float-right" style="position: absolute; right:10px;">
+                        <a style="text-decoration: none" href='#' }}>Detail</a>
+                    </button>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}

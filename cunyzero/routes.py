@@ -156,7 +156,6 @@ def student_application():
         flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
     if form.validate_on_submit():
-
         selected_program = None
         for i in form.program.data:
             selected_program = i.name
@@ -180,7 +179,6 @@ def instructor_application():
         flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
     if form.validate_on_submit():
-
         application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
                                           type='Instructor')
@@ -231,9 +229,6 @@ def application_review(application_id):
                 user.ownerId = instructor.ownerId
 
             db.session.commit()
-
-
-
             flash(f'{application.type} Application for ({application.firstname}'
                   f' {application.lastname}) has been accepted!', 'success')
             return redirect(url_for('application_list'))
@@ -260,6 +255,7 @@ def register_course():
     #     return redirect(url_for('home'))
     return render_template("register-course.html")
 
+
 # Admin only
 #@login_required
 @app.route('/course/create', methods=['GET', 'POST'])
@@ -278,15 +274,38 @@ def create_course():
         # db.session.commit()
     return render_template("create-course.html", form=form)
 
+
 @login_required
 @app.route('/students', methods=['GET', 'POST'])
 def student_list():
     students = Student.query.all()
-    return render_template("student-list.html", title="Student List", students=students)
+    programs = Program.query.all()
+    return render_template("student-list.html", title="Student List", students=students, programs=programs)
 
 
 @login_required
-@app.route('/instructor', methods=['GET', 'POST'])
+@app.route('/student_review/<int:student_id>', methods=['GET', 'POST'])
+def student_review(student_id):
+    student = Student.query.get(student_id)
+    program = Program.query.get(student.programId)
+    user = student.user[0]
+    courses = student.courses
+    return render_template("student-review.html", title="Student Review", student=student, user=user, program=program,
+                           courses=courses)
+
+
+@login_required
+@app.route('/instructors', methods=['GET', 'POST'])
 def instructor_list():
     instructors = Instructor.query.all()
     return render_template("instructor-list.html", title="Instructor List", instructors=instructors)
+
+
+@login_required
+@app.route('/instructor_review/<int:instructor_id>', methods=['GET', 'POST'])
+def instructor_review(instructor_id):
+    instructor = Instructor.query.get(instructor_id)
+    user = instructor.user[0]
+    courses = Course.query.filter_by(instructorId=instructor_id)
+    return render_template("instructor-review.html", title="Instructor Review", instructor=instructor, user=user,
+                           courses=courses)

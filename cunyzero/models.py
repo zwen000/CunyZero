@@ -19,7 +19,6 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
 
-    posts = db.relationship('Post', backref='author', lazy=True)
     role = db.Column(db.String(30), nullable=False, default='Visitor')
     ownerId = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), db.ForeignKey('admin.ownerId'), db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
 
@@ -107,17 +106,6 @@ class Program(db.Model):
 
     def __repr__(self):
         return f"Program('{self.id}', '{self.name}', '{self.enrolled_total}', '{self.capacity}')"
-
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    def __repr__(self):
-        return f"Post('{self.title}, {self.date_posted}')"
 
 
 class Course(db.Model):

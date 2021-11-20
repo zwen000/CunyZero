@@ -14,7 +14,7 @@
                          Employ ID: {{ application.visitor_id }}
                     </div>
                     <button class="btn btn-outline-info float-right" style="position: absolute; right:10px;">
-                        <a style="text-decoration: none" href={{ url_for('application_confirm', application_id=application.id) }}>Detail</a>
+                        <a href={{ url_for( "application_review", application_id=application.id) }} >Detail</a>
                     </button>
                 </div>
             </article>

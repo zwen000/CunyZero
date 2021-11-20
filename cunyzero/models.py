@@ -18,6 +18,8 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
+
+    posts = db.relationship('Post', backref='author', lazy=True)
     role = db.Column(db.String(30), nullable=False, default='Visitor')
     ownerId = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), db.ForeignKey('admin.ownerId'), db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
 
@@ -42,11 +44,13 @@ class Visitor(db.Model):
 
 class Student(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
-    programId = db.Column(db.Integer, db.ForeignKey('program.id'), unique=True, nullable=False)
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
+    programId = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)
     honor = db.Column(db.Integer, nullable = False, default=0)
     status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
-    gpa = db.Column(db.Float, nullable = False, default=4.0)
+    gpa = db.Column(db.Float, nullable = False, default=0.0)
 
     user = db.relationship('User', backref='studentOwner', lazy=True)
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
@@ -60,14 +64,15 @@ class Student(db.Model):
     def getWaitList(self):#return courses student is waiting for
         return StudentCourse.query.filterby(studentId=self.ownerId, waiting=True)
 
-
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(20), default=None)#fired, suspended, etc.
+    firstname = db.Column(db.String(30), nullable=False)
+    lastname = db.Column(db.String(30), nullable=False)
+
     user = db.relationship('User', backref='instructorOwner', lazy=True)
     warnings = db.relationship('Warning', backref='targetInstructor', lazy=True)
     complaints = db.relationship('Complaint', backref='target', lazy=True)
-
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
 

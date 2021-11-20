@@ -52,15 +52,21 @@ class ApplicationForm(FlaskForm):
     GPA = DecimalField('GPA', validators=[DataRequired()])
     program = QuerySelectMultipleField(
         'Program',
-        #allow_blank=True,
+        allow_blank=True,
         query_factory = lambda: Program.query,
         widget=widgets.Select(multiple=False),
         get_label='name'
     )
     submit = SubmitField('Send Application')
 
+class InstructorApplicationForm(FlaskForm):
+    firstname = StringField('Firstname', validators=[DataRequired()])
+    lastname = StringField('Lastname', validators=[DataRequired()])
+    intro = TextAreaField('Self-Description', default="", validators=[Length(0, 300)])
 
-class ConfirmForm(FlaskForm):
+    submit = SubmitField('Send Application')
+
+class ApplicationReviewForm(FlaskForm):
     id = StringField('Application ID', validators=[DataRequired()])
     justification = TextAreaField('Give A Justification: ')
     accept = SubmitField('Accept')

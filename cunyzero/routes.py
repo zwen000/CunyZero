@@ -147,7 +147,7 @@ def application():
     return render_template("application.html", title="Visitor-Application")
 
 
-@login_required
+@login_required#this dont seem to work. If you are not logged in and goto /application/student there will be attributeerror
 @app.route('/application/student', methods=['GET', 'POST'])
 def student_application():
     form = ApplicationForm()
@@ -251,6 +251,32 @@ def application_review(application_id):
     return render_template("application-confirm.html", title="Application-Confirm", form=form,
                            application=application)
 
+
+# Student only
+#@login_required
+@app.route('/course/register', methods=['GET', 'POST'])
+def register_course():
+    # if current_user.role != "Student":
+    #     return redirect(url_for('home'))
+    return render_template("register-course.html")
+
+# Admin only
+#@login_required
+@app.route('/course/create', methods=['GET', 'POST'])
+def create_course():
+    # if current_user.role != "Admin":
+    #     return redirect(url_for('home'))
+    form = CreateCourseForm()
+    if form.validate_on_submit():
+        dayofweek = ""
+        for i in form.dayofweek.data:
+            dayofweek+=i
+        # course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data, 
+        #                 start_period=form.startPeriod.data, end_period=form.endPeriod.data, 
+        #                 capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
+        # db.session.add(course)
+        # db.session.commit()
+    return render_template("create-course.html", form=form)
 
 @login_required
 @app.route('/students', methods=['GET', 'POST'])

@@ -34,7 +34,7 @@
                                 <a class="nav-item nav-link" href="#">Instructor</a>
                             {% elif current_user.role == 'Admin' %}
                                 <a class="nav-item nav-link" href="#">Course </a>
-                                <a class="nav-item nav-link" href="#">Student</a>
+                                <a class="nav-item nav-link" href="{{ url_for('student_list') }}">Student</a>
                                 <a class="nav-item nav-link" href="{{ url_for('instructor_list') }}">Instructor</a>
                                 <a class="nav-item nav-link" href="#">Complaint</a>
                                 <a class="nav-item nav-link" href="#">Warning</a>

@@ -1,4 +1,4 @@
-﻿astroid==2.4.2
+astroid==2.4.2
 bcrypt==3.2.0
 blinker==1.4
 cffi==1.14.5
@@ -22,7 +22,7 @@ lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
 passlib==1.7.4
-Pillow==8.3.2
+Pillow>=8.3.2
 pyclean==2.0.0
 pycparser==2.20
 pylint==2.6.0

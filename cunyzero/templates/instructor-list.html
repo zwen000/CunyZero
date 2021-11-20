@@ -8,13 +8,13 @@
                         Instructor: {{ instructor.firstname }} {{ instructor.lastname }}
                     </div>
                     <div class="col-md-3">
-                        Employ ID:  {{ instructor.visitor_id }}
+                        Employ ID:  {{ instructor.ownerId }}
                     </div>
                     <div class="col-md-3">
                         Status: {{ instructor.status }}
                     </div>
                     <button class="btn btn-outline-info float-right" style="position: absolute; right:10px;">
-                        <a style="text-decoration: none" href={{ url_for('application_confirm', instructor_id=instructor.ownerId) }}>Detail</a>
+                        <a style="text-decoration: none" href='#' }}>Detail</a>
                     </button>
                 </div>
             </article>

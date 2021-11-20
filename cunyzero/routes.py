@@ -251,3 +251,16 @@ def application_review(application_id):
     return render_template("application-confirm.html", title="Application-Confirm", form=form,
                            application=application)
 
+
+@login_required
+@app.route('/students', methods=['GET', 'POST'])
+def student_list():
+    students = Student.query.all()
+    return render_template("student-list.html", title="Student List", students=students)
+
+
+@login_required
+@app.route('/instructor', methods=['GET', 'POST'])
+def instructor_list():
+    instructors = Instructor.query.all()
+    return render_template("instructor-list.html", title="Instructor List", instructors=instructors)

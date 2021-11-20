@@ -25,6 +25,8 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return f"User('{self.username}, {self.id}, {self.role}, {self.ownerId}')"
+    def userid(self):
+        return self.id
 
 class Admin(db.Model): #Admin.user, User.adminOwner
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
@@ -116,15 +118,16 @@ class Post(db.Model):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    instructorId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'), primary_key=True)
+    instructorId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'))
     course_name = db.Column(db.String(20), nullable = False, unique = True)
 
-    creation_period = db.Column(db.Integer, nullable = False)#for period/semester task logic
-    period = db.Column(db.Integer, nullable = False)#0-9?
-    daytime = db.Column(db.String(30), nullable = True)#mo,tu,we,th,fr,sa,su if missing use -- 
-    enrolled_total = db.Column(db.Integer, nullable = True)
+    creation_period = db.Column(db.Integer, nullable = True)#for period/semester task logic
+    start_period = db.Column(db.Integer, nullable = False)#1-9
+    end_period = db.Column(db.Integer, nullable = False)#1-9
+    dayofweek = db.Column(db.String(30), nullable = True)#mo,tu,we,th,fr,sa,su if missing use -- 
+    enrolled_total = db.Column(db.Integer, nullable = False, default=0)
     capacity = db.Column(db.Integer, default=30)
-    status = db.Column(db.String(20), nullable = True)#status like open, finished, cancelled, etc.
+    status = db.Column(db.String(20), nullable = False, default="Open")#status like open, finished, cancelled, etc.
     
     #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
     waitlist_capacity = db.Column(db.Integer, default=30)

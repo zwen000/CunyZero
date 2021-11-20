@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
-from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm, ConfirmForm
+from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm, ConfirmForm, CreateCourseForm
 from cunyzero.models import *
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_user import roles_required, SQLAlchemyAdapter, UserManager, UserMixin
@@ -147,7 +147,7 @@ def application():
     return render_template("application.html", title="Visitor-Application")
 
 
-@login_required
+@login_required#this dont seem to work. If you are not logged in and goto /application/student there will be attributeerror
 @app.route('/application/student', methods=['GET', 'POST'])
 def student_application():
     form = ApplicationForm()
@@ -218,6 +218,32 @@ def confirm():
                 flash(f'Please provide your reason!', 'danger')
                 redirect(url_for('confirm'))
     return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications, form=form)
+
+# Student only
+#@login_required
+@app.route('/course/register', methods=['GET', 'POST'])
+def register_course():
+    # if current_user.role != "Student":
+    #     return redirect(url_for('home'))
+    return render_template("register-course.html")
+
+# Admin only
+#@login_required
+@app.route('/course/create', methods=['GET', 'POST'])
+def create_course():
+    # if current_user.role != "Admin":
+    #     return redirect(url_for('home'))
+    form = CreateCourseForm()
+    if form.validate_on_submit():
+        dayofweek = ""
+        for i in form.dayofweek.data:
+            dayofweek+=i
+        # course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data, 
+        #                 start_period=form.startPeriod.data, end_period=form.endPeriod.data, 
+        #                 capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
+        # db.session.add(course)
+        # db.session.commit()
+    return render_template("create-course.html", form=form)
 
 
 

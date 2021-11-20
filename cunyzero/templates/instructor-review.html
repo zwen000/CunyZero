@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="media content-section">
+            <div class="media-body">
+                <div class="lead border-bottom">
+                    <strong>{{ instructor.firstname }}, {{ instructor.lastname }}</strong>
+                    <small>/{{ user.role }}</small>
+                </div>
+                <div>Employee ID: {{ instructor.ownerId }}</div>
+                <div>Username: {{ user.username }}</div>
+                <div>Program: {{ program.name }}</div>
+                <div>Current GPA: {{ instructor.gpa }}</div>
+            </div>
+        </div>
+        <div class="content-section">
+            <div class="lead border-bottom">
+                <strong>Current Course</strong>
+            </div>
+            {% for course in courses %}
+                <div class="row col-md-12 border-bottom">
+
+                </div>
+            {% endfor %}
+        </div>
+        <div class="content-section">
+            <div class="lead border-bottom">
+                <strong>Previous Course</strong>
+            </div>
+            {% for course in courses %}
+                <div class="row col-md-12 border-bottom">
+
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}

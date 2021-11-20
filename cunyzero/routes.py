@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
-from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm, ConfirmForm
+from cunyzero.forms import *
 from cunyzero.models import *
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_user import roles_required, SQLAlchemyAdapter, UserManager, UserMixin
@@ -174,15 +174,17 @@ def student_application():
 @login_required
 @app.route('/application/instructor', methods=['GET', 'POST'])
 def instructor_application():
-    form = ApplicationForm()
-    application = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
-    if application:
+    form = InstructorApplicationForm()
+    application_exited = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
+    if application_exited:
         flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
     if form.validate_on_submit():
+
         application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
                                           type='Instructor')
+        print("inst  ", application)
         db.session.add(application)
         db.session.commit()
         flash(f'Your application id: {current_user.ownerId} is submitted successfully!', 'success')
@@ -199,29 +201,53 @@ def application_list():
 
 
 @login_required
-@app.route('/application/<int:application_id>', methods=['GET', 'POST'])
-def application_confirm(application_id):
-    form = ConfirmForm()
-    current_application = Application.query.get(application_id)
+@app.route('/application_review/<int:application_id>', methods=['GET', 'POST'])
+def application_review(application_id):
+    form = ApplicationReviewForm()
+    application = Application.query.get(application_id)
+    user = application.applicant.user[0]
     if form.validate_on_submit():
         if form.accept.data:
-            current_application.approval = True
-            current_application.justification = form.justification.data
+            application.approval = True
+            application.justification = form.justification.data
+            if application.type == "Student":
+                program = Program.query.filter_by(name= application.program_name).first()
+                program.enrolled_total += 1
+                student = Student(ownerId=random.randint(20000001, 30000000),
+                                  programId=program.id,
+                                  firstname=application.firstname,
+                                  lastname=application.lastname,
+                                  gpa=application.GPA)
+                db.session.add(student)
+                user.role = "Student"
+                user.ownerId = student.ownerId
+            else:
+                instructor = Instructor(ownerId=random.randint(30000001, 40000000),
+                                        firstname=application.firstname,
+                                        lastname=application.lastname
+                                        )
+                db.session.add(instructor)
+                user.role = "Instructor"
+                user.ownerId = instructor.ownerId
+
             db.session.commit()
-            flash(f'Application with type ({current_application.type}: {current_application.firstname}'
-                  f' {current_application.lastname}) has been accepted!', 'success')
+
+
+
+            flash(f'{application.type} Application for ({application.firstname}'
+                  f' {application.lastname}) has been accepted!', 'success')
             return redirect(url_for('application_list'))
         if form.reject.data:
             if form.justification.data != '':
-                current_application.approval = False
-                current_application.justification = form.justification.data
+                application.approval = False
+                application.justification = form.justification.data
                 db.session.commit()
-                flash(f'Application with ({current_application.type}: {current_application.firstname}'
-                      f' {current_application.lastname}) has been rejected!', 'success')
+
+                flash(f'{application.type} Application for ( {application.firstname}'
+                      f' {application.lastname}) has been rejected!', 'danger')
                 return redirect(url_for('application_list'))
             else:
                 flash(f'Please provide your reason!', 'danger')
-                return redirect(url_for('application_confirm'))
     return render_template("application-confirm.html", title="Application-Confirm", form=form,
-                           application=current_application)
+                           application=application)
 

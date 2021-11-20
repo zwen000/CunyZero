@@ -20,7 +20,7 @@
                         </div>
                         {% if current_user.role == 'Student' %}
                         <div class="row ml-0">
-                            <div class="mr-3">GPA: {{ current_user.GPA }} 5</div>
+                            <div class="mr-3">GPA: {{ current_user.studentOwner.gpa }}</div>
                             <div class="mr-3">honor: {{ current_user.honor }} 0</div>
                         </div>
                         {% endif %}

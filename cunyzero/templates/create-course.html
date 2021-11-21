@@ -1,0 +1,107 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="content-section">
+    <form method = "POST">
+        {{ form.hidden_tag() }} <!--CSRF token-->
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Create Course</legend>
+            <div class=container>
+                <div class="form-group col-md-5">
+                    <strong>{{ form.coursename.label(class="form-control-label") }}</strong>
+                    {% if form.coursename.errors %}
+                        {{ form.coursename(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.coursename.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.coursename(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-md-5">
+                    <strong>{{ form.instructor.label(class="form-control-label") }}</strong>
+                    {% if form.instructor.errors %}
+                        {{ form.instructor(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.instructor.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.instructor(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-md-3">
+                    <strong>{{ form.startPeriod.label(class="form-control-label") }}</strong>
+                    {% if form.startPeriod.errors %}
+                        {{ form.startPeriod(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.startPeriod.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.startPeriod(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-md-3">
+                    <strong>{{ form.endPeriod.label(class="form-control-label") }}</strong>
+                    {% if form.endPeriod.errors %}
+                        {{ form.endPeriod(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.endPeriod.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.endPeriod(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-md-3">
+                    <strong>{{ form.capacity.label(class="form-control-label") }}</strong>
+                    {% if form.capacity.errors %}
+                        {{ form.capacity(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.capacity.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.capacity(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-md-3">
+                    <strong>{{ form.waitListCapacity.label(class="form-control-label") }}</strong>
+                    {% if form.waitListCapacity.errors %}
+                        {{ form.waitListCapacity(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.waitListCapacity.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.waitListCapacity(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group col-md-3">
+                    <strong>{{ form.dayofweek.label(class="form-control-label") }}</strong>
+                    {% if form.dayofweek.errors %}
+                        {{ form.dayofweek(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.dayofweek.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.dayofweek(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </fieldset>
+</div>
+{% endblock %}

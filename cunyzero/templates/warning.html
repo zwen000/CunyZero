@@ -1,0 +1,27 @@
+{% extends "individual-review.html" %}
+{% block warning_content %}
+    <div class="content-section">
+        <form method="POST", action="">
+            {{ form.hidden_tag() }} <!--CSRF token-->
+            <fieldset class="form-group">
+                <!-- Username input field setting -->
+                <div class="form-group mb-0">
+                    <strong>{{ form.message.label(class="form-control-label") }}</strong>
+                    {% if form.message.errors %}
+                        {{ form.message(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.message.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor%}
+                        </div>
+                    {% else %}
+                        {{ form.message(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group mb-0">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock warning_content %}

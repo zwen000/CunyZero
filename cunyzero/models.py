@@ -19,12 +19,13 @@ class User(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
 
-    posts = db.relationship('Post', backref='author', lazy=True)
     role = db.Column(db.String(30), nullable=False, default='Visitor')
     ownerId = db.Column(db.Integer, db.ForeignKey('visitor.ownerId'), db.ForeignKey('admin.ownerId'), db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
 
     def __repr__(self):
         return f"User('{self.username}, {self.id}, {self.role}, {self.ownerId}')"
+    def userid(self):
+        return self.id
 
 class Admin(db.Model): #Admin.user, User.adminOwner
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
@@ -107,28 +108,18 @@ class Program(db.Model):
         return f"Program('{self.id}', '{self.name}', '{self.enrolled_total}', '{self.capacity}')"
 
 
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    date_posted = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    content = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-    def __repr__(self):
-        return f"Post('{self.title}, {self.date_posted}')"
-
-
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    instructorId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'), primary_key=True)
+    instructorId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'))
     course_name = db.Column(db.String(20), nullable = False, unique = True)
 
-    creation_period = db.Column(db.Integer, nullable = False)#for period/semester task logic
-    period = db.Column(db.Integer, nullable = False)#0-9?
-    daytime = db.Column(db.String(30), nullable = True)#mo,tu,we,th,fr,sa,su if missing use -- 
-    enrolled_total = db.Column(db.Integer, nullable = True)
+    creation_period = db.Column(db.Integer, nullable = True)#for period/semester task logic
+    start_period = db.Column(db.Integer, nullable = False)#1-9
+    end_period = db.Column(db.Integer, nullable = False)#1-9
+    dayofweek = db.Column(db.String(30), nullable = True)#mo,tu,we,th,fr,sa,su if missing use -- 
+    enrolled_total = db.Column(db.Integer, nullable = False, default=0)
     capacity = db.Column(db.Integer, default=30)
-    status = db.Column(db.String(20), nullable = True)#status like open, finished, cancelled, etc.
+    status = db.Column(db.String(20), nullable = False, default="Open")#status like open, finished, cancelled, etc.
     
     #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
     waitlist_capacity = db.Column(db.Integer, default=30)
@@ -175,8 +166,8 @@ class Complaint(db.Model):
 
 class Warning(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable = False)
-    message = db.Column(db.Text, nullable = False, default='')
+    userId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable=False)
+    message = db.Column(db.Text, nullable=False, default='')
     def __repr__(self):
         return '<Warning: %r>' % self.id
 

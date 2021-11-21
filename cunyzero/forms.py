@@ -1,10 +1,10 @@
 from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileAllowed
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_login import current_user
 from wtforms import *
 from wtforms.fields import *
 from wtforms_sqlalchemy.fields import *
-from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, Optional
+from wtforms.validators import DataRequired, Length, EqualTo, NumberRange, ValidationError, Optional
 from cunyzero.models import *
 
 
@@ -71,3 +71,36 @@ class ApplicationReviewForm(FlaskForm):
     justification = TextAreaField('Give A Justification: ')
     accept = SubmitField('Accept')
     reject = SubmitField('Reject')
+
+class CreateCourseForm(FlaskForm):
+    coursename = StringField('Coursename',
+                            validators=[DataRequired(), Length(min=2, max=20)])
+    dayofweek = SelectMultipleField(
+        'Days of the Week', 
+        validators=[DataRequired()], 
+        choices=[("Mo", "Mo"),("Tu", "Tu"),("We", "We"),("Th", "Th"),("Fr", "Fr"),("Sa", "Sa"),("Su", "Su")],
+        widget = widgets.ListWidget(prefix_label=False),
+        option_widget = widgets.CheckboxInput()
+    )
+    instructor = QuerySelectMultipleField(
+        'Instructors',
+        validators=[DataRequired()], 
+        query_factory = lambda: Instructor.query,
+        widget=widgets.Select(multiple=False),
+        get_label='user.username'
+    )                                
+    startPeriod = IntegerField('Start Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
+    endPeriod = IntegerField('End Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
+    capacity = IntegerField('Capacity', validators=[DataRequired(), NumberRange(min=5,max=100)])
+    waitListCapacity = IntegerField('Wait List Capacity', validators=[DataRequired(), NumberRange(min=0,max=100)])
+    submit = SubmitField('Create')
+
+    def validate_coursename(self, coursename):
+            course = Course.query.filter_by(course_name=coursename.data).first()
+            if course:
+                raise ValidationError("That coursename is taken, Please choose a different one.")
+
+
+class WarningForm(FlaskForm):
+    message = TextAreaField('Warning message: ', validators=[DataRequired()])
+    submit = SubmitField('Confirm')

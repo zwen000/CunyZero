@@ -120,6 +120,13 @@ def save_picture(form_picture):
 @login_required
 def account():
     form = UpdateAccountForm()
+    if current_user.role == 'Student':
+        owner = current_user.studentOwner
+    elif current_user.role == 'Instructor':
+        owner = current_user.instructorOwner
+    else:
+        owner = current_user.adminOwner
+
     if form.validate_on_submit():
         # if form.picture.data:
         #     picture_file = save_picture(form.picture.data)
@@ -138,7 +145,7 @@ def account():
 
     image_file = url_for('static', filename= "profile_pics/" + current_user.image_file)
     return render_template("account.html", title="Account",
-                           image_file=image_file, form=form)
+                           image_file=image_file, form=form, owner=owner)
 
 
 @login_required

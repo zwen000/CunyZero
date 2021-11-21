@@ -100,3 +100,7 @@ class CreateCourseForm(FlaskForm):
             if course:
                 raise ValidationError("That coursename is taken, Please choose a different one.")
 
+
+class WarningForm(FlaskForm):
+    message = TextAreaField('Warning message: ', validators=[DataRequired()])
+    submit = SubmitField('Confirm')

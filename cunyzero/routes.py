@@ -291,17 +291,6 @@ def student_list():
 
 
 @login_required
-@app.route('/student_review/<int:student_id>', methods=['GET', 'POST'])
-def student_review(student_id):
-    student = Student.query.get(student_id)
-    program = Program.query.get(student.programId)
-    user = student.user[0]
-    courses = student.courses
-    return render_template("student-review.html", title="Student Review", student=student, user=user, program=program,
-                           courses=courses)
-
-
-@login_required
 @app.route('/instructors', methods=['GET', 'POST'])
 def instructor_list():
     instructors = Instructor.query.all()
@@ -309,10 +298,39 @@ def instructor_list():
 
 
 @login_required
-@app.route('/instructor_review/<int:instructor_id>', methods=['GET', 'POST'])
-def instructor_review(instructor_id):
-    instructor = Instructor.query.get(instructor_id)
-    user = instructor.user[0]
-    courses = Course.query.filter_by(instructorId=instructor_id)
-    return render_template("instructor-review.html", title="Instructor Review", instructor=instructor, user=user,
-                           courses=courses)
+@app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
+def individual_review(role, owner_id):
+    if role == "Student":
+        owner = Student.query.get(owner_id)
+        program = Program.query.get(owner.programId)
+        user = owner.user[0]
+        courses = owner.courses
+        return render_template("individual-review.html", title="Student Review", owner=owner, user=user,
+                               program=program, courses=courses)
+    if role == "Instructor":
+        owner = Instructor.query.get(owner_id)
+        user = owner.user[0]
+        courses = Course.query.filter_by(instructorId=owner_id)
+        return render_template("individual-review.html", title="Instructor Review", owner=owner, user=user,
+                               courses=courses)
+
+
+@login_required
+@app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
+def warning(role, owner_id):
+    form = WarningForm()
+    if role == "Student":
+        owner = Student.query.get(owner_id)
+        program = Program.query.get(owner.programId)
+        user = owner.user[0]
+        courses = owner.courses
+        return render_template("warning.html", title="Student Review", owner=owner, user=user,
+                               program=program, courses=courses, form=form)
+    if role == "Instructor":
+        owner = Instructor.query.get(owner_id)
+        user = owner.user[0]
+        courses = Course.query.filter_by(instructorId=owner_id)
+        return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
+                               courses=courses, form=form)
+
+

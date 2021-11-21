@@ -166,8 +166,8 @@ class Complaint(db.Model):
 
 class Warning(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable = False)
-    message = db.Column(db.Text, nullable = False, default='')
+    userId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable=False)
+    message = db.Column(db.Text, nullable=False, default='')
     def __repr__(self):
         return '<Warning: %r>' % self.id
 

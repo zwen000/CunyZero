@@ -4,7 +4,7 @@
         <legend class="border-bottom mb-4"> Instructor List </legend>
         {% for instructor in instructors%}
             <article class="btn-outline-info media content-section col-md-12">
-                <a class="media-body row" style="text-decoration: none; color: #0d1421" href="{{ url_for('instructor_review', instructor_id=instructor.ownerId)}}">
+                <a class="media-body row" style="text-decoration: none; color: #0d1421" href="{{ url_for('individual_review',role='Instructor',owner_id=instructor.ownerId)}}">
                     <div class="col-md-3 border-left">
                         Name: {{ instructor.firstname }} {{ instructor.lastname }}
                     </div>

@@ -4,7 +4,8 @@
         <legend class="border-bottom mb-4"> Student List </legend>
         {% for student in students%}
             <article class="btn-outline-info media content-section col-md-12">
-                <a class="media-body row" style="text-decoration: none; color: #0d1421" href="{{ url_for('student_review', student_id=student.ownerId)}}">
+                <a class="media-body row" style="text-decoration: none; color: #0d1421"
+                   href="{{ url_for('individual_review',role='Student',owner_id=student.ownerId)}}">
                     <div class="col-md-3 border-left">
                         Name: {{ student.firstname }} {{ student.lastname }}
                     </div>

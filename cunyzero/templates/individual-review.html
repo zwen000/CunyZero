@@ -4,16 +4,18 @@
         <div class="media content-section">
             <div class="media-body" style="position: relative">
                 <div class="lead border-bottom">
-                    <strong>{{ student.firstname }}, {{ student.lastname }}</strong>
+                    <strong>{{ owner.firstname }}, {{ owner.lastname }}</strong>
                     <small>/{{ user.role }}</small>
                 </div>
-                <div>Employee ID: {{ student.ownerId }}</div>
+                <div>Employee ID: {{ owner.ownerId }}</div>
                 <div>Username: {{ user.username }}</div>
-                <div>Program: {{ program.name }}</div>
-                <div>Current GPA: {{ student.gpa }}</div>
-                <div>Status: {{ student.status }}</div>
+                {% if user.role == "Student" %}
+                    <div>Program: {{ program.name }}</div>
+                    <div>Current GPA: {{ owner.gpa }}</div>
+                {% endif %}
+                <div>Status: {{ owner.status }}</div>
                 <a class="btn btn-outline-info float-right" style="position: absolute; right:10px; top:40px"
-                   href="#" > warning </a>
+                   href="{{ url_for('warning',owner_id=owner.ownerId,role=user.role) }}" > warning </a>
             </div>
         </div>
         {% block warning_content %}{% endblock %}

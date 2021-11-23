@@ -316,7 +316,7 @@ def individual_review(role, owner_id):
 
 
 @login_required
-@app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
+@app.route('/<string:role>/<int:owner_id>/warning', methods=['GET', 'POST'])
 def warning(role, owner_id):
     form = WarningForm()
     if role == "Student":

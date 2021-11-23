@@ -154,9 +154,9 @@ def application():
     return render_template("application.html", title="Visitor-Application")
 
 
-@login_required#this dont seem to work. If you are not logged in and goto /application/student there will be attributeerror
+@login_required
 @app.route('/application/student', methods=['GET', 'POST'])
-def student_application():
+def student_application():#If you are not logged in and goto /application/student there will be attributeerror
     form = ApplicationForm()
     application = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
     if application:
@@ -260,7 +260,45 @@ def application_review(application_id):
 def register_course():
     # if current_user.role != "Student":
     #     return redirect(url_for('home'))
-    return render_template("register-course.html")
+    
+    courses = Course.query.filter_by(status="Open")
+    studentCourses = StudentCourse.query.filter_by(studentId=current_user.ownerId)
+    courseIds = [sc.courseId for sc in studentCourses]# id of courses student enrolled/waitlisted in
+    enrolledIds = [sc.courseId for sc in studentCourses if not sc.waiting]# id of courses student enrolled in
+
+    notEnrolledCourses = [course for course in courses if course.courseId not in courseIds]
+    enrolledCourses = [course for course in courses if course.courseId in enrolledIds]
+    waitListedCourses = [course for course in courses if (course.courseId in courseIds) and (course.courseId not in enrolledIds)]
+
+    if request.form.get("Enroll"):# Attempting to Enroll In a Course
+        courseId = int(request.form.get("Enroll"))
+        course = Course.query.filter_by(courseId=courseId).first()
+        courseSize = len(StudentCourse.query.filter_by(courseId=course.courseId, waiting=False))
+
+        if courseSize<course.capacity:# if course not full
+            studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=False)
+            db.session.add(studentcourse)
+            db.session.commit()
+            flash(f'You have successfully enrolled in {course.coursename}','success')
+        else:# course full
+            waitListSize = len(StudentCourse.query.filter_by(courseId=course.courseId, waiting=True))
+            if waitListSize<course.waitListCapacity:# if waitlist not full
+                studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=True)
+                db.session.add(studentcourse)
+                db.session.commit()
+                flash(f'You are now waitlisted for {course.coursename}','warning')
+            else:
+                flash('Course is full','danger')
+
+    if request.form.get("Drop"):# Dropping a Course
+        courseId = int(request.form.get("Enroll"))
+        StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).delete()
+        db.session.commit()
+        flash(f'You have successfully dropped {course.coursename}','success')
+
+    return render_template("register-course.html", courses=notEnrolledCourses, 
+                                                    enrolled = enrolledCourses, 
+                                                    waitListed = waitListedCourses)
 
 
 # Admin only

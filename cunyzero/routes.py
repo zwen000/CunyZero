@@ -45,7 +45,9 @@ posts = [
     }
 ]
 
-
+@app.route('/student')
+def student():
+    return render_template ('student.html',gpa=3.0)
 @app.route('/')
 @app.route('/home')
 def home():

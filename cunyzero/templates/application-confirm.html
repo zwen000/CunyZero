@@ -1,0 +1,36 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class="content-section">
+        <article class="media content-section col-md-12">
+            <div class="media-body" style="max-width: 100%">
+                <form method="POST", action="">
+                    {{ form.hidden_tag() }} <!--CSRF token-->
+                    <div class="form-group" style="display: none" >
+                        {{ form.id.label(class="form-control-label") }}
+                        {{ form.id(class="form-control-label", value=application.id) }}
+                    </div>
+                    <div class="article-metadata row">
+                        <H4 class="col-md-9 mr-4">Type: {{ application.type }}</H4>
+                            {{ form.accept(class="btn btn-outline-info col-md-1 ml-5") }}
+                            {{ form.reject(class="btn btn-outline-info col-md-1 ml-2") }}
+                    </div>
+                    <div class="row">
+                        <p class="article-content ml-3"><strong>Name:</strong> {{ application.firstname }} {{ application.lastname }}</p>
+                        <p class="article-content ml-3"><strong>Visitor ID:</strong> {{ application.visitor_id }}</p>
+                    </div>
+                    {% if application.type =='Student' %}
+                        <div class="row">
+                            <p class="article-content ml-3"><strong>GPA:</strong> {{ application.GPA }}</p>
+                            <p class="article-content ml-3"><strong>Program:</strong> {{ application.program_name }}</p>
+                        </div>
+                    {% endif %}
+                    <p class="article-content" style="word-wrap: break-word"><strong>intro:</strong> {{ application.intro }}</p>
+                    <div class="form-group">
+                        <strong>{{ form.justification.label(class="form-control-label") }}</strong>
+                        {{ form.justification(class="form-control form-control-lg", value='') }}
+                    </div>
+                </form>
+            </div>
+        </article>
+    </div>
+{% endblock content %}

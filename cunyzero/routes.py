@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
-from cunyzero.forms import RegistrationForm, LoginForm, UpdateAccountForm, ApplicationForm
+from cunyzero.forms import *
 from cunyzero.models import *
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_user import roles_required, SQLAlchemyAdapter, UserManager, UserMixin
@@ -83,6 +83,7 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
+        print(form.submit.data)
         user = User.query.filter_by(username=form.username.data).first()
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
@@ -121,6 +122,13 @@ def save_picture(form_picture):
 @login_required
 def account():
     form = UpdateAccountForm()
+    if current_user.role == 'Student':
+        owner = current_user.studentOwner
+    elif current_user.role == 'Instructor':
+        owner = current_user.instructorOwner
+    else:
+        owner = current_user.adminOwner
+
     if form.validate_on_submit():
         # if form.picture.data:
         #     picture_file = save_picture(form.picture.data)
@@ -139,43 +147,230 @@ def account():
 
     image_file = url_for('static', filename= "profile_pics/" + current_user.image_file)
     return render_template("account.html", title="Account",
-                           image_file=image_file, form=form)
+                           image_file=image_file, form=form, owner=owner)
 
 
+@login_required
 @app.route('/application/')
 def application():
     return render_template("application.html", title="Visitor-Application")
 
 
+@login_required
 @app.route('/application/student', methods=['GET', 'POST'])
-def student_application():
+def student_application():#If you are not logged in and goto /application/student there will be attributeerror
     form = ApplicationForm()
-    if form.validate_on_submit():
-        visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
-                                          lastname=form.lastname.data, intro=form.intro.data,
-                                          type='Student', GPA=form.GPA.data, Program=form.program.data)
-        db.session.add(visitor_application)
-        db.session.commit()
-        flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
+    application = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
+    if application:
+        flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
-    return render_template("student-application.html", title="Visitor-Application", form=form)
+    if form.validate_on_submit():
+        selected_program = None
+        for i in form.program.data:
+            selected_program = i.name
+        application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
+                                          lastname=form.lastname.data, intro=form.intro.data,
+                                          type='Student', GPA=float(form.GPA.data), program_name=selected_program)
+        db.session.add(application)
+        db.session.commit()
+        flash(f'Your application with id: {current_user.ownerId} is submitted successfully!', 'success')
+        return redirect(url_for('application'))
+
+    return render_template("student-application.html", title="Student Application", form=form)
 
 
+@login_required
 @app.route('/application/instructor', methods=['GET', 'POST'])
 def instructor_application():
-    form = ApplicationForm()
+    form = InstructorApplicationForm()
+    application_exited = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
+    if application_exited:
+        flash(f'You have an application processing!', 'danger')
+        return redirect(url_for('application'))
     if form.validate_on_submit():
-        visitor_application = Application(visitor_id=current_user.ownerId, firstname=form.firstname.data,
+        application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
                                           type='Instructor')
-        db.session.add(visitor_application)
+        print("inst  ", application)
+        db.session.add(application)
         db.session.commit()
-        flash(f'Your application with id: {current_user.ownerId} has been send to database!', 'success')
+        flash(f'Your application id: {current_user.ownerId} is submitted successfully!', 'success')
         return redirect(url_for('application'))
-    return render_template("instructor-application.html", title="Visitor-Application", form=form)
+    return render_template("instructor-application.html", title="Instructor Application", form=form)
 
 
-@app.route('/confirm/', methods=['GET', 'POST'])
-def confirm():
+# Admin only
+@login_required
+@app.route('/application/list', methods=['GET', 'POST'])
+def application_list():
     applications = Application.query.filter_by(approval=None)
-    return render_template("confirm.html", title="Visitor-Application-confirm", applications=applications)
+    return render_template("application-list.html", title="Application-List", applications=applications)
+
+
+@login_required
+@app.route('/application_review/<int:application_id>', methods=['GET', 'POST'])
+def application_review(application_id):
+    form = ApplicationReviewForm()
+    application = Application.query.get(application_id)
+    user = application.applicant.user[0]
+    if form.validate_on_submit():
+        if form.accept.data:
+            application.approval = True
+            application.justification = form.justification.data
+            if application.type == "Student":
+                program = Program.query.filter_by(name= application.program_name).first()
+                program.enrolled_total += 1
+                student = Student(ownerId=random.randint(20000001, 30000000),
+                                  programId=program.id,
+                                  firstname=application.firstname,
+                                  lastname=application.lastname,
+                                  gpa=application.GPA)
+                db.session.add(student)
+                user.role = "Student"
+                user.ownerId = student.ownerId
+            else:
+                instructor = Instructor(ownerId=random.randint(30000001, 40000000),
+                                        firstname=application.firstname,
+                                        lastname=application.lastname
+                                        )
+                db.session.add(instructor)
+                user.role = "Instructor"
+                user.ownerId = instructor.ownerId
+
+            db.session.commit()
+            flash(f'{application.type} Application for ({application.firstname}'
+                  f' {application.lastname}) has been accepted!', 'success')
+            return redirect(url_for('application_list'))
+        if form.reject.data:
+            if form.justification.data != '':
+                application.approval = False
+                application.justification = form.justification.data
+                db.session.commit()
+
+                flash(f'{application.type} Application for ( {application.firstname}'
+                      f' {application.lastname}) has been rejected!', 'danger')
+                return redirect(url_for('application_list'))
+            else:
+                flash(f'Please provide your reason!', 'danger')
+    return render_template("application-confirm.html", title="Application-Confirm", form=form,
+                           application=application)
+
+
+# Student only
+#@login_required
+@app.route('/course/register', methods=['GET', 'POST'])
+def register_course():
+    # if current_user.role != "Student":
+    #     return redirect(url_for('home'))
+    
+    courses = Course.query.filter_by(status="Open")
+    studentCourses = StudentCourse.query.filter_by(studentId=current_user.ownerId)
+    courseIds = [sc.courseId for sc in studentCourses]# id of courses student enrolled/waitlisted in
+    enrolledIds = [sc.courseId for sc in studentCourses if not sc.waiting]# id of courses student enrolled in
+
+    notEnrolledCourses = [course for course in courses if course.courseId not in courseIds]
+    enrolledCourses = [course for course in courses if course.courseId in enrolledIds]
+    waitListedCourses = [course for course in courses if (course.courseId in courseIds) and (course.courseId not in enrolledIds)]
+
+    if request.form.get("Enroll"):# Attempting to Enroll In a Course
+        courseId = int(request.form.get("Enroll"))
+        course = Course.query.filter_by(courseId=courseId).first()
+        courseSize = len(StudentCourse.query.filter_by(courseId=course.courseId, waiting=False))
+
+        if courseSize<course.capacity:# if course not full
+            studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=False)
+            db.session.add(studentcourse)
+            db.session.commit()
+            flash(f'You have successfully enrolled in {course.coursename}','success')
+        else:# course full
+            waitListSize = len(StudentCourse.query.filter_by(courseId=course.courseId, waiting=True))
+            if waitListSize<course.waitListCapacity:# if waitlist not full
+                studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=True)
+                db.session.add(studentcourse)
+                db.session.commit()
+                flash(f'You are now waitlisted for {course.coursename}','warning')
+            else:
+                flash('Course is full','danger')
+
+    if request.form.get("Drop"):# Dropping a Course
+        courseId = int(request.form.get("Enroll"))
+        StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).delete()
+        db.session.commit()
+        flash(f'You have successfully dropped {course.coursename}','success')
+
+    return render_template("register-course.html", courses=notEnrolledCourses, 
+                                                    enrolled = enrolledCourses, 
+                                                    waitListed = waitListedCourses)
+
+
+# Admin only
+#@login_required
+@app.route('/course/create', methods=['GET', 'POST'])
+def create_course():
+    # if current_user.role != "Admin":
+    #     return redirect(url_for('home'))
+    form = CreateCourseForm()
+    if form.validate_on_submit():
+        dayofweek = ""
+        for i in form.dayofweek.data:
+            dayofweek+=i
+        # course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data, 
+        #                 start_period=form.startPeriod.data, end_period=form.endPeriod.data, 
+        #                 capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
+        # db.session.add(course)
+        # db.session.commit()
+    return render_template("create-course.html", form=form)
+
+
+@login_required
+@app.route('/students', methods=['GET', 'POST'])
+def student_list():
+    students = Student.query.all()
+    programs = Program.query.all()
+    return render_template("student-list.html", title="Student List", students=students, programs=programs)
+
+
+@login_required
+@app.route('/instructors', methods=['GET', 'POST'])
+def instructor_list():
+    instructors = Instructor.query.all()
+    return render_template("instructor-list.html", title="Instructor List", instructors=instructors)
+
+
+@login_required
+@app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
+def individual_review(role, owner_id):
+    if role == "Student":
+        owner = Student.query.get(owner_id)
+        program = Program.query.get(owner.programId)
+        user = owner.user[0]
+        courses = owner.courses
+        return render_template("individual-review.html", title="Student Review", owner=owner, user=user,
+                               program=program, courses=courses)
+    if role == "Instructor":
+        owner = Instructor.query.get(owner_id)
+        user = owner.user[0]
+        courses = Course.query.filter_by(instructorId=owner_id)
+        return render_template("individual-review.html", title="Instructor Review", owner=owner, user=user,
+                               courses=courses)
+
+
+@login_required
+@app.route('/<string:role>/<int:owner_id>/warning', methods=['GET', 'POST'])
+def warning(role, owner_id):
+    form = WarningForm()
+    if role == "Student":
+        owner = Student.query.get(owner_id)
+        program = Program.query.get(owner.programId)
+        user = owner.user[0]
+        courses = owner.courses
+        return render_template("warning.html", title="Student Review", owner=owner, user=user,
+                               program=program, courses=courses, form=form)
+    if role == "Instructor":
+        owner = Instructor.query.get(owner_id)
+        user = owner.user[0]
+        courses = Course.query.filter_by(instructorId=owner_id)
+        return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
+                               courses=courses, form=form)
+
+

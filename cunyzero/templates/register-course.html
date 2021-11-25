@@ -1,5 +1,97 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<h1>hello</h1>
-{% endblock %}
+<div class="row">
+    <!-- <div class="content-section"> -->
+        <div class="col-7">
+            <table class="table table-primary">
+                <strong><label>Available Courses</label></strong>
+                <thead class="thead-light">
+                    <tr>
+                    <th scope="col">Course Name</th>
+                    <th scope="col">Start Period</th>
+                    <th scope="col">End Period</th>
+                    <th scope="col">Days of Week</th>
+                    <th scope="col">Capacity</th>
+                    <th scope="col">Wait List Capacity</th>
+                    <th scope="col">Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in student.notEnrolled() %}
+                        <tr>
+                        <td>{{course.coursename}}</td>
+                        <td>{{course.startPeriod}}</td>
+                        <td>{{course.endPeriod}}</td>
+                        <td>{{course.dayofweek}}</td>
+                        <td>{{course.capacity}}</td>
+                        <td>{{course.waitListCapacity}}</td>
+                        <td>
+                            <form method="POST">
+                                <button type="submit" name="Enroll" value="{{course.id}}" class="btn btn-success">Register</button>
+                            </form>
+                        </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-5" >
+            <table class="table table-success">
+                <strong><label>My Courses</label></strong>
+                <thead class="thead-light">
+                    <tr>
+                    <th scope="col">Course Name</th>
+                    <th scope="col">Start Period</th>
+                    <th scope="col">End Period</th>
+                    <th scope="col">Days of Week</th>
+                    <th scope="col">Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in student.enrolled() %}
+                        <tr>
+                        <td>{{course.coursename}}</td>
+                        <td>{{course.startPeriod}}</td>
+                        <td>{{course.endPeriod}}</td>
+                        <td>{{course.dayofweek}}</td>
+                        <td>
+                            <form method="POST">
+                                <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>
+                            </form>
+                        </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </div>
+            <table class="table table-danger">
+                <strong><label>Wait Listed Courses</label></strong>
+                <thead class="thead-light">
+                    <tr>
+                    <th scope="col">Course Name</th>
+                    <th scope="col">Start Period</th>
+                    <th scope="col">End Period</th>
+                    <th scope="col">Days of Week</th>
+                    <th scope="col">Options</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in student.waitListed() %}
+                        <tr>
+                        <td>{{course.coursename}}</td>
+                        <td>{{course.startPeriod}}</td>
+                        <td>{{course.endPeriod}}</td>
+                        <td>{{course.dayofweek}}</td>
+                        <td>
+                            <form method="POST">
+                                <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>
+                            </form>
+                        </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </div>
+        </div>
+    <!-- </div> -->
+</div>
+{% endblock %} 

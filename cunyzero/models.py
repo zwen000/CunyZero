@@ -62,8 +62,24 @@ class Student(db.Model):
 
     def __repr__(self):
         return '<studentid: %r>' % self.ownerId
-    def getWaitList(self):#return courses student is waiting for
-        return StudentCourse.query.filterby(studentId=self.ownerId, waiting=True)
+    def getWaitList(self):#return studentcourse that student is waiting for
+        return StudentCourse.query.filter_by(studentId=self.ownerId, waiting=True)
+    def enrolled(self):
+        return self.getWaitingCourses(False)
+    def waitListed(self):
+        return self.getWaitingCourses(True)
+    def getWaitingCourses(self, waiting):#returns waitlisted courses if waiting=true else if waiting=false return enrolled courses
+        studentCourses = StudentCourse.query.filter_by(studentId=self.ownerId, waiting=waiting)
+        filterIds = [sc.courseId for sc in studentCourses]
+        courses = []
+        for sc in studentCourses:# for each studentcourse
+            course = Course.query.filter_by(id=sc.courseId, status="Open").first()
+            if course.id in filterIds:#if its waitlisted/enrolled
+                courses.append(course)
+        return courses
+    def notEnrolled(self):#return courses that student is not enrolled or waitlisted in
+        studentCoursesIds = [sc.courseId for sc in StudentCourse.query.filter_by(studentId=self.ownerId)]
+        return [course for course in Course.query.all() if course.id not in studentCoursesIds]
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
@@ -111,13 +127,12 @@ class Program(db.Model):
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     instructorId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'))
-    course_name = db.Column(db.String(20), nullable = False, unique = True)
+    coursename = db.Column(db.String(20), nullable = False, unique = True)
 
-    creation_period = db.Column(db.Integer, nullable = True)#for period/semester task logic
-    start_period = db.Column(db.Integer, nullable = False)#1-9
-    end_period = db.Column(db.Integer, nullable = False)#1-9
-    dayofweek = db.Column(db.String(30), nullable = True)#mo,tu,we,th,fr,sa,su if missing use -- 
-    enrolled_total = db.Column(db.Integer, nullable = False, default=0)
+    creationPeriod = db.Column(db.Integer, nullable = True)#for period/semester task logic
+    startPeriod = db.Column(db.Integer, nullable = False)#1-9
+    endPeriod = db.Column(db.Integer, nullable = False)#1-9
+    dayofweek = db.Column(db.String(30), nullable = False)#mo,tu,we,th,fr,sa,su if missing use -- 
     capacity = db.Column(db.Integer, default=30)
     status = db.Column(db.String(20), nullable = False, default="Open")#status like open, finished, cancelled, etc.
     
@@ -127,10 +142,32 @@ class Course(db.Model):
     #rating = db.Column(db.Float, nullable = True)# ^
 
     def __repr__(self):
-        return '<Course %r>' % self.course_name
+        return '<Course %r, %r>' % (self.coursename, self.status)
     def getWaitList(self):#return waitlist (studentcourse with waiting=true)
         return StudentCourse.filter_by(courseId=self.id, waiting=True)
-
+    #pre: must be a real studentId
+    #post: return true if conflict with student's course(inluding waitlisted courses) else false                   
+    def courseConflict(self, studentId):
+        courses = StudentCourse.query.filter_by(studentId=studentId)
+        days = []
+        for i in range(int(len(self.dayofweek)/2)):#get list of days: [Mo, Tu, Etc.]
+            days.append(self.dayofweek[i*2:i*2+2])
+        for studentcourse in courses:#check all the student's courses
+            course = Course.query.filter_by(id=studentcourse.courseId).first()
+            enrolled_dayofweek = course.dayofweek
+            for day in days:#go through each day in list of days
+                if day in enrolled_dayofweek:#if day conflict
+                    #check if period conflicts
+                    if self.conflictPeriod(course.startPeriod, course.endPeriod, self.startPeriod, self.endPeriod):
+                        return True
+        return False
+    def conflictPeriod(self, start, end, start2, end2):
+        return self.conflictNum(start, end, start2, end2) or self.conflictNum(start2, end2, start, end)
+    def conflictNum(self,start, end, start2, end2):
+        if start>=start2 and start<=end2:
+            return True
+        if end>=start2 and end<=end2:
+            return True
 
 class StudentCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)

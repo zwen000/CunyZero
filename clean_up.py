@@ -46,7 +46,32 @@ db.session.add(user1)
 db.session.add(user2)
 db.session.add(user3)
 
+#testing courses
+course1 = Course(id=random.randint(10000000, 20000000), instructorId=user3.ownerId, dayofweek="MoTuWe", coursename="Cs322",
+                startPeriod="1", endPeriod="9")
+course2 = Course(id=random.randint(20000001, 30000000), instructorId=user3.ownerId, dayofweek="Sa", coursename="Cs5000",
+                startPeriod="3", endPeriod="4")
+course3 = Course(id=random.randint(30000001, 40000000), instructorId=user3.ownerId, dayofweek="Su", coursename="Cs300",
+                startPeriod="3", endPeriod="4")
+course4 = Course(id=random.randint(40000001, 50000000), instructorId=user3.ownerId, dayofweek="TuThFr", coursename="Cs50",
+                startPeriod="3", endPeriod="4")
+course5 = Course(id=random.randint(50000001, 60000000), instructorId=user3.ownerId, dayofweek="TuThFr", coursename="Cs212",
+                startPeriod="5", endPeriod="6")
 
+db.session.add(course1)
+db.session.add(course2)
+db.session.add(course3)
+db.session.add(course4)
+db.session.add(course5)
 
+studentCourse2 = StudentCourse(courseId = course2.id, studentId = user2.ownerId, waiting = True)
+studentCourse3 = StudentCourse(courseId = course3.id, studentId = user2.ownerId, waiting = True)
+studentCourse4 = StudentCourse(courseId = course4.id, studentId = user2.ownerId, waiting = False)
+studentCourse5 = StudentCourse(courseId = course5.id, studentId = user2.ownerId, waiting = False)
+
+db.session.add(studentCourse2)
+db.session.add(studentCourse3)
+db.session.add(studentCourse4)
+db.session.add(studentCourse5)
 
 db.session.commit()

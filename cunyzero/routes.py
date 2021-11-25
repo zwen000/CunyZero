@@ -333,5 +333,8 @@ def warning(role, owner_id):
         return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
                                courses=courses, form=form)
 
-
+    #if form.validate_on_submit():
+        warning = Warning(userId=owner_id, message=form.meesage.data)
+        #db.session.add(warning)
+        #db.session.commit()
 

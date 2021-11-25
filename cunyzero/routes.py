@@ -45,7 +45,9 @@ posts = [
     }
 ]
 
-
+@app.route('/student')
+def student():
+    return render_template ('student.html',gpa=3.0)
 @app.route('/')
 @app.route('/home')
 def home():
@@ -120,6 +122,13 @@ def save_picture(form_picture):
 @login_required
 def account():
     form = UpdateAccountForm()
+    if current_user.role == 'Student':
+        owner = current_user.studentOwner
+    elif current_user.role == 'Instructor':
+        owner = current_user.instructorOwner
+    else:
+        owner = current_user.adminOwner
+
     if form.validate_on_submit():
         # if form.picture.data:
         #     picture_file = save_picture(form.picture.data)
@@ -138,7 +147,7 @@ def account():
 
     image_file = url_for('static', filename= "profile_pics/" + current_user.image_file)
     return render_template("account.html", title="Account",
-                           image_file=image_file, form=form)
+                           image_file=image_file, form=form, owner=owner)
 
 
 @login_required
@@ -156,7 +165,6 @@ def student_application():#If you are not logged in and goto /application/studen
         flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
     if form.validate_on_submit():
-
         selected_program = None
         for i in form.program.data:
             selected_program = i.name
@@ -180,7 +188,6 @@ def instructor_application():
         flash(f'You have an application processing!', 'danger')
         return redirect(url_for('application'))
     if form.validate_on_submit():
-
         application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
                                           type='Instructor')
@@ -231,9 +238,6 @@ def application_review(application_id):
                 user.ownerId = instructor.ownerId
 
             db.session.commit()
-
-
-
             flash(f'{application.type} Application for ({application.firstname}'
                   f' {application.lastname}) has been accepted!', 'success')
             return redirect(url_for('application_list'))
@@ -313,6 +317,7 @@ def register_course():
     # student = current_user.studentOwner
     return render_template("register-course.html", student=student)
 
+
 # Admin only
 #@login_required
 @app.route('/course/create', methods=['GET', 'POST'])
@@ -331,15 +336,56 @@ def create_course():
         # db.session.commit()
     return render_template("create-course.html", form=form)
 
+
 @login_required
 @app.route('/students', methods=['GET', 'POST'])
 def student_list():
     students = Student.query.all()
-    return render_template("student-list.html", title="Student List", students=students)
+    programs = Program.query.all()
+    return render_template("student-list.html", title="Student List", students=students, programs=programs)
 
 
 @login_required
-@app.route('/instructor', methods=['GET', 'POST'])
+@app.route('/instructors', methods=['GET', 'POST'])
 def instructor_list():
     instructors = Instructor.query.all()
     return render_template("instructor-list.html", title="Instructor List", instructors=instructors)
+
+
+@login_required
+@app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
+def individual_review(role, owner_id):
+    if role == "Student":
+        owner = Student.query.get(owner_id)
+        program = Program.query.get(owner.programId)
+        user = owner.user[0]
+        courses = owner.courses
+        return render_template("individual-review.html", title="Student Review", owner=owner, user=user,
+                               program=program, courses=courses)
+    if role == "Instructor":
+        owner = Instructor.query.get(owner_id)
+        user = owner.user[0]
+        courses = Course.query.filter_by(instructorId=owner_id)
+        return render_template("individual-review.html", title="Instructor Review", owner=owner, user=user,
+                               courses=courses)
+
+
+@login_required
+@app.route('/<string:role>/<int:owner_id>/warning', methods=['GET', 'POST'])
+def warning(role, owner_id):
+    form = WarningForm()
+    if role == "Student":
+        owner = Student.query.get(owner_id)
+        program = Program.query.get(owner.programId)
+        user = owner.user[0]
+        courses = owner.courses
+        return render_template("warning.html", title="Student Review", owner=owner, user=user,
+                               program=program, courses=courses, form=form)
+    if role == "Instructor":
+        owner = Instructor.query.get(owner_id)
+        user = owner.user[0]
+        courses = Course.query.filter_by(instructorId=owner_id)
+        return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
+                               courses=courses, form=form)
+
+

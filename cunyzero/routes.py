@@ -316,7 +316,7 @@ def individual_review(role, owner_id):
 
 
 @login_required
-@app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
+@app.route('/warning/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def warning(role, owner_id):
     form = WarningForm()
     if role == "Student":
@@ -332,5 +332,6 @@ def warning(role, owner_id):
         courses = Course.query.filter_by(instructorId=owner_id)
         return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
                                courses=courses, form=form)
+
 
 

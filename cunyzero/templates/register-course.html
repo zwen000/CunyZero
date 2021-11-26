@@ -3,7 +3,7 @@
 {% block content %}
 <div class="row">
     <!-- <div class="content-section"> -->
-        <div class="col-6">
+        <div class="col-7">
             <table class="table table-primary">
                 <strong><label>Available Courses</label></strong>
                 <thead class="thead-light">
@@ -18,7 +18,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in courses %}
+                    {% for course in student.notEnrolled() %}
                         <tr>
                         <td>{{course.coursename}}</td>
                         <td>{{course.startPeriod}}</td>
@@ -36,7 +36,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-4" >
+        <div class="col-5" >
             <table class="table table-success">
                 <strong><label>My Courses</label></strong>
                 <thead class="thead-light">
@@ -49,7 +49,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in enrolled %}
+                    {% for course in student.enrolled() %}
                         <tr>
                         <td>{{course.coursename}}</td>
                         <td>{{course.startPeriod}}</td>
@@ -76,7 +76,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in waitListed %}
+                    {% for course in student.waitListed() %}
                         <tr>
                         <td>{{course.coursename}}</td>
                         <td>{{course.startPeriod}}</td>

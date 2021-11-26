@@ -104,3 +104,12 @@ class CreateCourseForm(FlaskForm):
 class WarningForm(FlaskForm):
     message = TextAreaField('Warning message: ', validators=[DataRequired()])
     submit = SubmitField('Confirm')
+
+
+class GraduationForm(FlaskForm):
+    FirstName= StringField('FirstName',validators=[DataRequired(),Length(min=2,max=20)])
+    LastName= StringField('LastName',validators=[DataRequired(),Length(min=2,max=20)])
+    GPA = DecimalField('GPA', validators=[DataRequired()])
+    Major=StringField('Major',validators=[DataRequired(),Length(min=2,max=30)])
+   
+

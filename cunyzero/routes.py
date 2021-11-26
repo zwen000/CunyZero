@@ -395,4 +395,13 @@ def warning(role, owner_id):
         return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
                                courses=courses, form=form)
 
+#Student only
+@login_required
+@app.route("/graduation",methods=['GET','POST'])
+def graduation():
+    form = GraduationForm()
+    if form.validate_on_submit():
+        flash(f'Application Submitted!','success')
+        return redirect(url_for('home'))
+    return render_template('graduation.html',title='Graduation',form=form)
 

@@ -111,5 +111,6 @@ class GraduationForm(FlaskForm):
     LastName= StringField('LastName',validators=[DataRequired(),Length(min=2,max=20)])
     GPA = DecimalField('GPA', validators=[DataRequired()])
     Major=StringField('Major',validators=[DataRequired(),Length(min=2,max=30)])
+    submit= SubmitField('Submit')
    
 

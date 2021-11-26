@@ -357,7 +357,7 @@ def instructor_list():
 def individual_review(role, owner_id):
     if role == "Student":
         owner = Student.query.get(owner_id)
-        program = Program.query.get(owner.programId)
+        program = Program.query.filter_by(id=owner.programId).first()
         user = owner.user[0]
         courses = owner.courses
         return render_template("individual-review.html", title="Student Review", owner=owner, user=user,
@@ -374,9 +374,16 @@ def individual_review(role, owner_id):
 @app.route('/<string:role>/<int:owner_id>/warning', methods=['GET', 'POST'])
 def warning(role, owner_id):
     form = WarningForm()
+    if form.validate_on_submit():
+        warning = Warning(userId=owner_id, message=form.message.data)
+        db.session.add(warning)
+        db.session.commit()
+        flash(f'The warning for Student id: {warning.userId} is submitted, reason is {form.message.data }!', 'success')
+        return redirect(url_for("individual_review", role=role, owner_id=owner_id))
+
     if role == "Student":
         owner = Student.query.get(owner_id)
-        program = Program.query.get(owner.programId)
+        program = Program.query.filter_by(id=owner.programId).first()
         user = owner.user[0]
         courses = owner.courses
         return render_template("warning.html", title="Student Review", owner=owner, user=user,

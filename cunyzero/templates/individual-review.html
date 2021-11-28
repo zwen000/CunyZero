@@ -14,7 +14,7 @@
                     <div>Current GPA: {{ owner.gpa }}</div>
                 {% endif %}
                 <div>Status: {{ owner.status }}</div>
-                <a class="btn btn-outline-info float-right" style="position: absolute; right:10px; top:40px"
+                <a class="btn btn-outline-info" style="position: absolute; right:10px; top:40px"
                    href="{{ url_for('warning',owner_id=owner.ownerId,role=user.role) }}" > warning </a>
             </div>
         </div>
@@ -28,8 +28,14 @@
                 <strong>Current Course</strong>
             </div>
             {% for course in courses %}
-                <div class="row col-md-12 border-bottom">
-                    <a class="btn btn-outline-info float-right" style="position: absolute; right:10px" href="#" > De-register </a>
+                <div class="row col-md-12 border-bottom" style="position: relative">
+                    <div class="col-md-3"> {{ course.coursename }} </div>
+                    <div class="col-md-3"> {{ course.startPeriod }} </div>
+                    <div class="col-md-3"> {{ course.endPeriod }} </div>
+                    <div class="col-md-3"> {{ course.dayofweek }} </div>
+                    {% if user.role == "Student" %}
+                        <a class="btn btn-outline-info float-right" href="#" > De-register </a>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
@@ -38,11 +44,6 @@
             <div class="lead border-bottom">
                 <strong>Previous Course</strong>
             </div>
-            {% for course in courses %}
-                <div class="row col-md-12 border-bottom">
-
-                </div>
-            {% endfor %}
         </div>
     </div>
 {% endblock content %}

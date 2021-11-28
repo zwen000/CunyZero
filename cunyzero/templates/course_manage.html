@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <legend class="border-bottom">
+            <span> Current Running Course </span>
+            <a class="btn btn-outline-info float-right" style="text-decoration: none; color: #0d1421" href="{{ url_for('create_course')}}">
+                Create Course
+            </a>
+        </legend>
+        {% for current_course in current_courses %}
+            <article class="media content-section col-md-12">
+                <div class="media-body row" style="position: relative; align-items: center">
+                <div class="col-md-3 border-left">
+                    Name: {{ current_course.coursename}}
+                </div>
+                <div class="col-md-3 border-left">
+                    {% for instructor in instructors %}
+                        {% if instructor.ownerId==current_course.instructorId%}
+                            Instructor:  {{ instructor.firstname }} {{ instructor.lastname }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="col-md-2 border-left border-right">
+                    Status: {{ current_course.dayofweek }}
+                </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock content %}

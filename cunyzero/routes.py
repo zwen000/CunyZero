@@ -45,9 +45,7 @@ posts = [
     }
 ]
 
-@app.route('/student')
-def student():
-    return render_template ('student.html',gpa=3.0)
+
 @app.route('/')
 @app.route('/home')
 def home():
@@ -152,8 +150,8 @@ def account():
 
 @login_required
 @app.route('/application/')
-def application():
-    return render_template("application.html", title="Visitor-Application")
+def enrollment_application():
+    return render_template("enrollment-application.html", title="Visitor-Application")
 
 
 @login_required
@@ -163,7 +161,7 @@ def student_application():#If you are not logged in and goto /application/studen
     application = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
     if application:
         flash(f'You have an application processing!', 'danger')
-        return redirect(url_for('application'))
+        return redirect(url_for('enrollment_application'))
     if form.validate_on_submit():
         selected_program = None
         for i in form.program.data:
@@ -174,7 +172,7 @@ def student_application():#If you are not logged in and goto /application/studen
         db.session.add(application)
         db.session.commit()
         flash(f'Your application with id: {current_user.ownerId} is submitted successfully!', 'success')
-        return redirect(url_for('application'))
+        return redirect(url_for('enrollment_application'))
 
     return render_template("student-application.html", title="Student Application", form=form)
 
@@ -186,7 +184,7 @@ def instructor_application():
     application_exited = Application.query.filter_by(approval=None, visitor_id=current_user.ownerId).first()
     if application_exited:
         flash(f'You have an application processing!', 'danger')
-        return redirect(url_for('application'))
+        return redirect(url_for('enrollment_application'))
     if form.validate_on_submit():
         application = Application(visitor_id=current_user.visitorOwner.ownerId, firstname=form.firstname.data,
                                           lastname=form.lastname.data, intro=form.intro.data,
@@ -195,21 +193,21 @@ def instructor_application():
         db.session.add(application)
         db.session.commit()
         flash(f'Your application id: {current_user.ownerId} is submitted successfully!', 'success')
-        return redirect(url_for('application'))
+        return redirect(url_for('enrollment_application'))
     return render_template("instructor-application.html", title="Instructor Application", form=form)
 
 
 # Admin only
 @login_required
 @app.route('/application/list', methods=['GET', 'POST'])
-def application_list():
+def application_manage():
     applications = Application.query.filter_by(approval=None)
-    return render_template("application-list.html", title="Application-List", applications=applications)
+    return render_template("application-manage.html", title="Application-List", applications=applications)
 
 
 @login_required
-@app.route('/application_review/<int:application_id>', methods=['GET', 'POST'])
-def application_review(application_id):
+@app.route('/application/<int:application_id>', methods=['GET', 'POST'])
+def application_confirm(application_id):
     form = ApplicationReviewForm()
     application = Application.query.get(application_id)
     user = application.applicant.user[0]
@@ -240,7 +238,7 @@ def application_review(application_id):
             db.session.commit()
             flash(f'{application.type} Application for ({application.firstname}'
                   f' {application.lastname}) has been accepted!', 'success')
-            return redirect(url_for('application_list'))
+            return redirect(url_for('application_manage'))
         if form.reject.data:
             if form.justification.data != '':
                 application.approval = False
@@ -249,7 +247,7 @@ def application_review(application_id):
 
                 flash(f'{application.type} Application for ( {application.firstname}'
                       f' {application.lastname}) has been rejected!', 'danger')
-                return redirect(url_for('application_list'))
+                return redirect(url_for('application_manage'))
             else:
                 flash(f'Please provide your reason!', 'danger')
     return render_template("application-confirm.html", title="Application-Confirm", form=form,
@@ -338,18 +336,18 @@ def create_course():
 
 
 @login_required
-@app.route('/students', methods=['GET', 'POST'])
-def student_list():
+@app.route('/student/list', methods=['GET', 'POST'])
+def student_manage():
     students = Student.query.all()
     programs = Program.query.all()
-    return render_template("student-list.html", title="Student List", students=students, programs=programs)
+    return render_template("student-manage.html", title="Student Management", students=students, programs=programs)
 
 
 @login_required
-@app.route('/instructors', methods=['GET', 'POST'])
-def instructor_list():
+@app.route('/instructor/list', methods=['GET', 'POST'])
+def instructor_manage():
     instructors = Instructor.query.all()
-    return render_template("instructor-list.html", title="Instructor List", instructors=instructors)
+    return render_template("instructor-manage.html", title="Instructor Management", instructors=instructors)
 
 
 @login_required
@@ -396,3 +394,11 @@ def warning(role, owner_id):
                                courses=courses, form=form)
 
 
+@login_required
+@app.route('/course/list', methods=['GET', 'POST'])
+def course_manage():
+    current_courses = Course.query.filter_by(status="Open")
+    past_courses = Course.query.filter_by(status="Finished")
+    instructors = Instructor.query.all()
+    return render_template("course_manage.html", title="Course Management", current_courses=current_courses,
+                           past_courses=past_courses, instructors=instructors)

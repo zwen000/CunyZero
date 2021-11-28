@@ -11,10 +11,10 @@
                         Name: {{ application.firstname }} {{ application.lastname }}
                     </div>
                     <div class="col-md-3">
-                         Employ ID: {{ application.visitor_id }}
+                         Visitor ID: {{ application.visitor_id }}
                     </div>
-                    <button class="btn btn-outline-info float-right" style="position: absolute; right:10px;">
-                        <a href={{ url_for( "application_review", application_id=application.id) }} >Detail</a>
+                    <button class="btn btn-outline-info" style="position: absolute; right:10px;">
+                        <a href={{ url_for( "application_confirm", application_id=application.id) }} >Detail</a>
                     </button>
                 </div>
             </article>

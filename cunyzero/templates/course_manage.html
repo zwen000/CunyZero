@@ -13,13 +13,9 @@
                 <div class="col-md-3 border-left">
                     Name: {{ current_course.coursename}}
                 </div>
-                <div class="col-md-3 border-left">
-                    {% for instructor in instructors %}
-                        {% if instructor.ownerId==current_course.instructorId%}
-                            Instructor:  {{ instructor.firstname }} {{ instructor.lastname }}
-                        {% endif %}
-                    {% endfor %}
-                </div>
+                <a class="col-md-3 border-left" href="{{ url_for('individual_review',role='Instructor',owner_id=current_course.instructorId)}}">
+                    Instructor:  {{ current_course.getInstructorName() }}
+                </a>
                 <div class="col-md-2 border-left border-right">
                     Status: {{ current_course.dayofweek }}
                 </div>

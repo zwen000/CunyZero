@@ -387,6 +387,19 @@ def individual_review(role, owner_id):
 def course_manage():
     current_courses = Course.query.filter_by(status="Open")
     past_courses = Course.query.filter_by(status="Finished")
+    courseId = request.form.get("Cancel")
+    if courseId:
+        courseId = int(courseId)
+        course = Course.query.get(courseId)
+        # course can only safe delete when the it don't have any students,
+        if course.getEnrolledTotal() == 0:
+            db.session.delete(course)
+            db.session.commit()
+            flash(f'The course {course.coursename} is deleted successfully', 'success')
+            return redirect(url_for("course_manage"))
+        else:
+            flash(f'The course {course.coursename} can\'t be deleted since there are students registered!', 'danger')
+            return redirect(url_for("course_manage"))
     return render_template("course_manage.html", title="Course Management", current_courses=current_courses,
                            past_courses=past_courses)
 
@@ -398,4 +411,5 @@ def complaint_manage():
     processed_comp = Complaint.query.filter_by(processed=True)
     return render_template("complaint-manage.html", title="Complaint Management", unprocessed_comp=unprocessed_comp,
                            processed_comp=processed_comp)
+
 

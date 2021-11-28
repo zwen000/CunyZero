@@ -96,7 +96,7 @@ class CreateCourseForm(FlaskForm):
     submit = SubmitField('Create')
 
     def validate_coursename(self, coursename):
-            course = Course.query.filter_by(course_name=coursename.data).first()
+            course = Course.query.filter_by(coursename=coursename.data).first()
             if course:
                 raise ValidationError("That coursename is taken, Please choose a different one.")
 
@@ -104,3 +104,4 @@ class CreateCourseForm(FlaskForm):
 class WarningForm(FlaskForm):
     message = TextAreaField('Warning message: ', validators=[DataRequired()])
     submit = SubmitField('Confirm')
+

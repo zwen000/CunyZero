@@ -14,30 +14,90 @@
                     <div>Current GPA: {{ owner.gpa }}</div>
                 {% endif %}
                 <div>Status: {{ owner.status }}</div>
-                <a class="btn btn-outline-info" style="position: absolute; right:10px; top:40px"
-                   href="{{ url_for('warning',owner_id=owner.ownerId,role=user.role) }}" > warning </a>
+                <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
+                    warning
+                </button>
             </div>
         </div>
-        {% block warning_content %}
-        {% endblock %}
 
-
+        <div class="content-section" id="warning-form" style="display: none">
+            <form method="POST", action="">
+                {{ form.hidden_tag() }} <!--CSRF token-->
+                <fieldset class="form-group">
+                    <!-- Username input field setting -->
+                    <div class="form-group mb-0">
+                        <strong>{{ form.message.label(class="form-control-label") }}</strong>
+                        {% if form.message.errors %}
+                            {{ form.message(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.message.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor%}
+                            </div>
+                        {% else %}
+                            {{ form.message(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                </fieldset>
+                <div class="form-group mb-0">
+                    {{ form.submit(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
 
         <div class="content-section">
             <div class="lead border-bottom">
                 <strong>Current Course</strong>
             </div>
-            {% for course in courses %}
-                <div class="row col-md-12 border-bottom" style="position: relative">
-                    <div class="col-md-3"> {{ course.coursename }} </div>
-                    <div class="col-md-3"> {{ course.startPeriod }} </div>
-                    <div class="col-md-3"> {{ course.endPeriod }} </div>
-                    <div class="col-md-3"> {{ course.dayofweek }} </div>
-                    {% if user.role == "Student" %}
-                        <a class="btn btn-outline-info float-right" href="#" > De-register </a>
-                    {% endif %}
-                </div>
-            {% endfor %}
+
+            <table class="table table-condensed">
+                <thead class="thead-light">
+                    <tr>
+                        {% if user.role == "Instructor" %}
+                            <th>Course Name</th>
+                            <th>Start Period</th>
+                            <th>End Period</th>
+                            <th>Days of Week</th>
+                            <th>Enroll total</th>
+                            <th>Rate</th>
+                        {% endif %}
+                        {% if user.role == "Student" %}
+                            <th>Course Name</th>
+                            <th>Instructor</th>
+                            <th>Start Period</th>
+                            <th>End Period</th>
+                            <th>Days of Week</th>
+                            <th>Deregister</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                        <tr>
+                            {% if user.role == "Instructor" %}
+                                <td> {{ course.coursename }} </td>
+                                <td> {{ course.startPeriod }} </td>
+                                <td> {{ course.endPeriod }} </td>
+                                <td> {{ course.dayofweek }} </td>
+                                <td>  enroll_total </td>
+                                <td>  rating  </td>
+                            {% endif %}
+                            {% if user.role == "Student"%}
+                                <td> {{ course.coursename }} </td>
+                                <td> {{ course.getInstructorName() }}</td>
+                                <td> {{ course.startPeriod }} </td>
+                                <td> {{ course.endPeriod }} </td>
+                                <td> {{ course.dayofweek }} </td>
+                                <td>
+                                    {% if user.role == "Student" %}
+                                        <a class="btn btn-outline-info" href="#" > De-register </a>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
         <div class="content-section">
@@ -46,4 +106,17 @@
             </div>
         </div>
     </div>
+
+    <script>
+        var warningForm = document.getElementById("warning-form");
+        function display(){
+            if(warningForm.style.display=="none"){
+                warningForm.style.display="";
+            }
+            else{
+                warningForm.style.display="none";
+            }
+        }
+    </script>
 {% endblock content %}
+

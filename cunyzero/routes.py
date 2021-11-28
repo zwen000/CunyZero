@@ -327,11 +327,13 @@ def create_course():
         dayofweek = ""
         for i in form.dayofweek.data:
             dayofweek+=i
-        # course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data, 
-        #                 start_period=form.startPeriod.data, end_period=form.endPeriod.data, 
-        #                 capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
-        # db.session.add(course)
-        # db.session.commit()
+        course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data,
+                        startPeriod=form.startPeriod.data, endPeriod=form.endPeriod.data,
+                        capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
+        db.session.add(course)
+        db.session.commit()
+        flash(f'You have successfully created new course {course.coursename}', 'success')
+        return redirect(url_for("course_manage"))
     return render_template("create-course.html", form=form)
 
 
@@ -353,24 +355,6 @@ def instructor_manage():
 @login_required
 @app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def individual_review(role, owner_id):
-    if role == "Student":
-        owner = Student.query.get(owner_id)
-        program = Program.query.filter_by(id=owner.programId).first()
-        user = owner.user[0]
-        courses = owner.courses
-        return render_template("individual-review.html", title="Student Review", owner=owner, user=user,
-                               program=program, courses=courses)
-    if role == "Instructor":
-        owner = Instructor.query.get(owner_id)
-        user = owner.user[0]
-        courses = Course.query.filter_by(instructorId=owner_id)
-        return render_template("individual-review.html", title="Instructor Review", owner=owner, user=user,
-                               courses=courses)
-
-
-@login_required
-@app.route('/<string:role>/<int:owner_id>/warning', methods=['GET', 'POST'])
-def warning(role, owner_id):
     form = WarningForm()
     if form.validate_on_submit():
         warning = Warning(userId=owner_id, message=form.message.data)
@@ -380,17 +364,21 @@ def warning(role, owner_id):
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
 
     if role == "Student":
-        owner = Student.query.get(owner_id)
-        program = Program.query.filter_by(id=owner.programId).first()
-        user = owner.user[0]
-        courses = owner.courses
-        return render_template("warning.html", title="Student Review", owner=owner, user=user,
+        student = Student.query.get(owner_id)
+        program = Program.query.filter_by(id=student.programId).first()
+        user = student.user[0] # find the student account's user
+        student_courses = student.courses # by relationship student.courses
+        courses = []
+        for student_course in student_courses:
+            course = Course.query.get(student_course.courseId)
+            courses.append(course)
+        return render_template("individual-review.html", title="Student Review", owner=student, user=user,
                                program=program, courses=courses, form=form)
     if role == "Instructor":
-        owner = Instructor.query.get(owner_id)
-        user = owner.user[0]
+        instructor = Instructor.query.get(owner_id)
+        user = instructor.user[0]
         courses = Course.query.filter_by(instructorId=owner_id)
-        return render_template("warning.html", title="Instructor Review", owner=owner, user=user,
+        return render_template("individual-review.html", title="Instructor Review", owner=instructor, user=user,
                                courses=courses, form=form)
 
 
@@ -399,6 +387,15 @@ def warning(role, owner_id):
 def course_manage():
     current_courses = Course.query.filter_by(status="Open")
     past_courses = Course.query.filter_by(status="Finished")
-    instructors = Instructor.query.all()
     return render_template("course_manage.html", title="Course Management", current_courses=current_courses,
-                           past_courses=past_courses, instructors=instructors)
+                           past_courses=past_courses)
+
+
+@login_required
+@app.route('/complaint/list', methods=['GET', 'POST'])
+def complaint_manage():
+    unprocessed_comp = Complaint.query.filter_by(processed=False)
+    processed_comp = Complaint.query.filter_by(processed=True)
+    return render_template("complaint-manage.html", title="Complaint Management", unprocessed_comp=unprocessed_comp,
+                           processed_comp=processed_comp)
+

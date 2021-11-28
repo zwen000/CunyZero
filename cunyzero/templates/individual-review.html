@@ -79,7 +79,7 @@
                                 <td> {{ course.startPeriod }} </td>
                                 <td> {{ course.endPeriod }} </td>
                                 <td> {{ course.dayofweek }} </td>
-                                <td>  enroll_total </td>
+                                <td> {{ course.getEnrolledTotal() }} </td>
                                 <td>  rating  </td>
                             {% endif %}
                             {% if user.role == "Student"%}

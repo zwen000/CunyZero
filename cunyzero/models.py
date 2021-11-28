@@ -143,6 +143,9 @@ class Course(db.Model):
 
     def __repr__(self):
         return '<Course %r, %r>' % (self.coursename, self.status)
+    def getInstructorName(self):
+        instructor = Instructor.query.get(self.instructorId)
+        return instructor.firstname + " " + instructor.lastname
     def getWaitList(self):#return waitlist (studentcourse with waiting=true)
         return StudentCourse.filter_by(courseId=self.id, waiting=True)
     #pre: must be a real studentId
@@ -194,9 +197,11 @@ class Period(db.Model):
 
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), nullable = False)
+    complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), nullable=False)
     targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
-    message = db.Column(db.Text, nullable = False, default='')
+    message = db.Column(db.Text, nullable=False, default='')
+    processed = db.Column(db.Boolean, nullable=False, default=False) #check the complaint is processed by admin or not
+
     def __repr__(self):
         return '<complainer: %r, complainee: %r>' % (self.complainerId, self.targetId)
 

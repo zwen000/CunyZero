@@ -9,14 +9,16 @@
                 </div>
                 <div>Employee ID: {{ owner.ownerId }}</div>
                 <div>Username: {{ user.username }}</div>
-                {% if user.role == "Student" %}
+                {% if user.role == "Student"%}
                     <div>Program: {{ program.name }}</div>
                     <div>Current GPA: {{ owner.gpa }}</div>
                 {% endif %}
                 <div>Status: {{ owner.status }}</div>
-                <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
-                    warning
-                </button>
+                {% if current_user.role == "Admin" %}
+                    <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
+                        warning
+                    </button>
+                {% endif %}
             </div>
         </div>
 
@@ -75,7 +77,9 @@
                     {% for course in courses %}
                         <tr>
                             {% if user.role == "Instructor" %}
-                                <td> {{ course.coursename }} </td>
+                                <td> <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                    {{ course.coursename }} </a>
+                                </td>
                                 <td> {{ course.startPeriod }} </td>
                                 <td> {{ course.endPeriod }} </td>
                                 <td> {{ course.dayofweek }} </td>

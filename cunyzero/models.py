@@ -172,7 +172,9 @@ class Course(db.Model):
         if end>=start2 and end<=end2:
             return True
     def getEnrolledTotal(self):
-        return StudentCourse.query.filter_by(courseId=self.id).count()
+        return StudentCourse.query.filter_by(courseId=self.id, waiting=False).count()
+    def getWaitlistTotal(self):
+        return StudentCourse.query.filter_by(courseId=self.id, waiting=True).count()
 
 class StudentCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)

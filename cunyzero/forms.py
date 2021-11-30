@@ -102,6 +102,13 @@ class CreateCourseForm(FlaskForm):
 
 
 class WarningForm(FlaskForm):
-    message = TextAreaField('Warning message: ', validators=[DataRequired()])
+    # message = QuerySelectMultipleField(
+    #     'Complaint message',
+    #     validators=[DataRequired()],
+    #     query_factory = lambda: Complaint.query,
+    #     widget=widgets.Select(multiple=False),
+    #     get_label='message'
+    # )
+    message = TextAreaField('Warning message', validators=[DataRequired()])
     submit = SubmitField('Confirm')
 

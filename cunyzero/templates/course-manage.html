@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="content-section">
-        <legend class="border-bottom">
+        <legend class="border-bottom pb-2">
             <span class="mr-4"> Current Running Course </span>
             <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('create_course')}}">
                 Create Course
@@ -10,14 +10,14 @@
         {% for current_course in current_courses %}
             <article class="media content-section col-md-12">
                 <div class="media-body row" style="position: relative; align-items: center">
-                <div class="col-md-3 border-left">
+                <a class="col-md-3 border-left" href="{{ url_for('course_review',course_Id=current_course.id)}}">
                     Name: {{ current_course.coursename}}
-                </div>
+                </a>
                 <a class="col-md-3 border-left" href="{{ url_for('individual_review',role='Instructor',owner_id=current_course.instructorId)}}">
                     Instructor:  {{ current_course.getInstructorName() }}
                 </a>
                 <div class="col-md-2 border-left">
-                    Status: {{ current_course.dayofweek }}
+                    Day: {{ current_course.dayofweek }}
                 </div>
                 <form method="POST">
                     <button type="submit" name="Cancel" value="{{current_course.id}}" class="btn btn-outline-info" style="position: absolute; top: -7px; right:0">

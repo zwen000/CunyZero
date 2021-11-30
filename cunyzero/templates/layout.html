@@ -41,8 +41,8 @@
                                 <a class="nav-item nav-link" href="#">System</a>
                             {% elif current_user.role == 'Instructor' %}
                                 <a class="nav-item nav-link" href="#">Course</a>
-                                <a class="nav-item nav-link" href="#">Current Course</a>
-                                <a class="nav-item nav-link" href="#">Course History</a>
+                                <a class="nav-item nav-link" href="{{ url_for('individual_review',role='Instructor',owner_id=current_user.ownerId)}}">Instructor</a>
+                                <a class="nav-item nav-link" href="#">Warning</a>
                             {% elif current_user.role == 'Student' %}
                                 <a class="nav-item nav-link" href="{{url_for('register_course')}}">Course</a>
                                 <!-- <a class="nav-item nav-link" href="#">Current Course</a>

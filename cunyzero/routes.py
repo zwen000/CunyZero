@@ -400,7 +400,7 @@ def course_manage():
         else:
             flash(f'The course {course.coursename} can\'t be deleted since there are students registered!', 'danger')
             return redirect(url_for("course_manage"))
-    return render_template("course_manage.html", title="Course Management", current_courses=current_courses,
+    return render_template("course-manage.html", title="Course Management", current_courses=current_courses,
                            past_courses=past_courses)
 
 
@@ -413,3 +413,26 @@ def complaint_manage():
                            processed_comp=processed_comp)
 
 
+# admin and instructor able to use this page to see the detail information of course
+# such as student in the course, and student grade, etc...
+# if grade is not assigned, and current period is grade period, instructor are able to give the grade to each
+@login_required
+@app.route('/course/<int:course_Id>', methods=['GET', 'POST'])
+def course_review(course_Id):
+    course = Course.query.get(course_Id)
+    programs = Program.query.all()
+    students = db.session.query(Student, StudentCourse)\
+        .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
+                                                                                StudentCourse.waiting == False).all()
+    students_waitlist = db.session.query(Student, StudentCourse)\
+        .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
+                                                                                StudentCourse.waiting == True).all()
+    return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
+                           programs=programs, students_waitlist=students_waitlist)
+
+
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+
+    student = db.session.query(Student, StudentCourse).join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == 38239413).all()
+    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)

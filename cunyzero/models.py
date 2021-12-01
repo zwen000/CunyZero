@@ -181,7 +181,7 @@ class StudentCourse(db.Model):
     courseId = db.Column(db.Integer, db.ForeignKey('course.id'),nullable=False)
     studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
 
-    gpa = db.Column(db.Float,nullable = True)
+    gpa = db.Column(db.Text,nullable = True)
     rating = db.Column(db.Integer, nullable = True)
     review = db.Column(db.Text, nullable = True)
     waiting = db.Column(db.Boolean,nullable = False, default=False)

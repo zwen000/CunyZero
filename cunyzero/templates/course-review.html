@@ -61,7 +61,37 @@
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
                             <td> {{ programs[student.Student.programId].name }} </td>
-                            <td> {{ student.StudentCourse.gpa }} </td>
+                            {% if current_user.role == "Instructor" %}
+                                <td>
+                                    <form method="post">
+{#                                        <input type="text" id="letter-grade" name="{{ student.Student.ownerId }}" placeholder="{{ student.StudentCourse.gpa }}"#}
+{#                                            pattern="[A-F]" size="3">#}
+                                        <select required name="{{ student.Student.ownerId }}" id="letter-grade">
+                                            <option value="" disabled selected>{{ student.StudentCourse.gpa }}</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="B-">B-</option>
+                                            <option value="C+">C+</option>
+                                            <option value="C">C</option>
+                                            <option value="C-">C-</option>
+                                            <option value="D+">D+</option>
+                                            <option value="D">D</option>
+                                            <option value="F">F</option>
+                                        </select>
+                                        <button type="submit" name="Grade" value="{{student.Student.ownerId}}" >
+                                            <i class="fi-rr-check"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            {% else %}
+                                <td>
+                                    {{ student.StudentCourse.gpa }}
+                                </td>
+                            {% endif %}
+
                         </tr>
                     {% endfor %}
                 </tbody>

@@ -427,6 +427,14 @@ def course_review(course_Id):
     students_waitlist = db.session.query(Student, StudentCourse)\
         .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
                                                                                 StudentCourse.waiting == True).all()
+    studentId = request.form.get("Grade")
+    if studentId:
+        letter_grade = request.form.get(studentId)
+        studentId = int(studentId) #change studentId from string to int
+        student = [student for student in students if student.Student.ownerId == studentId][0]
+        student.StudentCourse.gpa = letter_grade
+        db.session.commit()
+        flash(f'{student.Student.firstname} {student.Student.lastname}\'s grade has been updated!', 'success')
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
                            programs=programs, students_waitlist=students_waitlist)
 

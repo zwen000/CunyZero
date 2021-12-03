@@ -74,4 +74,8 @@ db.session.add(studentCourse3)
 db.session.add(studentCourse4)
 db.session.add(studentCourse5)
 
+#testing period
+period = Period(period=0)
+db.session.add(period)
+
 db.session.commit()

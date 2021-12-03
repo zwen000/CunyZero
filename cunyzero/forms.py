@@ -111,3 +111,12 @@ class WarningForm(FlaskForm):
     # )
     message = TextAreaField('Warning message', validators=[DataRequired()])
     submit = SubmitField('Confirm')
+    submit = SubmitField('Confirm')
+
+class SystemForm(FlaskForm):
+    taboo_list = TextAreaField('Taboo List')
+    updateTaboo = SubmitField('Update')
+    nextPeriod = SubmitField('Advance')
+
+
+

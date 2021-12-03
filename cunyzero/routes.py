@@ -1,3 +1,4 @@
+from operator import truediv
 from flask import render_template, url_for, flash, redirect, request
 from cunyzero import app, db, bcrypt
 from cunyzero.forms import *
@@ -260,68 +261,54 @@ def application_confirm(application_id):
 def register_course():
     if current_user.role != "Student":
         return redirect(url_for('home'))
-    
-    # courses = Course.query.filter_by(status="Open")
-    # studentCourses = StudentCourse.query.filter_by(studentId=current_user.ownerId)
-    # courseIds = [sc.courseId for sc in studentCourses]# id of courses student enrolled/waitlisted in
-    # enrolledIds = [sc.courseId for sc in studentCourses if not sc.waiting]# id of courses student enrolled in
-
-    # notEnrolledCourses = [course for course in courses if course.id not in courseIds]
-    # enrolledCourses = [course for course in courses if course.id in enrolledIds]
-    # waitListedCourses = [course for course in courses if (course.id in courseIds) and (course.id not in enrolledIds)]
 
     courseId = request.form.get("Enroll")
     if courseId:# Attempting to Enroll In a Course
         courseId = int(courseId)
         course = Course.query.filter_by(id=courseId).first()
-        #courseSize = len(StudentCourse.query.filter_by(courseId=courseId, waiting=False))
-        courseSize = 0#len dont seem to work
-        for i in StudentCourse.query.filter_by(courseId=courseId, waiting=False):
-            if i:
-                courseSize+=1
-        if course.courseConflict(current_user.ownerId):
-            flash(f'Course {course.coursename}, has conflict with enrolled course!','danger')
+        courseSize = StudentCourse.query.filter_by(courseId=courseId, waiting=False).count()
+        enrolledCourseCount = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId, waiting=False).count()
+        if enrolledCourseCount == 4:
+            flash('Already enrolled in 4, the maximum number of courses!', 'danger')
         else:
-            if courseSize<course.capacity:# if course not full
-                studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=False)
-                db.session.add(studentcourse)
-                db.session.commit()
-                flash(f'You have successfully enrolled in {course.coursename}','success')
-            else:# course full
-                #waitListSize = len(StudentCourse.query.filter_by(courseId=courseId, waiting=True))
-                waitListSize = 0
-                for i in StudentCourse.query.filter_by(courseId=courseId, waiting=True):
-                    if i:
-                        waitListSize+=1
-                if waitListSize<course.waitListCapacity:# if waitlist not full
-                    studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=True)
+            if course.courseConflict(current_user.ownerId): 
+                flash(f'Course {course.coursename}, has conflict with enrolled course!','danger')
+            else:
+                if courseSize<course.capacity:# if course not full
+                    studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=False)
                     db.session.add(studentcourse)
                     db.session.commit()
-                    flash(f'You are now waitlisted for {course.coursename}','warning')
-                else:
-                    flash('Course is full','danger')
+                    flash(f'You have successfully enrolled in {course.coursename}','success')
+                else:# course full
+                    waitListSize = StudentCourse.query.filter_by(courseId=courseId, waiting=True).count()
+                    if waitListSize<course.waitListCapacity:# if waitlist not full
+                        studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=True)
+                        db.session.add(studentcourse)
+                        db.session.commit()
+                        flash(f'You are now waitlisted for {course.coursename}','warning')
+                    else:
+                        flash('Course is full','danger')
 
     courseId = request.form.get("Drop")
     if courseId:# Dropping a Course
+        period = Period.query.all().first().getPeriodName()
         courseId = int(courseId)
-        StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).delete()
+        if period == "course registration period":# registration period delete class
+            StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).delete()
+        elif period == "course running period" or period =="grading period":# running-grading period, drop with grade w
+            StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).first().gpa = 'W'
         db.session.commit()
         flash(f'You have successfully dropped a course','success')
 
     student = Student.query.filter_by(ownerId=current_user.ownerId).first()
-    # return render_template("register-course.html", courses=student.notEnrolled(), 
-    #                                                 enrolled = student.enrolled(), 
-    #                                                 waitListed = student.waitListed())
-    # student = current_user.studentOwner
     return render_template("register-course.html", student=student)
-
 
 # Admin only
 #@login_required
 @app.route('/course/create', methods=['GET', 'POST'])
 def create_course():
-    # if current_user.role != "Admin":
-    #     return redirect(url_for('home'))
+    if current_user.role != "Admin":
+        return redirect(url_for('home'))
     form = CreateCourseForm()
     if form.validate_on_submit():
         dayofweek = ""
@@ -444,3 +431,39 @@ def test():
 
     student = db.session.query(Student, StudentCourse).join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == 38239413).all()
     return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
+    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
+
+# Admin only
+#@login_required
+@app.route('/admin/period', methods=['GET', 'POST'])
+def change_period():
+    if current_user.role != "Admin":
+        return redirect(url_for('home'))
+
+    form = SystemForm()
+    period = Period.query.all()[0]
+    if form.validate_on_submit():
+        if form.updateTaboo.data:
+            pass
+        if form.nextPeriod.data:
+            #period.nextPeriodLogic()# task logic when period changes
+            period.period+=1# advance period by 1
+            db.session.commit() # update db
+    
+    return render_template("change-period.html", period=period)
+
+#@login_required
+@app.route('/warning/<int:userId>', methods=['GET', 'POST'])
+def justify_warning_page(userId):
+    if (not current_user.is_authenticated) or (userId != current_user.ownerId):
+        return redirect(url_for('home'))
+    warnings = Warning.query.filter_by(userId=userId)
+    return render_template("warning-page.html", warnings=warnings)
+
+#@login_required
+@app.route('/admin/review-warning', methods=['GET', 'POST'])
+def review_warning_page(userId):
+    if current_user.role!="Admin":
+        return redirect(url_for('home'))
+    warnings = Warning.query.filter_by()
+    return render_template("review-warning-page.html", warnings=warnings)

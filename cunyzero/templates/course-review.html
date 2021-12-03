@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <article class="media content-section">
+            <div class="media-body">
+                <legend class="border-bottom">
+                    <strong>{{ course.coursename }}</strong>
+                </legend>
+                <div>
+                    <strong>Instructor Name: </strong>
+                    <span>{{ course.getInstructorName() }}</span>
+                    <strong class="ml-2">Course Rate: </strong>
+                    <span> course.status </span>
+                </div>
+                <div>
+                    <strong>Course ID: </strong>
+                    <span>{{ course.id }}</span>
+                    <strong class="ml-2">Course Status: </strong>
+                    <span>{{ course.status }}</span>
+                </div>
+
+                <div>
+                    <strong>Course Schedule: </strong>
+                    <span>
+                        {{ course.dayofweek }}
+                        {{ course.startPeriod }} - {{ course.endPeriod }}
+                    </span>
+                </div>
+                <div class="row ml-0">
+                    <strong>Class Availability:</strong>
+                    <ul class="pl-1" style="list-style-type: none">
+                        <li> Class Capacity: {{ course.capacity }} </li>
+                        <li> Enrollment Total: {{ course.getEnrolledTotal() }} </li>
+                    </ul>
+                    <ul style="list-style-type: none">
+                        <li> Wait List Capacity: {{ course.waitlist_capacity }} </li>
+                        <li> Wait List Total: {{ course.getWaitlistTotal() }} </li>
+                    </ul>
+                </div>
+
+            </div>
+        </article>
+
+        <div class="content-section">
+            <div class="lead border-bottom">
+                <strong>Students in Course</strong>
+            </div>
+
+            <table class="table table-condensed">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Employ ID</th>
+                        <th>Program</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
+                            <td> {{ student.Student.ownerId }}</td>
+                            <td> {{ programs[student.Student.programId].name }} </td>
+                            {% if current_user.role == "Instructor" %}
+                                <td>
+                                    <form method="post">
+{#                                        <input type="text" id="letter-grade" name="{{ student.Student.ownerId }}" placeholder="{{ student.StudentCourse.gpa }}"#}
+{#                                            pattern="[A-F]" size="3">#}
+                                        <select required name="{{ student.Student.ownerId }}" id="letter-grade">
+                                            <option value="" disabled selected>{{ student.StudentCourse.gpa }}</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A">A</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B">B</option>
+                                            <option value="B-">B-</option>
+                                            <option value="C+">C+</option>
+                                            <option value="C">C</option>
+                                            <option value="C-">C-</option>
+                                            <option value="D+">D+</option>
+                                            <option value="D">D</option>
+                                            <option value="F">F</option>
+                                        </select>
+                                        <button type="submit" name="Grade" value="{{student.Student.ownerId}}" >
+                                            <i class="fi-rr-check"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            {% else %}
+                                <td>
+                                    {{ student.StudentCourse.gpa }}
+                                </td>
+                            {% endif %}
+
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="content-section">
+            <div class="lead border-bottom">
+                <strong>Students in Waitlist</strong>
+            </div>
+
+            <table class="table table-condensed">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Employ ID</th>
+                        <th>Program</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students_waitlist %}
+                        <tr>
+                            <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
+                            <td> {{ student.Student.ownerId }}</td>
+                            <td> {{ programs[student.Student.programId].name }} </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock content %}
+

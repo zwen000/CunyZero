@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='uicons-regular-rounded.css') }}">
 
     {% if title %}
         <title>Cuny Zero - {{ title }}</title>
@@ -33,21 +34,21 @@
                                 <a class="nav-item nav-link" href="#">Course</a>
                                 <a class="nav-item nav-link" href="#">Instructor</a>
                             {% elif current_user.role == 'Admin' %}
-                                <a class="nav-item nav-link" href="#">Course</a>
-                                <a class="nav-item nav-link" href="{{ url_for('student_list') }}">Student</a>
-                                <a class="nav-item nav-link" href="{{ url_for('instructor_list') }}">Instructor</a>
-                                <a class="nav-item nav-link" href="#">Complaint</a>
-                                <a class="nav-item nav-link" href="{{ url_for('application_list') }}">Application</a>
-                                <a class="nav-item nav-link" href="#">System</a>
+                                <a class="nav-item nav-link" href="{{ url_for('course_manage') }}">Course</a>
+                                <a class="nav-item nav-link" href="{{ url_for('student_manage') }}">Student</a>
+                                <a class="nav-item nav-link" href="{{ url_for('instructor_manage') }}">Instructor</a>
+                                <a class="nav-item nav-link" href="{{ url_for('complaint_manage') }}">Complaint</a>
+                                <a class="nav-item nav-link" href="{{ url_for('application_manage') }}">Application</a>
+                                <a class="nav-item nav-link" href="{{ url_for('change_period') }}">System</a>
                             {% elif current_user.role == 'Instructor' %}
-                                <a class="nav-item nav-link" href="#">Course</a>
-                                <a class="nav-item nav-link" href="#">Current Course</a>
-                                <a class="nav-item nav-link" href="#">Course History</a>
+                                <a class="nav-item nav-link" href="{{ url_for('course_manage') }}">Course</a>
+                                <a class="nav-item nav-link" href="{{ url_for('individual_review',role='Instructor',owner_id=current_user.ownerId)}}">Instructor</a>
+                                <a class="nav-item nav-link" href="#">Warning</a>
                             {% elif current_user.role == 'Student' %}
                                 <a class="nav-item nav-link" href="{{url_for('register_course')}}">Course</a>
                                 <!-- <a class="nav-item nav-link" href="#">Current Course</a>
                                 <a class="nav-item nav-link" href="#">Course History</a> -->
-                                <a class="nav-item nav-link" href="#">Graduation Apply</a>
+                                <a class="nav-item nav-link" href="{{ url_for('individual_review',role='Student',owner_id=current_user.ownerId)}}">Student</a>
                                 <a class="nav-item nav-link" href="#">Warning</a>
                                 <a class="nav-item nav-link" href="#">Complaint</a>
                             {% endif %}
@@ -59,7 +60,7 @@
                         <span class="nav-item nav-link" id="split"> | </span>
                         {% if current_user.is_authenticated %}
                             {% if current_user.role == 'Visitor' %}
-                                <a class="nav-item nav-link" href="{{ url_for('application') }}">Enrollment</a>
+                                <a class="nav-item nav-link" href="{{ url_for('enrollment_application') }}">Enrollment</a>
                                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                             {% else %}
                                 <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>

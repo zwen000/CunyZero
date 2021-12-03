@@ -397,11 +397,7 @@ def warning(role, owner_id):
 
 #Student only
 @login_required
-@app.route("/graduation",methods=['GET','POST'])
+@app.route("/graduation")
 def graduation():
-    form = GraduationForm()
-    if form.validate_on_submit():
-        flash(f'Application Submitted!','success')
-        return redirect(url_for('home'))
-    return render_template('graduation.html',title='Graduation',form=form)
-
+    
+ return render_template('graduation.html',titile='graduation')

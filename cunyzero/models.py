@@ -30,7 +30,7 @@ class User(db.Model, UserMixin):
 class Admin(db.Model): #Admin.user, User.adminOwner
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
     user = db.relationship('User', backref='adminOwner', lazy=True)
-    #taboo_list = db.Column(db.Text, nullable = False, default='')#f**k, etc.
+    taboo_list = db.Column(db.Text, nullable = False, default='')#f**k, etc.
 
     def __repr__(self):
         return f"Admin('{self.ownerId}')"
@@ -52,13 +52,15 @@ class Student(db.Model):
     status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
     gpa = db.Column(db.Float, nullable = False, default=0.0)
+    warning = db.Column(db.Integer, nullable = False, default=0)
+    enrollmentPermission = db.Column(db.Boolean, nullable=False, default=False)#special enrollment permission
 
     user = db.relationship('User', backref='studentOwner', lazy=True)
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
     application = db.relationship('GraduationApplication', backref='applicant', lazy=True)
     warnings = db.relationship('Warning', backref='targetStudent', lazy=True)
-    #wait_list = db.relationship('StudentCourse', backref='student', lazy=True)
-    #complaints = db.relationship('Complaint', backref='target', lazy=True)
+    complaints = db.relationship('Complaint', backref='targetStudent', primaryjoin="Student.ownerId==Complaint.targetId", lazy=True)# complaints targeting/complaining about this student
+    myComplaints = db.relationship('Complaint', backref='complainingStudent', primaryjoin="Student.ownerId==Complaint.complainerId", lazy=True)# complaints from this student about others
 
     def __repr__(self):
         return '<studentid: %r>' % self.ownerId
@@ -80,16 +82,26 @@ class Student(db.Model):
     def notEnrolled(self):#return courses that student is not enrolled or waitlisted in
         studentCoursesIds = [sc.courseId for sc in StudentCourse.query.filter_by(studentId=self.ownerId)]
         return [course for course in Course.query.all() if course.id not in studentCoursesIds]
+    def getCurrentCourses(self):
+        studentCourses = StudentCourse.query.filter_by(studentId=self.ownerId)
+        currentCourses = []
+        for studentcourse in studentCourses:
+            if studentcourse.course.status == "Open":
+                currentCourses.append(studentcourse)
+        return currentCourses
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(20), default=None)#fired, suspended, etc.
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
+    warning = db.Column(db.Integer, nullable = False, default=0)
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
     warnings = db.relationship('Warning', backref='targetInstructor', lazy=True)
-    complaints = db.relationship('Complaint', backref='target', lazy=True)
+    complaints = db.relationship('Complaint', backref='targetInstructor', primaryjoin="Instructor.ownerId==Complaint.targetId", lazy=True)# complaints targeting/complaining about this instructor
+    myComplaints = db.relationship('Complaint', backref='complainingInstructor', primaryjoin="Instructor.ownerId==Complaint.complainerId", lazy=True)# complaints from this instructor about other students
+    courses = db.relationship('Course', backref='instructor', lazy=True)
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
 
@@ -137,9 +149,10 @@ class Course(db.Model):
     status = db.Column(db.String(20), nullable = False, default="Open")#status like open, finished, cancelled, etc.
     
     #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
-    waitlist_capacity = db.Column(db.Integer, default=30)
+    waitListCapacity = db.Column(db.Integer, default=30)
     #gpa = db.Column(db.Float, nullable = True) # can be calculated with StudentCourse
     #rating = db.Column(db.Float, nullable = True)# ^
+    studentcourses = db.relationship('StudentCourse', backref='course', lazy=True)
 
     def __repr__(self):
         return '<Course %r, %r>' % (self.coursename, self.status)
@@ -190,18 +203,110 @@ class StudentCourse(db.Model):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 
 
-class Period(db.Model):
+class Period(db.Model):#set-up, registration, running, or grading period
     id = db.Column(db.Integer, primary_key=True)
-    period_num = db.Column(db.Integer, nullable = False)#periods passed
-    period = db.Column(db.String(20), nullable = False)#current period
+    period = db.Column(db.Integer, nullable = False, default=0)#periods passed
+    #period = db.Column(db.String(20), nullable = False)#current period
     
-    def __repr__(self):
+    def __repr__(self): 
         return '<period: %r>' % self.period
+    def getPeriodName(self):# returns set-up, registration, running, or grading period
+        remainder = self.period % 4
+        if remainder==0:
+            return "Course Set-up Period"
+        if remainder==1:
+            return "Course Registration Period"
+        if remainder==2:
+            return "Course Running Period"
+        if remainder==3:
+            return "Grading Period"
+    def nextPeriodLogic(self):# corresponding logic depending on the period
+        nextPeriod = self.period+1
 
+        if nextPeriod == 0:# next is Course Set-up Period
+            # unsuspend students and instructors 
+            for student in Student.query.filter_by(status="Suspended"):
+                student.status = "None"
+            for instructor in Instructor.query.filter_by(status="Suspended"):
+                instructor.status = "None"
+            db.session.commit()
+            # student suspended if warning>=3
+            for student in Student.query.all():
+                if student.warning>=3:
+                    student.status = "Suspended"
+                    student.warnings-=3
+            # instructor didnt assign all grades receive 1 warning
+            warnedInstructors = []
+            for course in Course.query.filter_by(status="Open"):
+                instructor = course.instructor
+                if instructor not in warnedInstructors:
+                    for studentcourse in course.studentcourses:
+                        if not studentcourse.gpa:
+                            warnedInstructors.append(instructor.ownerId)
+                            instructor.warning+=1
+                            warning = Warning(userId=instructor.ownerId, 
+                                            message="Didn't assign every student a grade! warning +1",
+                                            semesterWarned=self.period+1)
+                            db.session.add(warning)
+                            break
+            # instructor whose courses are all canceled suspended
+            for instructor in Instructor.query.filter_by(status="None"):
+                canceled = False
+                for course in instructor.courses:
+                    if course.status=="Open":
+                        break
+                    if course.status=="Canceled":
+                        canceled = True
+                if canceled:# all courses canceled
+                    instructor.status = "Suspended"
+            # instructor 3 warning suspended
+            for instructor in Instructor.query.filter_by(status="None"):
+                if instructor.warning>=3:
+                    instructor.status = "Suspended"
+                    instructor.warning-=3
+            # previous semester's courses are now finished
+            for course in Course.query.filter_by(status="Open"):
+                course.status = "Finished"
+        elif nextPeriod == 1:# next is Course Registration Period
+            pass
+        elif nextPeriod == 2:# next is Course Running Period
+            # course < 5 student canceled, students get extra chance to register
+            for course in Course.query.filter_by(status="Open"):
+                studentcourses = course.studentcourses
+                if len(studentcourses)<5:
+                    instructor = course.instructor
+                    instructor.warning+=1
+                    warning = Warning(userId=instructor.ownerId, 
+                                        message=f"Course {course.coursename} has <5 students, course canceled! warning +1", 
+                                        semesterWarned=self.period+1+1)
+                    db.session.add(warning)
+                    for studentcourse in studentcourses:
+                        studentcourse.student.enrollmentPermission = True
+            # warn student with < 2 courses if no special permission
+            for student in Student.query.all():
+                if not student.enrollmentPermission:
+                    if len(student.getCurrentCourses())<2:
+                        student.warning+=1
+                        warning = Warning(userId=student.ownerId, 
+                                    message="you are enrolled in <2 courses! warning +1",
+                                    semesterWarned=self.period+1)
+                        db.session.add(warning)
+        elif nextPeriod==3:# next is Grading Period
+            # warn student < 2 courses with special permission
+            for student in Student.query.all():
+                if student.enrollmentPermission:
+                    if len(student.getCurrentCourses())<2:
+                        student.warning+=1
+                        warning = Warning(userId=student.ownerId, 
+                                        message="you are enrolled in <2 courses! warning +1",
+                                        semesterWarned = self.period+1)
+                        db.session.add(warning)
+                    student.enrollmentPermission = False # remove special permission
+        db.session.commit()
 
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), nullable=False)
+    complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable=False)
     targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
     message = db.Column(db.Text, nullable=False, default='')
     processed = db.Column(db.Boolean, nullable=False, default=False) #check the complaint is processed by admin or not
@@ -214,8 +319,16 @@ class Warning(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable=False)
     message = db.Column(db.Text, nullable=False, default='')
+
+    semesterWarned = db.Column(db.Integer, nullable=False, default=0)# period/semester warning was sent
+    justification = message = db.Column(db.Text, nullable=False, default='')# if null then admin dont need to process it
+    result = db.Column(db.Text, nullable=False, default='') # if result=='' warning is not yet processed, else has the processed result
     def __repr__(self):
         return '<Warning: %r>' % self.id
+    def thisSemester(self, period):#returns true if semester warned is this semester
+        return (self.semesterWarned/4)==(period/4)
+    def prevSemester(self, period):#returns true if semester warned is prev semester
+        return self.thisSemester(period-4)
 
 
 class GraduationApplication(db.Model):
@@ -229,10 +342,4 @@ class GraduationApplication(db.Model):
     def __repr__(self):
         return '<GradApplication: >' % self.id
 
-class Waitlist(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    courseId = db.Column(db.Integer,db.ForeignKey('course.id'), nullable=False)
-    studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
-    def __repr__(self):
-        return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 

@@ -117,5 +117,19 @@ class SystemForm(FlaskForm):
     updateTaboo = SubmitField('Update')
     nextPeriod = SubmitField('Advance')
 
+class JustifyWarningForm(FlaskForm):
+    #for student/instructor
+    justification = TextAreaField('Provide Justification')
+    provideJustification = SubmitField('Update')
+    
+    #for admin
+    accept = SubmitField('Accept')
+    reject = SubmitField('Reject') 
+
+class ReviewForm(FlaskForm):
+    rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=1,max=5)])
+    content = TextAreaField('Review', validators=[DataRequired()])
+    submit = SubmitField('Update')
+
 
 

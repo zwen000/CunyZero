@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="content-section">
+                <article class="media content-section">
+                    <div class="media-body">
+                      <div class="article-metadata">
+                        <a class="mr-2" href="#">{{ owner.firstname }}, {{ owner.lastname }}</a>
+                        <small class="text-muted">/{{ user.role }}, username: {{ user.username }}</small>
+                      </div>
+                      <form method="POST">
+                        <h2>
+                            <div class="form-group col-md-5">
+                                <strong>{{ form.rating.label(class="form-control-label") }}</strong>
+                                {% if form.rating.errors %}
+                                    {{ form.rating(class="form-control form-control-lg is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.rating.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor%}
+                                    </div>
+                                {% else %}
+                                    {{ form.rating(class="form-control form-control-lg") }}
+                                {% endif %}
+                            </div>
+                        </h2>
+                        <div class="form-group col-md-5">
+                            <strong>{{ form.content.label(class="form-control-label") }}</strong>
+                            {% if form.content.errors %}
+                                {{ form.content(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.content.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                                </div>
+                            {% else %}
+                                {{ form.content(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            {{ form.submit(class="btn btn-outline-info") }}
+                        </div>
+                      </form>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

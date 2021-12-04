@@ -1,0 +1,39 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container">
+    {% if current_user.role=='Student' %}
+        <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('update_rating', courseId=courseId, studentId=current_user.ownerId) }}">
+            Write Review
+          </a>
+        {% endif %}
+    <div class="row">
+        {% for review in reviews %}
+        {% if review.rating %}
+        <div class="col-md-8">
+            <div class="content-section">
+                <article class="media content-section">
+                    <div class="media-body">
+                      <div class="article-metadata">
+                        {% if current_user.role=='Admin' or current_user.ownerId==review.studentId %}
+                        <a class="mr-2" href="#">{{ review.student.firstname }}, {{ review.student.lastname }}</a>
+                        <small class="text-muted">/{{ review.student.user.role }}, username: {{ review.student.user.username }}</small>
+                        {% else %}
+                        <a class="mr-2" href="#">Anonymous Student</a>
+                        {% endif %}
+                      </div>
+                      <h2>
+                          <a class="article-title" href="{{ url_for('update_rating', courseId=review.courseId, studentId=review.studentId) }}">
+                              {{ review.rating }} Stars
+                            </a>
+                        </h2>
+                      <p class="article-content">{{ review.review }}</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}

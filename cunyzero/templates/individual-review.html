@@ -122,7 +122,11 @@
                                 <td> {{ course.coursename }} </td>
                                 <td> {{ course.getInstructorName() }} </td>
                                 <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
-                                <td><a class="btn btn-outline-info" href="#" > rate </a></td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}
@@ -143,11 +147,13 @@
                             <th>Enroll total</th>
                             <th>Rating</th>
                             <th>Average GPA</th>
+                            <th>Reviews</th>
                         {% elif person_be_reviewed.user[0].role == "Student" %}
                             <th>Course Name</th>
                             <th>Instructor</th>
                             <th>Days/Times</th>
                             <th>Grade</th>
+                            <th>Reviews</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -164,11 +170,21 @@
                                 <td> {{ course.getEnrolledTotal() }} </td>
                                 <td> {{ course.getRating() }} </td>
                                 <td> {{ course.getAverageGPA() }}</td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
                             {% elif person_be_reviewed.user[0].role == "Student" %}
                                 <td> {{ course.coursename }} </td>
                                 <td> {{ course.getInstructorName() }} </td>
                                 <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
-                                <td> {{ course.getStudentGrade() }}</td>
+                                <td> {{ course.getStudentGrade(person_be_reviewed.ownerId) }}</td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}

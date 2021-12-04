@@ -261,44 +261,58 @@ def application_confirm(application_id):
 def register_course():
     if current_user.role != "Student":
         return redirect(url_for('home'))
-
+    if current_user.studentOwner.status=='Suspended':
+        flash("No access, You are suspended!", 'danger')
+        return redirect(url_for('home'))
+    period = Period.query.all()[0]
     courseId = request.form.get("Enroll")
     if courseId:# Attempting to Enroll In a Course
         courseId = int(courseId)
         course = Course.query.filter_by(id=courseId).first()
         courseSize = StudentCourse.query.filter_by(courseId=courseId, waiting=False).count()
         enrolledCourseCount = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId, waiting=False).count()
-        if enrolledCourseCount == 4:
-            flash('Already enrolled in 4, the maximum number of courses!', 'danger')
+        if period.getPeriodName!= "" and not current_user.studentOwner.enrollmentPermission:
+            flash('Not course registration period and no special permission to enroll!', 'danger')
         else:
-            if course.courseConflict(current_user.ownerId): 
-                flash(f'Course {course.coursename}, has conflict with enrolled course!','danger')
+            if enrolledCourseCount == 4:
+                flash('Already enrolled in 4, the maximum number of courses!', 'danger')
             else:
-                if courseSize<course.capacity:# if course not full
-                    studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=False)
-                    db.session.add(studentcourse)
-                    db.session.commit()
-                    flash(f'You have successfully enrolled in {course.coursename}','success')
-                else:# course full
-                    waitListSize = StudentCourse.query.filter_by(courseId=courseId, waiting=True).count()
-                    if waitListSize<course.waitListCapacity:# if waitlist not full
-                        studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=True)
-                        db.session.add(studentcourse)
-                        db.session.commit()
-                        flash(f'You are now waitlisted for {course.coursename}','warning')
+                prevCourse = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).first()
+                if prevCourse.gpa and prevCourse.gpa!='F':# if student already has a non f grade
+                    flash(f'Course {course.coursename} already taken with grade {prevCourse.gpa}!','danger')
+                else:
+                    if course.courseConflict(current_user.ownerId): 
+                        flash(f'Course {course.coursename}, has conflict with enrolled course!','danger')
                     else:
-                        flash('Course is full','danger')
+                        if courseSize<course.capacity:# if course not full
+                            studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=False)
+                            db.session.add(studentcourse)
+                            db.session.commit()
+                            flash(f'You have successfully enrolled in {course.coursename}','success')
+                        else:# course full
+                            waitListSize = StudentCourse.query.filter_by(courseId=courseId, waiting=True).count()
+                            if waitListSize<course.waitListCapacity:# if waitlist not full
+                                studentcourse = StudentCourse(courseId=courseId, studentId=current_user.ownerId, waiting=True)
+                                db.session.add(studentcourse)
+                                db.session.commit()
+                                flash(f'You are now waitlisted for {course.coursename}','warning')
+                            else:
+                                flash('Course is full','danger')
 
     courseId = request.form.get("Drop")
     if courseId:# Dropping a Course
-        period = Period.query.all().first().getPeriodName()
+        periodName = period.getPeriodName()
         courseId = int(courseId)
-        if period == "course registration period":# registration period delete class
-            StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).delete()
-        elif period == "course running period" or period =="grading period":# running-grading period, drop with grade w
-            StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).first().gpa = 'W'
+        sc = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId)
+        if periodName == "Course Registration Period" or sc.first().waiting==True:# registration period or waitlisted class, delete class
+            sc.delete()
+            flash(f'You have successfully dropped a course','success')
+        elif periodName == "Course Running Period" or period =="Grading Period":# running-grading period, drop with grade w
+            StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId, waiting=False).first().gpa = 'W'
+            flash(f'You have dropped a course with grade W','success')
+        else:
+            flash(f'Cannot Drop Course!','danger')
         db.session.commit()
-        flash(f'You have successfully dropped a course','success')
 
     student = Student.query.filter_by(ownerId=current_user.ownerId).first()
     return render_template("register-course.html", student=student)
@@ -351,7 +365,8 @@ def individual_review(role, owner_id):
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
     if role == "Student":
         student = Student.query.get(owner_id)
-        program = Program.query.filter_by(id=student.programId).first()
+        print(student)
+        program = Program.query.filter_by(id=student.ownerId).first()
         student_courses = student.courses # by relationship student.courses
         courses = []
         past_courses = []
@@ -459,26 +474,109 @@ def change_period():
             admin.taboo_list = form.taboo_list.data
             db.session.commit()
         if form.nextPeriod.data:
-            #period.nextPeriodLogic()# do task logic when period changes
-            period.period+=1# advance period by 1
-            db.session.commit() # update db
+            period.advancePeriod()#advance to next period and do the task logic
     elif request.method=='GET':
         form.taboo_list.data = admin.taboo_list
     
     return render_template("change-period.html", form=form, period=period)
 
+#student and instructor only
 #@login_required
 @app.route('/warning/<int:userId>', methods=['GET', 'POST'])
-def justify_warning_page(userId):
-    if (not current_user.is_authenticated) or (userId != current_user.ownerId):
+def user_warning_page(userId):# show all warnings for that user
+    if (current_user.role!='Student' and current_user.role!='Instructor') or (userId != current_user.ownerId):
         return redirect(url_for('home'))
-    warnings = Warning.query.filter_by(userId=userId)
-    return render_template("warning-page.html", warnings=warnings)
 
+    warnings = Warning.query.filter_by(userId=userId)
+    return render_template("user-warning.html", warnings=warnings)
+
+#admin only
 #@login_required
 @app.route('/admin/review-warning', methods=['GET', 'POST'])
-def review_warning_page(userId):
+def review_warning_page():#show all warnings admin need to review
     if current_user.role!="Admin":
         return redirect(url_for('home'))
-    warnings = Warning.query.filter_by()
-    return render_template("review-warning-page.html", warnings=warnings)
+    form = JustifyWarningForm()
+    warnings = Warning.query.all()
+    #get warnings with justification from users and with no result/judgement from admin
+    warningsWithJustification = [warning for warning in warnings if warning.justification!='' and warning.result=='']
+    return render_template("user-warning.html", form=form, warnings=warningsWithJustification)
+
+#@login_required
+@app.route('/warning/<int:userId>/<int:warningId>', methods=['GET', 'POST'])
+def warning_page(userId, warningId):# show specific warning
+    if current_user.role!='Admin':
+        if (current_user.role!='Student' and current_user.role!='Instructor') or (userId != current_user.ownerId):
+            return redirect(url_for('home'))
+
+    form = JustifyWarningForm()
+    user = User.query.filter_by(ownerId=userId).first()
+    owner = (user.studentOwner if user.role=='Student' else user.instructorOwner)
+    warning = Warning.query.filter_by(id=warningId, userId=userId).first()
+    program = (Program.query.filter_by(id=owner.programId).first() if user.role=='Student' else None)
+    
+    if form.validate_on_submit():
+        if current_user.role=='Admin':
+            if warning.result == '':
+                if form.accept.data:
+                    warning.result = "Justification Accepted, Warning -1"
+                    owner.warning-=1
+                    flash("Justification Accepted",'success')
+                elif form.reject.data:
+                    warning.result = "Justification Rejected"
+                    flash("Justification Rejected",'success')
+            else:
+                flash("Already Processed",'danger')
+        else:
+            warning.justification=form.justification.data
+            flash("Justification Updated",'success')
+        db.session.commit()
+    elif request.method=='GET': 
+        form.justification.data = warning.justification
+
+    return render_template("review-warning.html", form=form, warning=warning, owner=owner, user=user, program=program)
+
+#@login_required
+@app.route('/course/review/<int:courseId>', methods=['GET', 'POST'])
+def course_rating(courseId):#show all ratings for the course
+    if not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    reviews = StudentCourse.query.filter_by(courseId=courseId)
+    return render_template("course-rating.html", reviews=reviews, courseId=courseId)
+
+#only for user who posted review
+#@login_required
+@app.route('/course/review/<int:courseId>/<int:studentId>', methods=['GET', 'POST'])
+def update_rating(courseId, studentId):#show specific rating
+    if not current_user.is_authenticated:
+        return redirect(url_for('home'))
+    if current_user.ownerId!=studentId:
+        return redirect(url_for('course_rating',courseId=courseId))
+
+    form = ReviewForm()
+    user = User.query.filter_by(ownerId=studentId).first()
+    owner = Student.query.filter_by(ownerId=studentId).first()
+    review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
+    period = Period.query.all()[0].getPeriodName()
+    if review.waiting==True:
+        flash("cannot leave review for waitlisted course!",'danger')
+        return redirect(url_for('course_rating',courseId=courseId))
+    if form.submit.data:
+        if period=="Course Running Period" or period=="Grading Period":
+            if not review.gpa:
+                review.review=form.content.data
+                review.rating=form.rating.data
+                db.session.commit()
+                flash("Review Updated", "success")
+            else:
+                flash("GPA is out, reviews can no longer be written!", 'danger')
+        else:
+            flash("Reviews can only be submitted from running to grading period!", 'danger')
+    elif request.method=='GET':
+        form.content.data=review.review
+        form.rating.data=review.rating
+
+    if review:
+        return render_template("rating.html", form=form, review=review, owner=owner, user=user)
+    else:
+        return redirect(url_for('course_rating',courseId=courseId))

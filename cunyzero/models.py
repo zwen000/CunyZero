@@ -227,14 +227,24 @@ class Course(db.Model):
                 count+=1
                 total+=sc.rating
         return total/count
+    def getRating(self):
+        return 'Student Rate'
+    def getAverageGPA(self):
+        return 'Average GPA'
+    def getStudentGrade(self, student_id):
+        studentCourse = StudentCourse.query.filter_by(courseId=self.id, studentId=student_id).first()
+        if studentCourse:
+            return studentCourse.gpa
+        else:
+            return None
 
 class StudentCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     courseId = db.Column(db.Integer, db.ForeignKey('course.id'),nullable=False)
     studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
 
-    gpa = db.Column(db.Float,nullable = True)
-    rating = db.Column(db.Float, nullable = True)
+    gpa = db.Column(db.Text,nullable = True)
+    rating = db.Column(db.Integer, nullable = True)
     review = db.Column(db.Text, nullable = True)
     waiting = db.Column(db.Boolean,nullable = False, default=False)
 
@@ -244,6 +254,29 @@ class StudentCourse(db.Model):
         return self.course.creationPeriod
     def getCourseName(self):
         return self.course.coursename
+
+    # The function will return a float grade base the the grade scale
+    def getFloat(self):
+        grade_scale = {
+            'A+': 4.0,
+            'A': 4.0,
+            'A-': 3.7,
+            'B+': 3.3,
+            'B': 3.0,
+            'B-': 2.7,
+            'C+': 2.3,
+            'C': 2.0,
+            'C-': 1.7,
+            'D+': 1.3,
+            'D': 1.0,
+            'F': 0.0,
+            'W': None,
+        }
+        return grade_scale[self.gpa]
+
+    def getCourseName(self):
+        course = Course.query.get(self.courseId)
+        return course.coursename
 
 class Period(db.Model):#set-up, registration, running, or grading period
     id = db.Column(db.Integer, primary_key=True)

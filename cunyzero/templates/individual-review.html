@@ -4,16 +4,16 @@
         <div class="media content-section">
             <div class="media-body" style="position: relative">
                 <div class="lead border-bottom">
-                    <strong>{{ owner.firstname }}, {{ owner.lastname }}</strong>
-                    <small>/{{ user.role }}</small>
+                    <strong>{{ person_be_reviewed.firstname }}, {{ person_be_reviewed.lastname }}</strong>
+                    <small>/{{ person_be_reviewed.user[0].role }}</small>
                 </div>
-                <div>Employee ID: {{ owner.ownerId }}</div>
-                <div>Username: {{ user.username }}</div>
-                {% if user.role == "Student"%}
+                <div>Employee ID: {{ person_be_reviewed.ownerId }}</div>
+                <div>Username: {{ person_be_reviewed.user[0].username }}</div>
+                {% if person_be_reviewed.user[0].role == "Student"%}
                     <div>Program: {{ program.name }}</div>
-                    <div>Current GPA: {{ owner.gpa }}</div>
+                    <div>Current GPA: {{ person_be_reviewed.gpa }}</div>
                 {% endif %}
-                <div>Status: {{ owner.status }}</div>
+                <div>Status: {{ person_be_reviewed.status }}</div>
                 {% if current_user.role == "Admin" %}
                     <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
                         warning
@@ -55,49 +55,73 @@
             <table class="table table-condensed">
                 <thead class="thead-light">
                     <tr>
-                        {% if user.role == "Instructor" %}
+                        {% if current_user.role == "Admin" %}
+                            {% if person_be_reviewed.user[0].role == "Instructor" %}
+                                <th>Course Name</th>
+                                <th>Days/Times</th>
+                                <th>Enroll total</th>
+                                <th>Rating</th>
+                            {% elif person_be_reviewed.user[0].role == "Student" %}
+                                <th>Course Name</th>
+                                <th>Instructor</th>
+                                <th>Days/Times</th>
+                                <th>Enroll total</th>
+                                <th>Deregister</th>
+                            {% endif %}
+                        {% elif current_user.role == "Instructor" %}
                             <th>Course Name</th>
-                            <th>Start Period</th>
-                            <th>End Period</th>
-                            <th>Days of Week</th>
+                            <th>Days/Times</th>
                             <th>Enroll total</th>
-                            <th>Rate</th>
-                        {% endif %}
-                        {% if user.role == "Student" %}
+                            <th>Rating</th>
+                        {% elif current_user.role == "Student" %}
                             <th>Course Name</th>
                             <th>Instructor</th>
-                            <th>Start Period</th>
-                            <th>End Period</th>
-                            <th>Days of Week</th>
-                            <th>Deregister</th>
-                            <th>Review</th>
+                            <th>Days/Times</th>
+                            <th>Give Rating</th>
                         {% endif %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in courses %}
+                    {% for course in current_courses %}
                         <tr>
-                            {% if user.role == "Instructor" %}
-                                <td> <a href="{{ url_for('course_review', course_Id=course.id) }}">
-                                    {{ course.coursename }} </a>
-                                </td>
-                                <td> {{ course.startPeriod }} </td>
-                                <td> {{ course.endPeriod }} </td>
-                                <td> {{ course.dayofweek }} </td>
-                                <td> {{ course.getEnrolledTotal() }} </td>
-                                <td>  rating  </td>
-                            {% endif %}
-                            {% if user.role == "Student"%}
-                                <td> {{ course.coursename }} </td>
-                                <td> {{ course.getInstructorName() }}</td>
-                                <td> {{ course.startPeriod }} </td>
-                                <td> {{ course.endPeriod }} </td>
-                                <td> {{ course.dayofweek }} </td>
+                            {% if current_user.role == "Admin" %}
+                                {% if person_be_reviewed.user[0].role == "Instructor" %}
+                                    <td>
+                                        <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                            {{ course.coursename }}
+                                        </a>
+                                    </td>
+                                    <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                    <td> {{ course.getEnrolledTotal() }} </td>
+                                     <td> rating </td>
+                                {% elif person_be_reviewed.user[0].role == "Student" %}
+                                    <td>
+                                        <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                            {{ course.coursename }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('individual_review',role='Instructor',owner_id=course.instructorId)}}">
+                                            {{ course.getInstructorName() }}
+                                        </a>
+                                    </td>
+                                    <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                    <td> {{ course.getEnrolledTotal() }} </td>
+                                    <td> <a class="btn btn-outline-info" href="#" > De-register </a> </td>
+                                {% endif %}
+                            {% elif current_user.role == "Instructor" %}
                                 <td>
-                                    {% if user.role == "Student" %}
-                                        <a class="btn btn-outline-info" href="#" > De-register </a>
-                                    {% endif %}
+                                    <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                        {{ course.coursename }}
+                                    </a>
                                 </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                <td> {{ course.getEnrolledTotal() }} </td>
+                                <td> rating </td>
+                            {% elif current_user.role == "Student" %}
+                                <td> {{ course.coursename }} </td>
+                                <td> {{ course.getInstructorName() }} </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
                                 <td>
                                     <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
                                         Reviews
@@ -114,6 +138,46 @@
             <div class="lead border-bottom">
                 <strong>Previous Course</strong>
             </div>
+            <table class="table table-condensed">
+                <thead class="thead-light">
+                    <tr>
+                        {% if person_be_reviewed.user[0].role == "Instructor" %}
+                            <th>Course Name</th>
+                            <th>Days/Times</th>
+                            <th>Enroll total</th>
+                            <th>Rating</th>
+                            <th>Average GPA</th>
+                        {% elif person_be_reviewed.user[0].role == "Student" %}
+                            <th>Course Name</th>
+                            <th>Instructor</th>
+                            <th>Days/Times</th>
+                            <th>Grade</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in past_courses%}
+                        <tr>
+                            {% if person_be_reviewed.user[0].role == "Instructor" %}
+                                <td>
+                                    <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                        {{ course.coursename }}
+                                    </a>
+                                </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                <td> {{ course.getEnrolledTotal() }} </td>
+                                <td> {{ course.getRating() }} </td>
+                                <td> {{ course.getAverageGPA() }}</td>
+                            {% elif person_be_reviewed.user[0].role == "Student" %}
+                                <td> {{ course.coursename }} </td>
+                                <td> {{ course.getInstructorName() }} </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
+                                <td> {{ course.getStudentGrade() }}</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 

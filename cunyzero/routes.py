@@ -363,24 +363,35 @@ def individual_review(role, owner_id):
         db.session.commit()
         flash(f'The warning for Student id: {warning.userId} is submitted, reason is {form.message.data }!', 'success')
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
-
     if role == "Student":
         student = Student.query.get(owner_id)
         program = Program.query.filter_by(id=student.programId).first()
-        user = student.user[0] # find the student account's user
         student_courses = student.courses # by relationship student.courses
         courses = []
+        past_courses = []
         for student_course in student_courses:
             course = Course.query.get(student_course.courseId)
-            courses.append(course)
-        return render_template("individual-review.html", title="Student Review", owner=student, user=user,
-                               program=program, courses=courses, form=form)
+            if student_course.waiting:
+                continue
+            else:
+                if student_course.gpa != "W" and course.status == "Open":
+                    courses.append(course)
+                else:
+                    past_courses.append(course)
+        return render_template("individual-review.html", title="Student Review", person_be_reviewed=student,
+                               program=program, current_courses=courses, past_courses=past_courses, form=form)
     if role == "Instructor":
         instructor = Instructor.query.get(owner_id)
-        user = instructor.user[0]
-        courses = Course.query.filter_by(instructorId=owner_id)
-        return render_template("individual-review.html", title="Instructor Review", owner=instructor, user=user,
-                               courses=courses, form=form)
+        all_courses = Course.query.filter_by(instructorId=owner_id)
+        courses = []
+        past_courses = []
+        for course in all_courses:
+            if course.status == "Open":
+                courses.append(course)
+            else:
+                past_courses.append(course)
+        return render_template("individual-review.html", title="Instructor Review", person_be_reviewed=instructor,
+                               current_courses=courses, past_courses=past_courses, form=form)
 
 
 @login_required
@@ -420,6 +431,7 @@ def complaint_manage():
 @login_required
 @app.route('/course/<int:course_Id>', methods=['GET', 'POST'])
 def course_review(course_Id):
+    period = Period.query.all()[0]
     course = Course.query.get(course_Id)
     programs = Program.query.all()
     students = db.session.query(Student, StudentCourse)\
@@ -428,8 +440,16 @@ def course_review(course_Id):
     students_waitlist = db.session.query(Student, StudentCourse)\
         .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
                                                                                 StudentCourse.waiting == True).all()
+    studentId = request.form.get("Grade")
+    if studentId:
+        letter_grade = request.form.get(studentId)
+        studentId = int(studentId) #change studentId from string to int
+        student = [student for student in students if student.Student.ownerId == studentId][0]
+        student.StudentCourse.gpa = letter_grade
+        db.session.commit()
+        flash(f'{student.Student.firstname} {student.Student.lastname}\'s grade has been updated!', 'success')
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
-                           programs=programs, students_waitlist=students_waitlist)
+                           programs=programs, students_waitlist=students_waitlist, period=period)
 
 
 @app.route('/test', methods=['GET', 'POST'])

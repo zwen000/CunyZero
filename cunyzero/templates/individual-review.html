@@ -122,7 +122,11 @@
                                 <td> {{ course.coursename }} </td>
                                 <td> {{ course.getInstructorName() }} </td>
                                 <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
-                                <td><a class="btn btn-outline-info" href="#" > rate </a></td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
                             {% endif %}
                         </tr>
                     {% endfor %}

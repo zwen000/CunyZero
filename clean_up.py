@@ -75,7 +75,26 @@ db.session.add(studentCourse4)
 db.session.add(studentCourse5)
 
 #testing period
-period = Period(period=0)
+period = Period(period=2)#course grading period
 db.session.add(period)
 
+#testing review
+studentCourse2.review="testing review"
+studentCourse2.rating=2
+studentCourse3.review="testing review again"
+studentCourse3.rating=3
+studentCourse4.review="testing review still"
+studentCourse4.rating=4
+studentCourse5.review="testing review done"
+studentCourse5.rating=5
+
+db.session.commit()
+
+#testing warnings/period
+period.advanceNPeriod(50)# advances period 50 times and perform the task logic, warnings will be given accordingly
+
+warnings = Warning.query.all()
+if len(warnings)>=10:
+    for i in range(10):
+        warnings[i].justification="some justification"
 db.session.commit()

@@ -101,7 +101,10 @@ class Student(db.Model):
             if sc.gpa and sc.creationSemester()==period-1:
                 count+=1
                 total+=sc.getFloat()
-        return total/count
+        if count == 0:
+            return 4.0
+        else:
+            return total/count
     def getOverallGpa(self):#return overall gpa
         count = 0
         total = 0.0
@@ -313,7 +316,6 @@ class Period(db.Model):#set-up, registration, running, or grading period
             # Update the student overall gpa to Student
             for student in Student.query.filter_by(status='Employed'):
                 student.gpa = student.getOverallGpa()
-                print(student.gpa)
             db.session.commit()
             # unsuspend students and instructors 
             for student in Student.query.filter_by(status="Suspended"):

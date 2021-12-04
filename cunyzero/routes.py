@@ -365,7 +365,8 @@ def individual_review(role, owner_id):
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
     if role == "Student":
         student = Student.query.get(owner_id)
-        program = Program.query.filter_by(id=student.programId).first()
+        print(student)
+        program = Program.query.filter_by(id=student.ownerId).first()
         student_courses = student.courses # by relationship student.courses
         courses = []
         past_courses = []

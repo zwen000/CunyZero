@@ -530,9 +530,10 @@ def update_rating(courseId, studentId):#show specific rating
             if not review.gpa:
                 review.review=form.content.data
                 review.rating=form.rating.data
-                course = Course.query.filter_by(id=review.courseId)
+
                 db.session.commit()
                 # automate update the course avg rating
+                course = Course.query.get(review.courseId)
                 course.rating = course.getAvgRating()
                 db.session.commit()
                 flash("Review Updated", "success")

@@ -1,7 +1,7 @@
 {% extends "layout.html"%}
 {% block content %}
     {% if courses %}
-        {% with course = courses[0] %}
+        {% with course = courses[-1] %}
             <article class="media content-section">
                 <div class="media-body">
                     <div class="article-metadata">
@@ -14,7 +14,7 @@
                 </div>
             </article>
         {% endwith %}
-        {% with course = courses[-1] %}
+        {% with course = courses[0] %}
             <article class="media content-section">
             <div class="media-body">
             <div class="article-metadata">

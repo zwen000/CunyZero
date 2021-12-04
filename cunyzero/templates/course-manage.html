@@ -3,9 +3,11 @@
     <div class="content-section">
         <legend class="border-bottom pb-2">
             <span class="mr-4"> Current Running Course </span>
-            <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('create_course')}}">
-                Create Course
-            </a>
+            {% if current_user.role == "Admin" %}
+                <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('create_course')}}">
+                    Create Course
+                </a>
+            {% endif %}
         </legend>
         {% for current_course in current_courses %}
             <article class="media content-section col-md-12">
@@ -19,11 +21,13 @@
                 <div class="col-md-2 border-left">
                     Day: {{ current_course.dayofweek }}
                 </div>
-                <form method="POST">
-                    <button type="submit" name="Cancel" value="{{current_course.id}}" class="btn btn-outline-info" style="position: absolute; top: -7px; right:0">
-                        Cancel
-                    </button>
-                </form>
+                {% if current_user.role == "Admin" %}
+                    <form method="POST">
+                        <button type="submit" name="Cancel" value="{{current_course.id}}" class="btn btn-outline-info" style="position: absolute; top: -7px; right:0">
+                            Cancel
+                        </button>
+                    </form>
+                {% endif %}
                 </div>
             </article>
         {% endfor %}

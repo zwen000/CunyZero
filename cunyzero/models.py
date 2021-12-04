@@ -188,6 +188,16 @@ class Course(db.Model):
         return StudentCourse.query.filter_by(courseId=self.id, waiting=False).count()
     def getWaitlistTotal(self):
         return StudentCourse.query.filter_by(courseId=self.id, waiting=True).count()
+    def getRating(self):
+        return 'Student Rate'
+    def getAverageGPA(self):
+        return 'Average GPA'
+    def getStudentGrade(self, student_id):
+        studentCourse = StudentCourse.query.filter_by(courseId=self.id, studentId=student_id).first()
+        if studentCourse:
+            return studentCourse.gpa
+        else:
+            return None
 
 class StudentCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -202,6 +212,28 @@ class StudentCourse(db.Model):
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
 
+    # The function will return a float grade base the the grade scale
+    def getFloat(self):
+        grade_scale = {
+            'A+': 4.0,
+            'A': 4.0,
+            'A-': 3.7,
+            'B+': 3.3,
+            'B': 3.0,
+            'B-': 2.7,
+            'C+': 2.3,
+            'C': 2.0,
+            'C-': 1.7,
+            'D+': 1.3,
+            'D': 1.0,
+            'F': 0.0,
+            'W': None,
+        }
+        return grade_scale[self.gpa]
+
+    def getCourseName(self):
+        course = Course.query.get(self.courseId)
+        return course.coursename
 
 class Period(db.Model):#set-up, registration, running, or grading period
     id = db.Column(db.Integer, primary_key=True)

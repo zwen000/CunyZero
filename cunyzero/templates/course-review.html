@@ -10,7 +10,7 @@
                     <strong>Instructor Name: </strong>
                     <span>{{ course.getInstructorName() }}</span>
                     <strong class="ml-2">Course Rate: </strong>
-                    <span> course.status </span>
+                    <span> course.rate </span>
                 </div>
                 <div>
                     <strong>Course ID: </strong>
@@ -44,6 +44,7 @@
         <div class="content-section">
             <div class="lead border-bottom">
                 <strong>Students in Course</strong>
+                <small>/{{ period.getPeriodName() }}</small>
             </div>
 
             <table class="table table-condensed">
@@ -61,7 +62,7 @@
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
                             <td> {{ programs[student.Student.programId].name }} </td>
-                            {% if current_user.role == "Instructor" %}
+                            {% if current_user.role == "Instructor" and period.getPeriodName() == "Grading Period"%}
                                 <td>
                                     <form method="post">
 {#                                        <input type="text" id="letter-grade" name="{{ student.Student.ownerId }}" placeholder="{{ student.StudentCourse.gpa }}"#}

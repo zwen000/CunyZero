@@ -174,7 +174,7 @@ class Course(db.Model):
     #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
     waitListCapacity = db.Column(db.Integer, default=30)
     #gpa = db.Column(db.Float, nullable = True) # can be calculated with StudentCourse
-    #rating = db.Column(db.Float, nullable = True)# ^
+    rating = db.Column(db.Float, default=None, nullable = True)# ^
     studentcourses = db.relationship('StudentCourse', backref='course', lazy=True)
 
     def __repr__(self):
@@ -218,7 +218,10 @@ class Course(db.Model):
             if sc.gpa:
                 count+=1
                 total+=sc.gpa
-        return total/count
+        if count != 0:
+            return total/count
+        else:
+            return None
     def getAvgRating(self):
         count=0
         total=0.0
@@ -226,11 +229,10 @@ class Course(db.Model):
             if sc.rating:
                 count+=1
                 total+=sc.rating
-        return total/count
-    def getRating(self):
-        return 'Student Rate'
-    def getAverageGPA(self):
-        return 'Average GPA'
+        if count != 0:
+            return total/count
+        else:
+            return None
     def getStudentGrade(self, student_id):
         studentCourse = StudentCourse.query.filter_by(courseId=self.id, studentId=student_id).first()
         if studentCourse:

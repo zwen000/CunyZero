@@ -10,48 +10,19 @@ import random
 import os
 from PIL import Image
 
-highest_rate_course = [
-    {
-        'course_name': 'csc 32200',
-        'instructor': 'Prof. X',
-        'status': 'Current',
-        'rate': '5 star'
-    }
-]
-
-lowest_rate_course = [
-    {
-        'course_name': 'csc 33200',
-        'instructor': 'Prof. Y',
-        'Status': 'Finished',
-        'rate': '0 star'
-    }
-]
-
-highest_GPA_student = [
-    {
-        'student': 'Corey Schafer',
-        'major_in': 'Computer Science',
-        'status': 'senior',
-        'gpa': '4.0'
-    }
-]
-
-posts = [
-    {
-        'author':  'Corey Schafer',
-        'title': 'Blog Post 1',
-        'content': 'First Post Content',
-        'date_posted': 'April 20, 2018'
-    }
-]
-
-
 @app.route('/')
 @app.route('/home')
 def home():
-    return render_template("home.html", highest_rate_course=highest_rate_course, lowest_rate_course=lowest_rate_course,
-                           highest_GPA_student=highest_GPA_student)
+    courses = Course.query.order_by(Course.rating)
+    courses_without_null = []
+    for course in courses:
+        if course.rating:
+            courses_without_null.append(course)
+        else:
+            continue
+    students = db.session.query(Student, Program)\
+        .join(Program, Program.id == Student.programId).order_by(Student.gpa)
+    return render_template("home.html", courses=courses_without_null, students=students)
 
 
 @app.route('/register/', methods=['GET', 'POST'])
@@ -365,8 +336,7 @@ def individual_review(role, owner_id):
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
     if role == "Student":
         student = Student.query.get(owner_id)
-        print(student)
-        program = Program.query.filter_by(id=student.ownerId).first()
+        program = Program.query.filter_by(id=student.programId).first()
         student_courses = student.courses # by relationship student.courses
         courses = []
         past_courses = []
@@ -452,12 +422,6 @@ def course_review(course_Id):
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
                            programs=programs, students_waitlist=students_waitlist, period=period)
 
-
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-
-    student = db.session.query(Student, StudentCourse).join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == 38239413).all()
-    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
 
 # Admin only
 #@login_required
@@ -566,6 +530,10 @@ def update_rating(courseId, studentId):#show specific rating
             if not review.gpa:
                 review.review=form.content.data
                 review.rating=form.rating.data
+                course = Course.query.filter_by(id=review.courseId)
+                db.session.commit()
+                # automate update the course avg rating
+                course.rating = course.getAvgRating()
                 db.session.commit()
                 flash("Review Updated", "success")
             else:

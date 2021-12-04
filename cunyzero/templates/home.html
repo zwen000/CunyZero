@@ -1,42 +1,62 @@
 {% extends "layout.html"%}
 {% block content %}
-    {% for course in highest_rate_course %}
-    <article class="media content-section">
-        <div class="media-body">
-            <div class="article-metadata">
-                <H4>Highest Rate Class</H4>
-            </div>
-            <p class="article-content"><strong>Course Name:</strong> {{ course.course_name }}</p>
-            <p class="article-content"><strong>Instructor:</strong> {{ course.instructor }}</p>
-            <p class="article-content"><strong>Status:</strong> {{ course.status }}</p>
-            <p class="article-content"><strong>Rate:</strong> {{ course.rate }}</p>
-        </div>
-    </article>
-    {% endfor %}
-    {% for course in lowest_rate_course %}
-    <article class="media content-section">
-        <div class="media-body">
+    {% if courses %}
+        {% with course = courses[0] %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <H4>Highest Rate Class</H4>
+                    </div>
+                    <p class="article-content"><strong>Course Name:</strong> {{ course.coursename }}</p>
+                    <p class="article-content"><strong>Instructor:</strong> {{ course.getInstructorName() }}</p>
+                    <p class="article-content"><strong>Status:</strong> {{ course.status }}</p>
+                    <p class="article-content"><strong>Rate:</strong> {{ course.rating }}</p>
+                </div>
+            </article>
+        {% endwith %}
+        {% with course = courses[-1] %}
+            <article class="media content-section">
+            <div class="media-body">
             <div class="article-metadata">
                 <H4>Lowest Rate Class</H4>
             </div>
-            <p class="article-content"><strong>Course Name:</strong> {{ course.course_name }}</p>
-            <p class="article-content"><strong>Instructor:</strong> {{ course.instructor }}</p>
+            <p class="article-content"><strong>Course Name:</strong> {{ course.coursename }}</p>
+            <p class="article-content"><strong>Instructor:</strong> {{ course.getInstructorName() }}</p>
             <p class="article-content"><strong>Status:</strong> {{ course.status }}</p>
-            <p class="article-content"><strong>Rate:</strong> {{ course.rate }}</p>
-        </div>
-    </article>
-    {% endfor %}
-    {% for student in highest_GPA_student %}
-    <article class="media content-section">
-        <div class="media-body">
-            <div class="article-metadata">
-                <H4>Highest GPA Student</H4>
+            <p class="article-content"><strong>Rate:</strong> {{ course.rating }}</p>
             </div>
-            <p class="article-content"><strong>Student Name:</strong> {{ student.student }}</p>
-            <p class="article-content"><strong>Major:</strong> {{ student.major_in }}</p>
-            <p class="article-content"><strong>Status:</strong> {{ student.status }}</p>
-            <p class="article-content"><strong>GPA:</strong> {{ student.gpa }}</p>
-        </div>
-    </article>
-    {% endfor %}
+            </article>
+        {% endwith %}
+    {% else %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <H4>None Rated Course In the List</H4>
+                </div>
+            </div>
+        </article>
+    {% endif %}
+    {% if students %}
+        {% with student = students[-1] %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <H4>Highest GPA Student</H4>
+                </div>
+                <p class="article-content"><strong>Student Name:</strong> {{ student.Student.firstname }} {{ student.Student.lastname }}</p>
+                <p class="article-content"><strong>Major:</strong> {{ student.Program.name }}</p>
+                <p class="article-content"><strong>Status:</strong> {{ student.Student.status }}</p>
+                <p class="article-content"><strong>GPA:</strong> {{ student.Student.gpa }}</p>
+            </div>
+        </article>
+        {% endwith %}
+    {% else %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <H4>None Student In the List</H4>
+                </div>
+            </div>
+        </article>
+    {% endif %}
 {% endblock content %}

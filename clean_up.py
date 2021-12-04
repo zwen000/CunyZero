@@ -90,11 +90,11 @@ studentCourse5.rating=5
 
 db.session.commit()
 
-#testing warnings/period
-period.advanceNPeriod(50)# advances period 50 times and perform the task logic, warnings will be given accordingly
+# #testing warnings/period
+# period.advanceNPeriod(50)# advances period 50 times and perform the task logic, warnings will be given accordingly
 
-warnings = Warning.query.all()
-if len(warnings)>=10:
-    for i in range(10):
-        warnings[i].justification="some justification"
-db.session.commit()
+# warnings = Warning.query.all()
+# if len(warnings)>=10:
+#     for i in range(10):
+#         warnings[i].justification="some justification"
+# db.session.commit()

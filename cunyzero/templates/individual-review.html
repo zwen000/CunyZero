@@ -168,8 +168,8 @@
                                 </td>
                                 <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
                                 <td> {{ course.getEnrolledTotal() }} </td>
-                                <td> {{ course.getRating() }} </td>
-                                <td> {{ course.getAverageGPA() }}</td>
+                                <td> {{ course.getAvgRating() }} </td>
+                                <td> {{ course.getClassGPA() }}</td>
                                 <td>
                                     <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
                                         Reviews

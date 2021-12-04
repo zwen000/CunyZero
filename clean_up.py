@@ -90,6 +90,12 @@ studentCourse5.rating=5
 
 db.session.commit()
 
+course2.rating = course2.getAvgRating()
+course3.rating = course3.getAvgRating()
+course4.rating = course4.getAvgRating()
+course5.rating = course5.getAvgRating()
+
+db.session.commit()
 # #testing warnings/period
 # period.advanceNPeriod(50)# advances period 50 times and perform the task logic, warnings will be given accordingly
 

@@ -252,7 +252,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
             return "Course Running Period"
         if remainder==3:
             return "Grading Period"
-    def nextPeriodLogic(self):# corresponding logic depending on the period
+    def nextPeriodLogic(self):# corresponding logic depending on the next period
         nextPeriod = self.period+1
 
         if nextPeriod == 0:# next is Course Set-up Period

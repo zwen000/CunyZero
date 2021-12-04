@@ -453,15 +453,19 @@ def change_period():
 
     form = SystemForm()
     period = Period.query.all()[0]
+    admin = Admin.query.all()[0]
     if form.validate_on_submit():
         if form.updateTaboo.data:
-            pass
+            admin.taboo_list = form.taboo_list.data
+            db.session.commit()
         if form.nextPeriod.data:
-            #period.nextPeriodLogic()# task logic when period changes
+            #period.nextPeriodLogic()# do task logic when period changes
             period.period+=1# advance period by 1
             db.session.commit() # update db
+    elif request.method=='GET':
+        form.taboo_list.data = admin.taboo_list
     
-    return render_template("change-period.html", period=period)
+    return render_template("change-period.html", form=form, period=period)
 
 #@login_required
 @app.route('/warning/<int:userId>', methods=['GET', 'POST'])

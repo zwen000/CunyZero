@@ -114,7 +114,20 @@ class Student(db.Model):
         else:
             return total/count
     def terminate(self):#terminate student
-        pass
+        #delete courses
+        StudentCourse.query.filter_by(studentId=self.ownerId).delete()
+        #delete complaints
+        Complaint.query.filter_by(complainerId=self.ownerId).delete()
+        Complaint.query.filter_by(targetId=self.ownerId).delete()
+        #delete warnings
+        Warning.query.filter_by(userId=self.ownerId).delete()
+        #delete graduation application
+        GraduationApplication.query.filter_by(studentId=self.ownerId).delete()
+        #delete user
+        User.query.filter_by(ownerId=self.ownerId)
+        #delete student
+        Student.query.filter_by(ownerId=self.ownerId).delete()
+        db.session.commit()
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
@@ -130,6 +143,17 @@ class Instructor(db.Model):
     courses = db.relationship('Course', backref='instructor', lazy=True)
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
+    # def terminate(self):#dont use since its weird what to do with existing courses instructor teaches
+    #     #delete complaints
+    #     Complaint.query.filter_by(complainerId=self.ownerId).delete()
+    #     Complaint.query.filter_by(targetId=self.ownerId).delete()
+    #     #delete warnings
+    #     Warning.query.filter_by(userId=self.ownerId).delete()
+    #     #delete user
+    #     User.query.filter_by(ownerId=self.ownerId)
+    #     #delete instructor
+    #     Instructor.query.filter_by(ownerId=self.ownerId).delete()
+    #     db.session.commit()
 
 
 class Application(db.Model):
@@ -313,8 +337,6 @@ class Period(db.Model):#set-up, registration, running, or grading period
             # Update the student overall gpa to Student
             for student in Student.query.filter_by(status='Employed'):
                 student.gpa = student.getOverallGpa()
-                print(student.gpa)
-            db.session.commit()
             # unsuspend students and instructors 
             for student in Student.query.filter_by(status="Suspended"):
                 student.status = "Employed"
@@ -323,40 +345,40 @@ class Period(db.Model):#set-up, registration, running, or grading period
             db.session.commit()
             # student whose semester gpa>3.75 or overall gpa>3.5 + 1 to honor
             #student whose gpa <2 or failed same course twice terminated
-            # for student in Student.query.all():
-            #     overAllGpa = student.getOverallGpa()
-            #     if student.getSemesterGpa()>3.75 or overAllGpa>3.5:
-            #         student.honor+=1
-            #     elif overAllGpa<2:
-            #         student.terminate()
-            #instructor whose class gpa >3.5 or <2.5 warned/fired unless justified
+            for student in Student.query.all():
+                overAllGpa = student.gpa
+                if student.getSemesterGpa()>3.75 or overAllGpa>3.5:
+                    student.honor+=1
+                elif overAllGpa<2:
+                    student.terminate()
+            #instructor whose class gpa >3.5 or <2.5 warned/fired(didnt add fire yet) unless justified
             #instructor whose avgclass rating<2 receive 1 warning
-            # for course in Course.query.all():
-            #     classGpa = course.getClassGpa()
-            #     if classGpa<2.5 or classGpa>3.5:
-            #         course.instructor.warning+=1
-            #         warning = Warning(userId=instructor.ownerId, 
-            #                                 message="Class Gpa >3.5 or <2.5, until further justification, warning +1",
-            #                                 semesterWarned=self.period+1)
-            #         db.session.add(warning)
-            #     if course.getAvgRating()<2:
-            #         course.instructor.warning+=1
-            #         warning = Warning(userId=instructor.ownerId, 
-            #                                 message="Average class rating <2, warning +1",
-            #                                 semesterWarned=self.period+1)
-            #         db.session.add(warning)
+            for course in Course.query.all():
+                classGpa = course.getClassGpa()
+                if classGpa<2.5 or classGpa>3.5:
+                    course.instructor.warning+=1
+                    warning = Warning(userId=instructor.ownerId, 
+                                            message="Class Gpa >3.5 or <2.5, until further justification, warning +1",
+                                            semesterWarned=self.period+1)
+                    db.session.add(warning)
+                if course.getAvgRating()<2:
+                    course.instructor.warning+=1
+                    warning = Warning(userId=instructor.ownerId, 
+                                            message="Average class rating <2, warning +1",
+                                            semesterWarned=self.period+1)
+                    db.session.add(warning)
             #student failed same course twice terminated
-            # for student in Student.query.all():
-            #     dict={}#key: coursename, value: gpa 'F', 'A', etc.
-            #     for sc in self.courses:
-            #         coursename = sc.getCourseName()
-            #         if dict[coursename]:
-            #             if dict[coursename]=='F':
-            #                 if sc.gpa=='F':
-            #                     student.terminate()
-            #                     break
-            #         else:
-            #             dict[coursename]=sc.gpa
+            for student in Student.query.all():
+                dict={}#key,value: coursename,gpa ('F', 'A', etc.)
+                for sc in self.courses:
+                    coursename = sc.getCourseName()
+                    if coursename in dict:#if key in dict
+                        if dict[coursename]=='F':
+                            if sc.gpa=='F':
+                                student.terminate()
+                                break
+                    else:
+                        dict[coursename]=sc.gpa
             # student suspended and pay fine if warning>=3
             for student in Student.query.all():
                 if student.warning>=3:

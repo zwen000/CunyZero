@@ -70,6 +70,7 @@
                             <th>End Period</th>
                             <th>Days of Week</th>
                             <th>Deregister</th>
+                            <th>Review</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -96,6 +97,11 @@
                                     {% if user.role == "Student" %}
                                         <a class="btn btn-outline-info" href="#" > De-register </a>
                                     {% endif %}
+                                </td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
                                 </td>
                             {% endif %}
                         </tr>

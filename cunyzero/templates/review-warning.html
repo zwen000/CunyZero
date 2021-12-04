@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container">
+    <div class="content-section">
+        <div class="media content-section">
+            <div class="media-body" style="position: relative">
+                <div class="lead border-bottom">
+                    <strong>{{ owner.firstname }}, {{ owner.lastname }}</strong>
+                    <small>/{{ user.role }}</small>
+                </div>
+                <div>Employee ID: {{ owner.ownerId }}</div>
+                <div>Username: {{ user.username }}</div>
+                {% if user.role == "Student"%}
+                    <div>Program: {{ program.name }}</div>
+                    <div>Current GPA: {{ owner.gpa }}</div>
+                {% endif %}
+                <div>Status: {{ owner.status }}</div>
+            </div>
+        </div>
+    <div class="content-section">
+        <article>
+            <div class="media-body">
+              <div class="article-metadata">
+                <a class="mr-2" >Warning# {{warning.id}}</a>
+                <small class="text-muted">Issued on Period# {{warning.semesterWarned}}</small>
+              </div>
+                <div class="container">
+                    <strong><p class="article-content">Warning Info: </p></strong>
+                    <div class=container><p class="article-content">{{warning.message}}</p></div>
+                    <strong><p>Admin Ruling</p></strong>
+                    <p>{{warning.result}}</p>
+                </div>
+              </div>
+          </article>
+          <form method="POST", action="">
+            {{ form.hidden_tag() }} <!--CSRF token-->
+            <fieldset class="form-group">
+                <div class="form-group col-md-3">
+                    {% if current_user.role != 'Admin' %}
+                    <strong>{{ form.justification.label(class="form-control-label") }}</strong>
+                        {% if form.justification.errors %}
+                            {{ form.justification(class="form-control form-control-lg is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.justification.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor%}
+                            </div>
+                        {% else %}
+                            {{ form.justification(class="form-control form-control-lg") }}
+                        {% endif %}
+                    {% else %}
+                    <strong><p class="article-content">User Justification: </p></strong>
+                    <div class="container"><p class="article-content">{{warning.justification}}</p></div>
+                    {% endif %}
+                </div>
+                {% if current_user.role == 'Admin' %}
+                <div class="form-group mb-0">
+                    {{ form.accept(class="btn btn-outline-info") }}
+                    {{ form.reject(class="btn btn-outline-info") }}
+                </div>
+                {% else %}
+                <div class="form-group mb-0">
+                    {{ form.provideJustification(class="btn btn-outline-info") }}
+                </div>
+                {% endif %}
+            </fieldset>
+        </form>
+    </div>
+</div>
+
+
+{% endblock content %}

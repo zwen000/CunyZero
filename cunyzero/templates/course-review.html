@@ -1,6 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="content-section">
+        <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+            Reviews
+        </a>
         <article class="media content-section">
             <div class="media-body">
                 <legend class="border-bottom">

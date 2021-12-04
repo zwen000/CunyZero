@@ -1,3 +1,4 @@
+from wtforms.fields.core import DecimalField
 from cunyzero import db, login_manager
 from datetime import datetime
 from flask_login import UserMixin
@@ -26,6 +27,8 @@ class User(db.Model, UserMixin):
         return f"User('{self.username}, {self.id}, {self.role}, {self.ownerId}')"
     def userid(self):
         return self.id
+    def getPeriodName(self):
+        return Period.query.all()[0].getPeriodName()
 
 class Admin(db.Model): #Admin.user, User.adminOwner
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
@@ -76,12 +79,13 @@ class Student(db.Model):
         courses = []
         for sc in studentCourses:# for each studentcourse
             course = Course.query.filter_by(id=sc.courseId, status="Open").first()
-            if course.id in filterIds:#if its waitlisted/enrolled
-                courses.append(course)
+            if course:
+                if course.id in filterIds:#if its waitlisted/enrolled
+                    courses.append(course)
         return courses
     def notEnrolled(self):#return courses that student is not enrolled or waitlisted in
         studentCoursesIds = [sc.courseId for sc in StudentCourse.query.filter_by(studentId=self.ownerId)]
-        return [course for course in Course.query.all() if course.id not in studentCoursesIds]
+        return [course for course in Course.query.filter_by(status="Open") if course.id not in studentCoursesIds]
     def getCurrentCourses(self):
         studentCourses = StudentCourse.query.filter_by(studentId=self.ownerId)
         currentCourses = []
@@ -89,6 +93,25 @@ class Student(db.Model):
             if studentcourse.course.status == "Open":
                 currentCourses.append(studentcourse)
         return currentCourses
+    def getSemesterGpa(self):#return prev semester gpa
+        count = 0
+        total = 0.0
+        period = Period.query.all()[0]
+        for sc in self.courses:
+            if sc.gpa and sc.creationSemester()==period-1:
+                count+=1
+                total+=sc.gpa
+        return total/count
+    def getOverallGpa(self):#return overall gpa
+        count = 0
+        total = 0.0
+        for sc in self.courses:
+            if sc.gpa:
+                count+=1
+                total+=sc.gpa
+        return total/count
+    def terminate(self):#terminate student
+        pass
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
@@ -188,6 +211,22 @@ class Course(db.Model):
         return StudentCourse.query.filter_by(courseId=self.id, waiting=False).count()
     def getWaitlistTotal(self):
         return StudentCourse.query.filter_by(courseId=self.id, waiting=True).count()
+    def getClassGpa(self):
+        count=0
+        total=0.0
+        for sc in self.studentcourses:
+            if sc.gpa:
+                count+=1
+                total+=sc.gpa
+        return total/count
+    def getAvgRating(self):
+        count=0
+        total=0.0
+        for sc in self.studentcourses:
+            if sc.rating:
+                count+=1
+                total+=sc.rating
+        return total/count
 
 class StudentCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -195,13 +234,16 @@ class StudentCourse(db.Model):
     studentId = db.Column(db.Integer,db.ForeignKey('student.ownerId'),nullable = False)
 
     gpa = db.Column(db.Float,nullable = True)
-    rating = db.Column(db.Integer, nullable = True)
+    rating = db.Column(db.Float, nullable = True)
     review = db.Column(db.Text, nullable = True)
     waiting = db.Column(db.Boolean,nullable = False, default=False)
 
     def __repr__(self):
         return '<courseid: %r, studentid: %r>' % (self.courseId, self.studentId)
-
+    def creationSemester(self):
+        return self.course.creationPeriod
+    def getCourseName(self):
+        return self.course.coursename
 
 class Period(db.Model):#set-up, registration, running, or grading period
     id = db.Column(db.Integer, primary_key=True)
@@ -220,9 +262,15 @@ class Period(db.Model):#set-up, registration, running, or grading period
             return "Course Running Period"
         if remainder==3:
             return "Grading Period"
+    def advanceNPeriod(self, n):#calls advance period n times
+        for i in range(n):
+            self.advancePeriod()
+    def advancePeriod(self):#advance to next period and perform task logic
+        self.nextPeriodLogic()# do task logic when period changes
+        self.period+=1# advance period by 1
+        db.session.commit() # update db
     def nextPeriodLogic(self):# corresponding logic depending on the next period
-        nextPeriod = self.period+1
-
+        nextPeriod = (self.period+1)%4
         if nextPeriod == 0:# next is Course Set-up Period
             # unsuspend students and instructors 
             for student in Student.query.filter_by(status="Suspended"):
@@ -230,11 +278,60 @@ class Period(db.Model):#set-up, registration, running, or grading period
             for instructor in Instructor.query.filter_by(status="Suspended"):
                 instructor.status = "None"
             db.session.commit()
-            # student suspended if warning>=3
+            # student whose semester gpa>3.75 or overall gpa>3.5 + 1 to honor
+            #student whose gpa <2 or failed same course twice terminated
+            # for student in Student.query.all():
+            #     overAllGpa = student.getOverallGpa()
+            #     if student.getSemesterGpa()>3.75 or overAllGpa>3.5:
+            #         student.honor+=1
+            #     elif overAllGpa<2:
+            #         student.terminate()
+            #instructor whose class gpa >3.5 or <2.5 warned/fired unless justified
+            #instructor whose avgclass rating<2 receive 1 warning
+            # for course in Course.query.all():
+            #     classGpa = course.getClassGpa()
+            #     if classGpa<2.5 or classGpa>3.5:
+            #         course.instructor.warning+=1
+            #         warning = Warning(userId=instructor.ownerId, 
+            #                                 message="Class Gpa >3.5 or <2.5, until further justification, warning +1",
+            #                                 semesterWarned=self.period+1)
+            #         db.session.add(warning)
+            #     if course.getAvgRating()<2:
+            #         course.instructor.warning+=1
+            #         warning = Warning(userId=instructor.ownerId, 
+            #                                 message="Average class rating <2, warning +1",
+            #                                 semesterWarned=self.period+1)
+            #         db.session.add(warning)
+            #student failed same course twice terminated
+            # for student in Student.query.all():
+            #     dict={}#key: coursename, value: gpa 'F', 'A', etc.
+            #     for sc in self.courses:
+            #         coursename = sc.getCourseName()
+            #         if dict[coursename]:
+            #             if dict[coursename]=='F':
+            #                 if sc.gpa=='F':
+            #                     student.terminate()
+            #                     break
+            #         else:
+            #             dict[coursename]=sc.gpa
+            # student suspended and pay fine if warning>=3
             for student in Student.query.all():
                 if student.warning>=3:
-                    student.status = "Suspended"
-                    student.warnings-=3
+                    if student.honor>1:#if there is honor
+                        if student.honor>student.warning:# if more honor than warning no suspension, remove warnings
+                            student.honor-=student.warning
+                            student.warning=0
+                        else:#if honor<=warning remove warnings with honor
+                            student.warning-=student.honor
+                            student.honor=0
+                            if student.warning>=3:#if still 3 warnings, suspend
+                                student.status = "Suspended"
+                                student.warning-=3
+                                student.fine +=50.0
+                    else:
+                        student.status = "Suspended"
+                        student.warning-=3
+                        student.fine +=50.0
             # instructor didnt assign all grades receive 1 warning
             warnedInstructors = []
             for course in Course.query.filter_by(status="Open"):
@@ -321,10 +418,10 @@ class Warning(db.Model):
     message = db.Column(db.Text, nullable=False, default='')
 
     semesterWarned = db.Column(db.Integer, nullable=False, default=0)# period/semester warning was sent
-    justification = message = db.Column(db.Text, nullable=False, default='')# if null then admin dont need to process it
+    justification = db.Column(db.Text, nullable=False, default='')# if null then admin dont need to process it
     result = db.Column(db.Text, nullable=False, default='') # if result=='' warning is not yet processed, else has the processed result
     def __repr__(self):
-        return '<Warning: %r>' % self.id
+        return '<Warning: %r, message: %r>' % (self.id, self.message)
     def thisSemester(self, period):#returns true if semester warned is this semester
         return (self.semesterWarned/4)==(period/4)
     def prevSemester(self, period):#returns true if semester warned is prev semester

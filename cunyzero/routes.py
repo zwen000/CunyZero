@@ -503,6 +503,7 @@ def warning_page(userId, warningId):# show specific warning
                 elif form.reject.data:
                     warning.result = "Justification Rejected"
                     flash("Justification Rejected",'success')
+                return redirect(url_for('review_warning_page'))
             else:
                 flash("Already Processed",'danger')
         else:

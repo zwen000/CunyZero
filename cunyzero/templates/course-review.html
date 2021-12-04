@@ -1,13 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="content-section">
-        <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
-            Reviews
-        </a>
+
         <article class="media content-section">
             <div class="media-body">
-                <legend class="border-bottom">
+                <legend class="pb-2 border-bottom">
                     <strong>{{ course.coursename }}</strong>
+                    <a class="btn btn-outline-info float-right" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                        Rating Reviews
+                    </a>
                 </legend>
                 <div>
                     <strong>Instructor Name: </strong>
@@ -112,6 +113,12 @@
                         <th>Student Name</th>
                         <th>Employ ID</th>
                         <th>Program</th>
+                        <th>
+                            {% if current_user.role == "Instructor" %}
+                                Approve
+                            {% endif %}
+                        </th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -120,6 +127,15 @@
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
                             <td> {{ programs[student.Student.programId].name }} </td>
+                            <td>
+                                {% if current_user.role == "Instructor"%}
+                                    <form method="post">
+                                        <button type="submit" name="Approve" value="{{student.Student.ownerId}}" >
+                                             Let He In
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

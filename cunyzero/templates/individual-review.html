@@ -93,7 +93,7 @@
                                     </td>
                                     <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
                                     <td> {{ course.getEnrolledTotal() }} </td>
-                                     <td> rating </td>
+                                     <td> {{ course.getAvgRating() }} </td>
                                 {% elif person_be_reviewed.user[0].role == "Student" %}
                                     <td>
                                         <a href="{{ url_for('course_review', course_Id=course.id) }}">
@@ -169,7 +169,7 @@
                                 <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
                                 <td> {{ course.getEnrolledTotal() }} </td>
                                 <td> {{ course.getAvgRating() }} </td>
-                                <td> {{ course.getClassGPA() }}</td>
+                                <td> {{ course.getClassGpa() }}</td>
                                 <td>
                                     <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
                                         Reviews

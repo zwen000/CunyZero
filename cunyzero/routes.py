@@ -100,15 +100,15 @@ def account():
         owner = current_user.adminOwner
 
     if form.validate_on_submit():
-        # if form.picture.data:
-        #     picture_file = save_picture(form.picture.data)
-        #     current_user.image_file = picture_file
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
         if form.password.data:
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
             current_user.password = hashed_password
         current_user.username = form.username.data
-        current_user.firstname = form.firstname.data
-        current_user.lastname = form.lastname.data
+        owner.firstname = form.firstname.data
+        owner.lastname = form.lastname.data
         db.session.commit()
         flash('Your account has been updated!', 'success')
         return redirect(url_for('account'))
@@ -419,6 +419,20 @@ def course_review(course_Id):
         student.StudentCourse.gpa = letter_grade
         db.session.commit()
         flash(f'{student.Student.firstname} {student.Student.lastname}\'s grade has been updated!', 'success')
+    studentId_waiting = request.form.get("Approve")
+    if studentId_waiting:
+        studentId_waiting = int(studentId_waiting)
+        student = [student for student in students_waitlist if student.Student.ownerId == studentId_waiting][0]
+        period = Period.query.all()[0].getPeriodName()
+        if period == "Grading Period":
+            flash("Too late to join the course!", 'danger')
+            return redirect(url_for("course_review", course_Id=course_Id))
+        else:
+            student.StudentCourse.waiting = False
+            db.session.commit()
+            flash(f'{student.Student.firstname} {student.Student.lastname} has been added to the course!', 'success')
+            return redirect(url_for("course_review", course_Id=course_Id))
+
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
                            programs=programs, students_waitlist=students_waitlist, period=period)
 

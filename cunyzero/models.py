@@ -52,7 +52,7 @@ class Student(db.Model):
     lastname = db.Column(db.String(30), nullable=False)
     programId = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)
     honor = db.Column(db.Integer, nullable = False, default=0)
-    status = db.Column(db.String(20), default=None)#suspended, graduated, etc.
+    status = db.Column(db.String(20), default='Employed')#suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
     gpa = db.Column(db.Float, nullable = False, default=0.0)
     warning = db.Column(db.Integer, nullable = False, default=0)
@@ -100,7 +100,7 @@ class Student(db.Model):
         for sc in self.courses:
             if sc.gpa and sc.creationSemester()==period-1:
                 count+=1
-                total+=sc.gpa
+                total+=sc.getFloat()
         return total/count
     def getOverallGpa(self):#return overall gpa
         count = 0
@@ -108,14 +108,17 @@ class Student(db.Model):
         for sc in self.courses:
             if sc.gpa:
                 count+=1
-                total+=sc.gpa
-        return total/count
+                total+=sc.getFloat()
+        if count == 0:
+            return 0.0
+        else:
+            return total/count
     def terminate(self):#terminate student
         pass
 
 class Instructor(db.Model):
     ownerId = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(20), default=None)#fired, suspended, etc.
+    status = db.Column(db.String(20), default='Employed')#fired, suspended, etc.
     firstname = db.Column(db.String(30), nullable=False)
     lastname = db.Column(db.String(30), nullable=False)
     warning = db.Column(db.Integer, nullable = False, default=0)
@@ -217,7 +220,7 @@ class Course(db.Model):
         for sc in self.studentcourses:
             if sc.gpa:
                 count+=1
-                total+=sc.gpa
+                total+=sc.getFloat()
         if count != 0:
             return total/count
         else:
@@ -307,11 +310,16 @@ class Period(db.Model):#set-up, registration, running, or grading period
     def nextPeriodLogic(self):# corresponding logic depending on the next period
         nextPeriod = (self.period+1)%4
         if nextPeriod == 0:# next is Course Set-up Period
+            # Update the student overall gpa to Student
+            for student in Student.query.filter_by(status='Employed'):
+                student.gpa = student.getOverallGpa()
+                print(student.gpa)
+            db.session.commit()
             # unsuspend students and instructors 
             for student in Student.query.filter_by(status="Suspended"):
-                student.status = "None"
+                student.status = "Employed"
             for instructor in Instructor.query.filter_by(status="Suspended"):
-                instructor.status = "None"
+                instructor.status = "Employed"
             db.session.commit()
             # student whose semester gpa>3.75 or overall gpa>3.5 + 1 to honor
             #student whose gpa <2 or failed same course twice terminated
@@ -382,7 +390,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
                             db.session.add(warning)
                             break
             # instructor whose courses are all canceled suspended
-            for instructor in Instructor.query.filter_by(status="None"):
+            for instructor in Instructor.query.filter_by(status="Employed"):
                 canceled = False
                 for course in instructor.courses:
                     if course.status=="Open":
@@ -392,7 +400,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
                 if canceled:# all courses canceled
                     instructor.status = "Suspended"
             # instructor 3 warning suspended
-            for instructor in Instructor.query.filter_by(status="None"):
+            for instructor in Instructor.query.filter_by(status="Employed"):
                 if instructor.warning>=3:
                     instructor.status = "Suspended"
                     instructor.warning-=3

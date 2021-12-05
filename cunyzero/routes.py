@@ -296,15 +296,18 @@ def create_course():
         return redirect(url_for('home'))
     form = CreateCourseForm()
     if form.validate_on_submit():
-        dayofweek = ""
-        for i in form.dayofweek.data:
-            dayofweek+=i
-        course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data,
-                        startPeriod=form.startPeriod.data, endPeriod=form.endPeriod.data,
-                        capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
-        db.session.add(course)
-        db.session.commit()
-        flash(f'You have successfully created new course {course.coursename}', 'success')
+        if form.instructor.data[0].status!="Employed":
+            flash('Instructor not available!','danger')
+        else:
+            dayofweek = ""
+            for i in form.dayofweek.data:
+                dayofweek+=i
+            course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data,
+                            startPeriod=form.startPeriod.data, endPeriod=form.endPeriod.data,
+                            capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
+            db.session.add(course)
+            db.session.commit()
+            flash(f'You have successfully created new course {course.coursename}', 'success')
         return redirect(url_for("course_manage"))
     return render_template("create-course.html", form=form)
 
@@ -451,8 +454,10 @@ def change_period():
         if form.updateTaboo.data:
             admin.taboo_list = form.taboo_list.data
             db.session.commit()
+            flash("Taboo List Updated!", 'success')
         if form.nextPeriod.data:
             period.advancePeriod()#advance to next period and do the task logic
+            flash("Period Advanced!", 'success')
     elif request.method=='GET':
         form.taboo_list.data = admin.taboo_list
     
@@ -497,8 +502,12 @@ def warning_page(userId, warningId):# show specific warning
         if current_user.role=='Admin':
             if warning.result == '':
                 if form.accept.data:
-                    warning.result = "Justification Accepted, Warning -1"
-                    owner.warning-=1
+                    if warning.message=="Review has >=3 Taboo Words, Warning +2":#special case hard code
+                        warning.result = "Justification Accepted, Warning -2"
+                        owner.warning-=2
+                    else:
+                        warning.result = "Justification Accepted, Warning -1"
+                        owner.warning-=1
                     flash("Justification Accepted",'success')
                 elif form.reject.data:
                     warning.result = "Justification Rejected"
@@ -520,7 +529,7 @@ def warning_page(userId, warningId):# show specific warning
 def course_rating(courseId):#show all ratings for the course
     if not current_user.is_authenticated:
         return redirect(url_for('home'))
-    reviews = StudentCourse.query.filter_by(courseId=courseId)
+    reviews = StudentCourse.query.filter_by(courseId=courseId, visible=True)
     return render_template("course-rating.html", reviews=reviews, courseId=courseId)
 
 #only for user who posted review
@@ -536,6 +545,9 @@ def update_rating(courseId, studentId):#show specific rating
     user = User.query.filter_by(ownerId=studentId).first()
     owner = Student.query.filter_by(ownerId=studentId).first()
     review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
+    if not review.visible:
+        flash("Taboo Words>3 Review is not invisible!")
+        return redirect(url_for('course_rating',courseId=courseId))
     period = Period.query.all()[0].getPeriodName()
     if review.waiting==True:
         flash("cannot leave review for waitlisted course!",'danger')
@@ -545,7 +557,7 @@ def update_rating(courseId, studentId):#show specific rating
             if not review.gpa:
                 review.review=form.content.data
                 review.rating=form.rating.data
-
+                review.checkTabooWords()#check taboo words and performs task logic accordingly
                 db.session.commit()
                 # automate update the course avg rating
                 course = Course.query.get(review.courseId)

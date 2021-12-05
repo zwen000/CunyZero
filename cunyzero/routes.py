@@ -1,5 +1,6 @@
+
 from operator import truediv
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from cunyzero import app, db, bcrypt
 from cunyzero.forms import *
 from cunyzero.models import *
@@ -447,9 +448,11 @@ def course_review(course_Id):
     period = Period.query.all()[0]
     course = Course.query.get(course_Id)
     programs = Program.query.all()
+
     students = db.session.query(Student, StudentCourse)\
-        .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
-                                                                                StudentCourse.waiting == False).all()
+        .join(StudentCourse, StudentCourse.studentId == Student.ownerId)\
+        .filter(StudentCourse.courseId == course_Id,
+        StudentCourse.waiting == False).all()
     students_waitlist = db.session.query(Student, StudentCourse)\
         .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
                                                                                 StudentCourse.waiting == True).all()
@@ -474,6 +477,7 @@ def course_review(course_Id):
             db.session.commit()
             flash(f'{student.Student.firstname} {student.Student.lastname} has been added to the course!', 'success')
             return redirect(url_for("course_review", course_Id=course_Id))
+
 
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
                            programs=programs, students_waitlist=students_waitlist, period=period)
@@ -626,3 +630,58 @@ def graduation():
     form=GraduationForm()
         
     return render_template("graduation.html")
+
+@login_required
+@app.route('/instructor/complaint', methods=['GET', 'POST'])
+def instructor_file_complaint():
+    form = InstructorComplaintForm()
+    history = current_user.instructorOwner.complaints
+    targets = dict()
+    for complaint in history:
+        student = Student.query.filter_by(ownerId=complaint.targetId).first()
+        targets[complaint.targetId] = f"{student.firstname} {student.lastname}"
+
+    if current_user.role != "Instructor":
+        abort(403)
+    if form.validate_on_submit():
+        targetId = None
+        for i in form.target.data:
+            targetId = i.ownerId
+        complaint = InstructorComplaint(complainerId=current_user.ownerId,
+                                targetId=targetId,
+                                reason = form.reason.data,
+                                message=form.message.data)
+        db.session.add(complaint)
+        db.session.commit()
+
+        flash(f'Your complaint to {form.target.data} is submitted', 'success')
+        return redirect(url_for("instructor_file_complaint"))
+
+    return render_template("instructor_complaint.html", title="Instructor Complaint", form=form, history=history, targets=targets)
+
+@login_required
+@app.route('/student/complaint', methods=['GET', 'POST'])
+def student_file_complaint():
+    form = StudentComplaintForm()
+    history = current_user.studentOwner.complaints
+    targets = dict()
+    for complaint in history:
+        target = User.query.filter_by(ownerId=complaint.targetId).first()
+        targets[complaint.targetId] = target
+
+    if current_user.role != "Student":
+        abort(403)
+    if form.validate_on_submit():
+        targetId = None
+        for i in form.target.data:
+            targetId = i.ownerId
+        complaint = Complaint(complainerId=current_user.ownerId,
+                              targetId=targetId,
+                              message=form.message.data)
+        db.session.add(complaint)
+        db.session.commit()
+
+        flash(f'Your complaint to {form.target.data} is submitted', 'success')
+
+    return render_template("student_complaint.html", title="Student Complaint", form=form, history=history, targets=targets)
+

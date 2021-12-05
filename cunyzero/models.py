@@ -65,11 +65,12 @@ class Student(db.Model):
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
     application = db.relationship('GraduationApplication', backref='applicant', lazy=True)
     warnings = db.relationship('Warning', backref='targetStudent', lazy=True)
-    complaints = db.relationship('Complaint', backref='targetStudent', primaryjoin="Student.ownerId==Complaint.targetId", lazy=True)# complaints targeting/complaining about this student
-    myComplaints = db.relationship('Complaint', backref='complainingStudent', primaryjoin="Student.ownerId==Complaint.complainerId", lazy=True)# complaints from this student about others
+
+    #wait_list = db.relationship('StudentCourse', backref='student', lazy=True)
+    complaints = db.relationship('Complaint', backref='owner', lazy=True)
 
     def __repr__(self):
-        return '<studentid: %r>' % self.ownerId
+        return f"Student({self.ownerId} -- {self.firstname} {self.lastname})"
     def getWaitList(self):#return studentcourse that student is waiting for
         return StudentCourse.query.filter_by(studentId=self.ownerId, waiting=True)
     def enrolled(self):
@@ -145,9 +146,10 @@ class Instructor(db.Model):
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
     warnings = db.relationship('Warning', backref='targetInstructor', lazy=True)
-    complaints = db.relationship('Complaint', backref='targetInstructor', primaryjoin="Instructor.ownerId==Complaint.targetId", lazy=True)# complaints targeting/complaining about this instructor
-    myComplaints = db.relationship('Complaint', backref='complainingInstructor', primaryjoin="Instructor.ownerId==Complaint.complainerId", lazy=True)# complaints from this instructor about other students
+
     courses = db.relationship('Course', backref='instructor', lazy=True)
+    complaints = db.relationship('InstructorComplaint', backref='owner', lazy=True)
+
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
     # def terminate(self):#dont use since its weird what to do with existing courses instructor teaches
@@ -501,12 +503,17 @@ class Period(db.Model):#set-up, registration, running, or grading period
                     student.enrollmentPermission = False # remove special permission
         db.session.commit()
 
+
+
+
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'), nullable=False)
-    targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
+    complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), nullable=False)
+    targetId = db.Column(db.Integer, db.ForeignKey('user.ownerId'))
     message = db.Column(db.Text, nullable=False, default='')
     processed = db.Column(db.Boolean, nullable=False, default=False) #check the complaint is processed by admin or not
+
+   # owner = db.relationship
 
     def __repr__(self):
         return '<complainer: %r, complainee: %r>' % (self.complainerId, self.targetId)
@@ -516,6 +523,17 @@ class Complaint(db.Model):
     def getTarget(self):
         user = User.query.filter(User.ownerId==self.targetId).first()
         return user
+
+class InstructorComplaint(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
+    complainerId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'), nullable=False)
+    targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), nullable=False)
+    reason = db.Column(db.Enum("Warning", "De-Register", "Other"), nullable=False)
+    message = db.Column(db.Text, nullable=False, default='')
+    processed = db.Column(db.Boolean, nullable=False, default=False)  # check the complaint is processed by admin or not
+    #result = ????
+    def __repr__(self):
+        return f"InstructorComplaint('{self.id}, {self.reason},  {self.complainerId}, {self.targetId}, {self.processed}')"
 
 
 class Warning(db.Model):

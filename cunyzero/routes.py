@@ -564,7 +564,7 @@ def update_rating(courseId, studentId):#show specific rating
     owner = Student.query.filter_by(ownerId=studentId).first()
     review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
     if not review.visible:
-        flash("Taboo Words>3 Review is not invisible!")
+        flash("Taboo Words>3 Review is not invisible!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
     period = Period.query.all()[0].getPeriodName()
     if review.waiting==True:

@@ -331,22 +331,22 @@ def instructor_manage():
 @app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def individual_review(role, owner_id):
     graduation_form=GraduationForm()
-    if graduation_form.validate_on_submit():
+    if graduation_form.submit1.data and graduation_form.validate():
         graduation_application = GraduationApplication.query.filter_by(approval=None, studentId=owner_id).first()
         if graduation_application:
             flash(f'You have an graduation application processing!', 'danger')
-            return redirect(url_for("individual_review", role=role, owner_id=owner_id))
+
         else:
             application=GraduationApplication(studentId=owner_id)
             db.session.add(application)
             db.session.commit()
             flash(f'Applcation test!','success')
-            return redirect(url_for("individual_review", role=role, owner_id=owner_id))
+
 
     # Admin able to warning/deregister student or instructor base on complaint
     warning_form = WarningForm(owner_id)
     deregister_form = DeregisterForm(owner_id)
-    if warning_form.validate_on_submit():
+    if warning_form.submit2.data and warning_form.validate():
         warning = Warning(userId=owner_id, message=warning_form.message.data[0].message)
         complaint = Complaint.query.get(warning_form.message.data[0].id)
         complaint.processed = True
@@ -354,7 +354,7 @@ def individual_review(role, owner_id):
         db.session.commit()
         flash(f'The warning for Student id: {warning.userId} is submitted, reason is {warning_form.message.data[0].message}!', 'success')
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
-    if deregister_form.validate_on_submit():
+    if deregister_form.submit3.data and deregister_form.validate():
         period = Period.query.all()[0].getPeriodName()
         if period == "Grading Period":
             flash("Too late to join the course!", 'danger')
@@ -362,8 +362,8 @@ def individual_review(role, owner_id):
         else:
             complaint = Complaint.query.get(warning_form.message.data[0].id)
             complaint.processed = True
-            studentCourse = StudentCourse.query.filtir_by(courseId=deregister_form.courseId.data, studentId=owner_id).first()
-            studentCourse.delete()
+            studentCourse = StudentCourse.query.filter_by(courseId=deregister_form.courseId.data, studentId=owner_id).first()
+            db.session.delete(studentCourse)
             db.session.commit()
             flash("Student has been deregister from the course!", 'danger')
             return redirect(url_for("individual_review", role=role, owner_id=owner_id))
@@ -397,7 +397,7 @@ def individual_review(role, owner_id):
                 past_courses.append(course)
         return render_template("individual-review.html", title="Instructor Review", person_be_reviewed=instructor,
                                current_courses=courses, past_courses=past_courses, warning_form=warning_form,
-                               deregister_form=deregister_form, graduation_form=graduation_form)
+                               deregister_form=deregister_form)
 
 
 @login_required
@@ -427,6 +427,15 @@ def course_manage():
 def complaint_manage():
     unprocessed_comp = Complaint.query.filter_by(processed=False)
     processed_comp = Complaint.query.filter_by(processed=True)
+    complaint_id = request.form.get("Complaint")
+    if complaint_id:
+        complaint_id = int(complaint_id)
+        print(complaint_id)
+        complaint_reviewed = Complaint.query.get(complaint_id)
+        complaint_reviewed.processed = True
+        db.session.commit()
+        flash(f'The complaint #{complaint_id} has been reviewed and taken no action.', 'success')
+        return redirect(url_for("complaint_manage"))
     return render_template("complaint-manage.html", title="Complaint Management", unprocessed_comp=unprocessed_comp,
                            processed_comp=processed_comp)
 

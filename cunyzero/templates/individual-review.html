@@ -13,16 +13,19 @@
                     <div>Program: {{ program.name }}</div>
                     <div>Current GPA: {{ person_be_reviewed.gpa }}</div>
                 {% endif %}
-<<<<<<< Updated upstream
+
                 <div>Status: {{ person_be_reviewed.status }}</div>
-=======
-                <div>Status: {{ owner.status }}</div>
-                {% if user.role == "Student"%}
-                <div class="form-group mb-0">
-                    {{ form2.submit(class="btn btn-outline-info") }}
-                </div>
+
+                {% if current_user.role == "Student"%}
+                     <form method="POST", action="">
+                        {{ deregister_form.hidden_tag() }} <!--CSRF token-->
+                        <div class="form-group mb-0">
+                            {{ graduation_form.submit(class="btn btn-outline-info") }}
+                        </div>
+                     </form>
+
                 {% endif %}
->>>>>>> Stashed changes
+
                 {% if current_user.role == "Admin" %}
                     <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
                         warning

@@ -20,7 +20,7 @@
                     {% if current_user.role != 'Admin' %}
                         <div class="row ml-0">
                             <div class="mr-3">Status: {{ owner.status }}</div>
-                            <div class="mr-3">Warning: {{ owner.warnings }}</div>
+                            <div class="mr-3">Warning: {{ owner.warning }}</div>
                         </div>
                         {% if current_user.role == 'Student' %}
                         <div class="row ml-0">
@@ -94,6 +94,15 @@
                             </div>
                         {% else %}
                             {{ form.password(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.picture.label() }}
+                        {{ form.picture(class="form-control-file") }}
+                        {% if form.picture.errors %}
+                            {% for error in form.picture.errors %}
+                                <span class="text-danger">{{ error }}</span></br>
+                            {% endfor %}
                         {% endif %}
                     </div>
                 </fieldset>

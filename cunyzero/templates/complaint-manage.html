@@ -7,13 +7,37 @@
         {% for complaint in unprocessed_comp %}
             <article class="media content-section">
                 <div class="media-body">
-                    <div class="article-metadata row">
-                        From complainer
-                        <a href="#"> {{ complaint.complainerId }}</a>
-                        To target
-                        <a href="#"> {{ complaint.targetId }} </a>
+                    <div class="article-metadata row ml-0 center-block" display="block">
+                        <div class="h5 mr-4">
+                            # {{ complaint.id }}
+                        </div>
+                        <div class="mr-4">
+                            From {{ complaint.getComplainer().role }}:
+                            <a href="{{ url_for('individual_review',
+                            role=complaint.getComplainer().role, owner_id=complaint.getComplainer().ownerId)}}"> {{ complaint.complainerId }} </a>
+                        </div>
+                        <div class="mr-4">
+                            To {{ complaint.getTarget().role }}:
+                            <a href="{{ url_for('individual_review',
+                            role=complaint.getTarget().role, owner_id=complaint.getTarget().ownerId)}}"> {{ complaint.targetId }} </a>
+                        </div>
+
                     </div>
-                    <p class="article-content"> {{ complaint.message }}</p>
+                    <div class="content-section mb-1">
+                        <strong>Complaint Message: </strong>
+                        {{ complaint.message }}
+                    </div>
+                    <div class="row ml-0">
+                        <div class="mr-2">
+                            <a class="btn btn-outline-info btn-sm " href="{{ url_for('individual_review',
+                            role=complaint.getTarget().role, owner_id=complaint.getTarget().ownerId)}}"> Take Action </a>
+                        </div>
+                        <form method="post">
+                            <button class="btn btn-outline-danger btn-sm" name="Complaint" value="{{ complaint.id }}">
+                                Reviewed Complaint
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </article>
         {% endfor %}
@@ -22,16 +46,29 @@
         <div class="lead border-bottom">
             <strong>Complaints were processed:</strong>
         </div>
-        {% for complaint in unprocessed_comp %}
+        {% for complaint in processed_comp %}
             <article class="media content-section">
                 <div class="media-body">
-                    <div class="article-metadata row">
-                        From complainer
-                        <a href="#"> {{ complaint.complainerId }}</a>
-                        To target
-                        <a href="#"> {{ complaint.targetId }} </a>
+                    <div class="article-metadata row ml-0 center-block" display="block">
+                        <div class="h5 mr-4">
+                            # {{ complaint.id }}
+                        </div>
+                        <div class="mr-4">
+                            From {{ complaint.getComplainer().role }}:
+                            <a href="{{ url_for('individual_review',
+                            role=complaint.getComplainer().role, owner_id=complaint.getComplainer().ownerId)}}"> {{ complaint.complainerId }} </a>
+                        </div>
+                        <div class="mr-4">
+                            To {{ complaint.getTarget().role }}:
+                            <a href="{{ url_for('individual_review',
+                            role=complaint.getTarget().role, owner_id=complaint.getTarget().ownerId)}}"> {{ complaint.targetId }} </a>
+                        </div>
+
                     </div>
-                    <p class="article-content"> {{ complaint.message }}</p>
+                    <div class="content-section mb-1">
+                        <strong>Complaint Message: </strong>
+                        {{ complaint.message }}
+                    </div>
                 </div>
             </article>
         {% endfor %}

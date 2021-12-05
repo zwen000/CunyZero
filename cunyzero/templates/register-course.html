@@ -6,7 +6,7 @@
         <div class="col-7">
             <table class="table table-primary">
                 <strong><label>Available Courses</label></strong>
-                <thead class="thead-light">
+                <thead class="thead-blue">
                     <tr>
                     <th scope="col">Course Name</th>
                     <th scope="col">Start Period</th>
@@ -39,12 +39,14 @@
         <div class="col-5" >
             <table class="table table-success">
                 <strong><label>My Courses</label></strong>
-                <thead class="thead-light">
+                <thead class="thead-green">
                     <tr>
                     <th scope="col">Course Name</th>
                     <th scope="col">Start Period</th>
                     <th scope="col">End Period</th>
                     <th scope="col">Days of Week</th>
+                    <th scope="col">Capacity</th>
+                    <th scope="col">Wait List Capacity</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -55,6 +57,8 @@
                         <td>{{course.startPeriod}}</td>
                         <td>{{course.endPeriod}}</td>
                         <td>{{course.dayofweek}}</td>
+                        <td>{{course.capacity}}</td>
+                        <td>{{course.waitListCapacity}}</td>
                         <td>
                             <form method="POST">
                                 <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>
@@ -66,12 +70,14 @@
             </div>
             <table class="table table-danger">
                 <strong><label>Wait Listed Courses</label></strong>
-                <thead class="thead-light">
+                <thead class="thead-red">
                     <tr>
                     <th scope="col">Course Name</th>
                     <th scope="col">Start Period</th>
                     <th scope="col">End Period</th>
                     <th scope="col">Days of Week</th>
+                    <th scope="col">Capacity</th>
+                    <th scope="col">Wait List Capacity</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -82,6 +88,8 @@
                         <td>{{course.startPeriod}}</td>
                         <td>{{course.endPeriod}}</td>
                         <td>{{course.dayofweek}}</td>
+                        <td>{{course.capacity}}</td>
+                        <th scope="col">Wait List Capacity</th>
                         <td>
                             <form method="POST">
                                 <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>

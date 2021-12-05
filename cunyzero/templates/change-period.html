@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <form method = "post">
+        {{ form.hidden_tag() }} <!--CSRF token-->
+        <fieldset class="form-group" action="">
+            <div class="container">
+                <div class="meda content-section">
+                    <legend class="border-bottom mb-10"><strong>#{{period.period}} {{period.getPeriodName()}}</strong></legend>
+                    <div class="form-group">
+                        {{ form.nextPeriod(class="btn btn-outline-info") }}
+                    </div>
+                </div>
+                <div class="meda content-section">
+                    <legend class="border-bottom mb-10"><strong>Taboo Words</strong></legend>
+                    <p>
+                        <div class="form-group col-md-3">
+                            <strong>{{ form.taboo_list.label(class="form-control-label") }}</strong>
+                            {% if form.taboo_list.errors %}
+                                {{ form.taboo_list(class="form-control form-control-lg is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.taboo_list.errors %}
+                                        <span>{{ error }}</span>
+                                    {% endfor%}
+                                </div>
+                            {% else %}
+                                {{ form.taboo_list(class="form-control form-control-lg") }}
+                            {% endif %}
+                        </div>
+                    </p>
+                    <div class="form-group">
+                        {{ form.updateTaboo(class="btn btn-outline-info") }}
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>  
+{% endblock %}

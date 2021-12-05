@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_login import current_user
+from werkzeug.datastructures import Accept
 from wtforms import *
 from wtforms.fields import *
 from wtforms_sqlalchemy.fields import *
@@ -36,6 +37,7 @@ class UpdateAccountForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)] )
     password = PasswordField('Password', validators=[DataRequired()])
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -87,7 +89,7 @@ class CreateCourseForm(FlaskForm):
         validators=[DataRequired()], 
         query_factory = lambda: Instructor.query,
         widget=widgets.Select(multiple=False),
-        get_label='ownerId'
+        get_label='firstname'
     )                                
     startPeriod = IntegerField('Start Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
     endPeriod = IntegerField('End Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
@@ -102,15 +104,60 @@ class CreateCourseForm(FlaskForm):
 
 
 class WarningForm(FlaskForm):
-    # message = QuerySelectMultipleField(
-    #     'Complaint message',
-    #     validators=[DataRequired()],
-    #     query_factory = lambda: Complaint.query,
-    #     widget=widgets.Select(multiple=False),
-    #     get_label='message'
-    # )
-    message = TextAreaField('Warning message', validators=[DataRequired()])
-    submit = SubmitField('Confirm')
+    # the targetId will change to current reviewed people id by get method when first time open the routes
+    message = QuerySelectMultipleField(
+        'Complaint message',
+        validators=[DataRequired()],
+        query_factory = lambda: Complaint.query,
+        widget=widgets.Select(multiple=False),
+        get_label='message'
+    )
+    submit2 = SubmitField('Confirm')
+    def __init__(self, myParam: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.targetId = myParam
+        self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
+                                                                   Complaint.processed == 0).all()
+
+class DeregisterForm(FlaskForm):
+    courseId = IntegerField('Course', validators=[DataRequired()], render_kw={'readonly': True})
+    message = QuerySelectMultipleField(
+        'Complaint message',
+        validators=[DataRequired()],
+        query_factory = lambda : Complaint.query,
+        widget=widgets.Select(multiple=False),
+        get_label='message',
+    )
+    submit3 = SubmitField('Confirm')
+    def __init__(self, myParam: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.targetId = myParam
+        self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
+                                                                   Complaint.processed == 0).all()
+
+class GraduationForm(FlaskForm):
+    submit1=SubmitField('Apply for Graduation')
+
+class SystemForm(FlaskForm):
+    taboo_list = TextAreaField('Taboo List')
+    updateTaboo = SubmitField('Update')
+    nextPeriod = SubmitField('Advance')
+
+class JustifyWarningForm(FlaskForm):
+    #for student/instructor
+    justification = TextAreaField('Provide Justification')
+    provideJustification = SubmitField('Update')
+    
+    #for admin
+    accept = SubmitField('Accept')
+    reject = SubmitField('Reject') 
+
+class ReviewForm(FlaskForm):
+    rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=1,max=5)])
+    content = TextAreaField('Review', validators=[DataRequired()])
+    submit = SubmitField('Update')
+
+
 
 class InstructorComplaintForm(FlaskForm):
     target = QuerySelectMultipleField(

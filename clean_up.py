@@ -74,4 +74,39 @@ db.session.add(studentCourse3)
 db.session.add(studentCourse4)
 db.session.add(studentCourse5)
 
+#testing period
+period = Period(period=2)#course grading period
+db.session.add(period)
+
+#testing review
+studentCourse2.review="testing review"
+studentCourse2.rating=2
+studentCourse3.review="testing review again"
+studentCourse3.rating=3
+studentCourse4.review="testing review still"
+studentCourse4.rating=4
+studentCourse5.review="testing review done"
+studentCourse5.rating=5
+
+db.session.commit()
+
+course2.rating = course2.getAvgRating()
+course3.rating = course3.getAvgRating()
+course4.rating = course4.getAvgRating()
+course5.rating = course5.getAvgRating()
+
+db.session.commit()
+# #testing warnings/period
+# period.advanceNPeriod(50)# advances period 50 times and perform the task logic, warnings will be given accordingly
+
+# warnings = Warning.query.all()
+# if len(warnings)>=10:
+#     for i in range(10):
+#         warnings[i].justification="some justification"
+# db.session.commit()
+
+complaint1 = Complaint(complainerId=user2.ownerId, targetId=user3.ownerId, message="Too bad")
+complaint2 = Complaint(complainerId=user3.ownerId, targetId=user2.ownerId, message="Deregister test")
+db.session.add(complaint1)
+db.session.add(complaint2)
 db.session.commit()

@@ -103,7 +103,7 @@ class Student(db.Model):
         total = 0.0
         period = Period.query.all()[0]
         for sc in self.courses:
-            if sc.gpa and sc.creationSemester()==period-1:
+            if sc.gpa and sc.creationSemester()==period.period-1:
                 if sc.getFloat()!='W':
                     count+=1
                     total+=sc.getFloat()
@@ -323,6 +323,7 @@ class StudentCourse(db.Model):
         review= self.review
         tempReview = self.review
         tabooList = Admin.query.all()[0].getTabooList()
+        tabooList = [word for word in tabooList if word!='']
         count = 0
         for tabooWord in tabooList:
             temp = review

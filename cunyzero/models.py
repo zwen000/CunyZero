@@ -104,8 +104,9 @@ class Student(db.Model):
         period = Period.query.all()[0]
         for sc in self.courses:
             if sc.gpa and sc.creationSemester()==period-1:
-                count+=1
-                total+=sc.getFloat()
+                if sc.getFloat()!='W':
+                    count+=1
+                    total+=sc.getFloat()
         if count == 0:
             return 4.0
         else:
@@ -115,8 +116,9 @@ class Student(db.Model):
         total = 0.0
         for sc in self.courses:
             if sc.gpa:
-                count+=1
-                total+=sc.getFloat()
+                if sc.getFloat()!='W':
+                    count+=1
+                    total+=sc.getFloat()
         if count == 0:
             return 0.0
         else:
@@ -252,8 +254,9 @@ class Course(db.Model):
         total=0.0
         for sc in self.studentcourses:
             if sc.gpa:
-                count+=1
-                total+=sc.getFloat()
+                if sc.gpa!='W':
+                    count+=1
+                    total+=sc.getFloat()
         if count != 0:
             return total/count
         else:
@@ -384,30 +387,38 @@ class Period(db.Model):#set-up, registration, running, or grading period
             #student whose gpa <2 or failed same course twice terminated
             for student in Student.query.all():
                 overAllGpa = student.gpa
-                if student.getSemesterGpa()>3.75 or overAllGpa>3.5:
-                    student.honor+=1
-                elif overAllGpa<2:
-                    student.terminate()
+                semesterGpa = student.getSemesterGpa()
+                if overAllGpa: 
+                    if overAllGpa>3.5:
+                        student.honor+=1
+                    elif overAllGpa<2:
+                        student.terminate()
+                if semesterGpa:
+                    if semesterGpa>3.75:
+                        student.honor+=1
             #instructor whose class gpa >3.5 or <2.5 warned/fired(didnt add fire yet) unless justified
             #instructor whose avgclass rating<2 receive 1 warning
             for course in Course.query.all():
                 classGpa = course.getClassGpa()
-                if classGpa<2.5 or classGpa>3.5:
-                    course.instructor.warning+=1
-                    warning = Warning(userId=instructor.ownerId, 
-                                            message="Class Gpa >3.5 or <2.5, until further justification, warning +1",
-                                            semesterWarned=self.period+1)
-                    db.session.add(warning)
-                if course.getAvgRating()<2:
-                    course.instructor.warning+=1
-                    warning = Warning(userId=instructor.ownerId, 
-                                            message="Average class rating <2, warning +1",
-                                            semesterWarned=self.period+1)
-                    db.session.add(warning)
+                if classGpa:
+                    if classGpa<2.5 or classGpa>3.5:
+                        course.instructor.warning+=1
+                        warning = Warning(userId=instructor.ownerId, 
+                                                message="Class Gpa >3.5 or <2.5, until further justification, warning +1",
+                                                semesterWarned=self.period+1)
+                        db.session.add(warning)
+                avgRating = course.getAvgRating()
+                if avgRating:
+                    if avgRating<2:
+                        course.instructor.warning+=1
+                        warning = Warning(userId=instructor.ownerId, 
+                                                message="Average class rating <2, warning +1",
+                                                semesterWarned=self.period+1)
+                        db.session.add(warning)
             #student failed same course twice terminated
             for student in Student.query.all():
                 dict={}#key,value: coursename,gpa ('F', 'A', etc.)
-                for sc in self.courses:
+                for sc in student.courses:
                     coursename = sc.getCourseName()
                     if coursename in dict:#if key in dict
                         if dict[coursename]=='F':

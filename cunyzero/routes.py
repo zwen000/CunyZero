@@ -331,10 +331,29 @@ def individual_review(role, owner_id):
     form = WarningForm()
     if form.validate_on_submit():
         warning = Warning(userId=owner_id, message=form.message.data)
+    warning_form = WarningForm(owner_id)
+    deregister_form = DeregisterForm(owner_id)
+    if warning_form.validate_on_submit():
+        warning = Warning(userId=owner_id, message=warning_form.message.data[0].message)
+        complaint = Complaint.query.get(warning_form.message.data[0].id)
+        complaint.processed = True
         db.session.add(warning)
         db.session.commit()
-        flash(f'The warning for Student id: {warning.userId} is submitted, reason is {form.message.data }!', 'success')
+        flash(f'The warning for Student id: {warning.userId} is submitted, reason is {warning_form.message.data[0].message}!', 'success')
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
+    if deregister_form.validate_on_submit():
+        period = Period.query.all()[0].getPeriodName()
+        if period == "Grading Period":
+            flash("Too late to join the course!", 'danger')
+            return redirect(url_for("individual_review", role=role, owner_id=owner_id))
+        else:
+            complaint = Complaint.query.get(warning_form.message.data[0].id)
+            complaint.processed = True
+            studentCourse = StudentCourse.query.filtir_by(courseId=deregister_form.courseId.data, studentId=owner_id).first()
+            studentCourse.delete()
+            db.session.commit()
+            flash("Student has been deregister from the course!", 'danger')
+            return redirect(url_for("individual_review", role=role, owner_id=owner_id))
     if role == "Student":
         student = Student.query.get(owner_id)
         program = Program.query.filter_by(id=student.programId).first()
@@ -351,9 +370,8 @@ def individual_review(role, owner_id):
                 else:
                     past_courses.append(course)
         return render_template("individual-review.html", title="Student Review", person_be_reviewed=student,
-                               program=program, current_courses=courses, past_courses=past_courses, form=form,form2=form2)
-            
-        
+                               program=program, current_courses=courses, past_courses=past_courses,
+                               warning_form=warning_form, deregister_form=deregister_form,form2=form2)
     if role == "Instructor":
         instructor = Instructor.query.get(owner_id)
         all_courses = Course.query.filter_by(instructorId=owner_id)
@@ -365,7 +383,8 @@ def individual_review(role, owner_id):
             else:
                 past_courses.append(course)
         return render_template("individual-review.html", title="Instructor Review", person_be_reviewed=instructor,
-                               current_courses=courses, past_courses=past_courses, form=form)
+                               current_courses=courses, past_courses=past_courses, warning_form=warning_form,
+                               deregister_form=deregister_form)
 
 
 @login_required

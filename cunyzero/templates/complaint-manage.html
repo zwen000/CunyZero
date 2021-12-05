@@ -13,7 +13,7 @@
                         To target
                         <a href="#"> {{ complaint.targetId }} </a>
                     </div>
-                    <p class="article-content"> {{ complaint.message }}</p>
+                    <p class="article-content"> Message: {{ complaint.message }}</p>
                 </div>
             </article>
         {% endfor %}
@@ -22,7 +22,7 @@
         <div class="lead border-bottom">
             <strong>Complaints were processed:</strong>
         </div>
-        {% for complaint in unprocessed_comp %}
+        {% for complaint in processed_comp %}
             <article class="media content-section">
                 <div class="media-body">
                     <div class="article-metadata row">
@@ -31,7 +31,7 @@
                         To target
                         <a href="#"> {{ complaint.targetId }} </a>
                     </div>
-                    <p class="article-content"> {{ complaint.message }}</p>
+                    <p class="article-content"> Message: {{ complaint.message }}</p>
                 </div>
             </article>
         {% endfor %}

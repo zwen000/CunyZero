@@ -1,16 +1,20 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="content-section">
+
         <article class="media content-section">
             <div class="media-body">
-                <legend class="border-bottom">
+                <legend class="pb-2 border-bottom">
                     <strong>{{ course.coursename }}</strong>
+                    <a class="btn btn-outline-info float-right" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                        Rating Reviews
+                    </a>
                 </legend>
                 <div>
                     <strong>Instructor Name: </strong>
                     <span>{{ course.getInstructorName() }}</span>
                     <strong class="ml-2">Course Rate: </strong>
-                    <span> course.status </span>
+                    <span> {{ course.getAvgRating() }} </span>
                 </div>
                 <div>
                     <strong>Course ID: </strong>
@@ -44,6 +48,7 @@
         <div class="content-section">
             <div class="lead border-bottom">
                 <strong>Students in Course</strong>
+                <small>/{{ period.getPeriodName() }}</small>
             </div>
 
             <table class="table table-condensed">
@@ -61,7 +66,7 @@
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
                             <td> {{ programs[student.Student.programId].name }} </td>
-                            {% if current_user.role == "Instructor" %}
+                            {% if current_user.role == "Instructor" and period.getPeriodName() == "Grading Period"%}
                                 <td>
                                     <form method="post">
 {#                                        <input type="text" id="letter-grade" name="{{ student.Student.ownerId }}" placeholder="{{ student.StudentCourse.gpa }}"#}
@@ -108,6 +113,12 @@
                         <th>Student Name</th>
                         <th>Employ ID</th>
                         <th>Program</th>
+                        <th>
+                            {% if current_user.role == "Instructor" %}
+                                Approve
+                            {% endif %}
+                        </th>
+
                     </tr>
                 </thead>
                 <tbody>
@@ -116,6 +127,15 @@
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
                             <td> {{ programs[student.Student.programId].name }} </td>
+                            <td>
+                                {% if current_user.role == "Instructor"%}
+                                    <form method="post">
+                                        <button type="submit" name="Approve" value="{{student.Student.ownerId}}" >
+                                             Let He In
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

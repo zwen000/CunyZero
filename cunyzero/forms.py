@@ -36,6 +36,7 @@ class UpdateAccountForm(FlaskForm):
     username = StringField('Username',
                            validators=[DataRequired(), Length(min=2, max=20)] )
     password = PasswordField('Password', validators=[DataRequired()])
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     submit = SubmitField('Update')
 
     def validate_username(self, username):
@@ -117,6 +118,20 @@ class SystemForm(FlaskForm):
     taboo_list = TextAreaField('Taboo List')
     updateTaboo = SubmitField('Update')
     nextPeriod = SubmitField('Advance')
+
+class JustifyWarningForm(FlaskForm):
+    #for student/instructor
+    justification = TextAreaField('Provide Justification')
+    provideJustification = SubmitField('Update')
+    
+    #for admin
+    accept = SubmitField('Accept')
+    reject = SubmitField('Reject') 
+
+class ReviewForm(FlaskForm):
+    rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=1,max=5)])
+    content = TextAreaField('Review', validators=[DataRequired()])
+    submit = SubmitField('Update')
 
 
 

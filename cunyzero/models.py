@@ -81,10 +81,11 @@ class Student(db.Model):
         filterIds = [sc.courseId for sc in studentCourses]
         courses = []
         for sc in studentCourses:# for each studentcourse
-            course = Course.query.filter_by(id=sc.courseId, status="Open").first()
-            if course:
-                if course.id in filterIds:#if its waitlisted/enrolled
-                    courses.append(course)
+            if sc.gpa != 'W':
+                course = Course.query.filter_by(id=sc.courseId, status="Open").first()
+                if course:
+                    if course.id in filterIds:#if its waitlisted/enrolled
+                        courses.append(course)
         return courses
     def notEnrolled(self):#return courses that student is not enrolled or waitlisted in
         studentCoursesIds = [sc.courseId for sc in StudentCourse.query.filter_by(studentId=self.ownerId)]

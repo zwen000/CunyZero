@@ -329,6 +329,24 @@ def instructor_manage():
 def individual_review(role, owner_id):
     form2=GraduationForm()
     form = WarningForm()
+    
+    if form2.validate_on_submit():
+        if current_user.role == "Admin":
+            if form2.accept.data:
+                application=GraduationApplication.query.filter_by(studentId=owner_id).first()
+                application.approval= True
+                db.session.commit()
+            elif form2.reject.data:
+                application=GraduationApplication.query.filter_by(studentId=owner_id).first()
+                application.approval= False
+                db.session.commit()
+        elif current_user.role == "Student":
+            if form2.submit.data:
+                application=GraduationApplication(studentId=owner_id)
+                db.session.add(application)
+                db.seesion.commit(application)    
+
+
     if form.validate_on_submit():
         warning = Warning(userId=owner_id, message=form.message.data)
     warning_form = WarningForm(owner_id)

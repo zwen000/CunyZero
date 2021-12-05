@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_login import current_user
+from werkzeug.datastructures import Accept
 from wtforms import *
 from wtforms.fields import *
 from wtforms_sqlalchemy.fields import *
@@ -128,11 +129,11 @@ class DeregisterForm(FlaskForm):
         get_label='message',
     )
     submit = SubmitField('Confirm')
-    def __init__(self, myParam: int, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.targetId = myParam
-        self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
-                                                                   not Complaint.processed).all()
+    # def __init__(self, myParam: int, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.targetId = myParam
+    #     self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
+    #                                                                not Complaint.processed).all()
 
 class SystemForm(FlaskForm):
     taboo_list = TextAreaField('Taboo List')
@@ -154,4 +155,8 @@ class ReviewForm(FlaskForm):
     submit = SubmitField('Update')
 
 
+class GraduationForm(FlaskForm):
+    submit=SubmitField('Apply for Graduation')
+    accept=SubmitField('Accept Application')
+    reject=SubmitField('Reject Application')
 

@@ -330,6 +330,28 @@ def instructor_manage():
 @login_required
 @app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def individual_review(role, owner_id):
+    form2=GraduationForm()
+    form = WarningForm()
+    
+    if form2.validate_on_submit():
+        if current_user.role == "Admin":
+            if form2.accept.data:
+                application=GraduationApplication.query.filter_by(studentId=owner_id).first()
+                application.approval= True
+                db.session.commit()
+            elif form2.reject.data:
+                application=GraduationApplication.query.filter_by(studentId=owner_id).first()
+                application.approval= False
+                db.session.commit()
+        elif current_user.role == "Student":
+            if form2.submit.data:
+                application=GraduationApplication(studentId=owner_id)
+                db.session.add(application)
+                db.seesion.commit(application)    
+
+
+    if form.validate_on_submit():
+        warning = Warning(userId=owner_id, message=form.message.data)
     warning_form = WarningForm(owner_id)
     deregister_form = DeregisterForm(owner_id)
     if warning_form.validate_on_submit():
@@ -370,7 +392,7 @@ def individual_review(role, owner_id):
                     past_courses.append(course)
         return render_template("individual-review.html", title="Student Review", person_be_reviewed=student,
                                program=program, current_courses=courses, past_courses=past_courses,
-                               warning_form=warning_form, deregister_form=deregister_form)
+                               warning_form=warning_form, deregister_form=deregister_form,form2=form2)
     if role == "Instructor":
         instructor = Instructor.query.get(owner_id)
         all_courses = Course.query.filter_by(instructorId=owner_id)
@@ -457,6 +479,9 @@ def course_review(course_Id):
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
                            programs=programs, students_waitlist=students_waitlist, period=period)
 
+    student = db.session.query(Student, StudentCourse).join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == 38239413).all()
+    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
+    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
 
 # Admin only
 #@login_required
@@ -564,7 +589,7 @@ def update_rating(courseId, studentId):#show specific rating
     owner = Student.query.filter_by(ownerId=studentId).first()
     review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
     if not review.visible:
-        flash("Taboo Words>3 Review is not invisible!")
+        flash("Taboo Words>3 Review is not invisible!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
     period = Period.query.all()[0].getPeriodName()
     if review.waiting==True:
@@ -594,3 +619,13 @@ def update_rating(courseId, studentId):#show specific rating
         return render_template("rating.html", form=form, review=review, owner=owner, user=user)
     else:
         return redirect(url_for('course_rating',courseId=courseId))
+    warnings = Warning.query.filter_by()
+    return render_template("review-warning-page.html", warnings=warnings)
+
+@app.route('/graduation',methods=['GET', 'POST'])
+def graduation():
+    form=GraduationForm()
+        
+    return render_template("graduation.html")
+    
+    

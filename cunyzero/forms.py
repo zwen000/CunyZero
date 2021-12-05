@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from flask_login import current_user
+from werkzeug.datastructures import Accept
 from wtforms import *
 from wtforms.fields import *
 from wtforms_sqlalchemy.fields import *
@@ -88,7 +89,7 @@ class CreateCourseForm(FlaskForm):
         validators=[DataRequired()], 
         query_factory = lambda: Instructor.query,
         widget=widgets.Select(multiple=False),
-        get_label='user.username'
+        get_label='firstname'
     )                                
     startPeriod = IntegerField('Start Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
     endPeriod = IntegerField('End Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
@@ -111,12 +112,12 @@ class WarningForm(FlaskForm):
         widget=widgets.Select(multiple=False),
         get_label='message'
     )
-    submit = SubmitField('Confirm')
+    submit2 = SubmitField('Confirm')
     def __init__(self, myParam: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.targetId = myParam
         self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
-                                                                   not Complaint.processed).all()
+                                                                   Complaint.processed == 0).all()
 
 class DeregisterForm(FlaskForm):
     courseId = IntegerField('Course', validators=[DataRequired()], render_kw={'readonly': True})
@@ -127,12 +128,15 @@ class DeregisterForm(FlaskForm):
         widget=widgets.Select(multiple=False),
         get_label='message',
     )
-    submit = SubmitField('Confirm')
+    submit3 = SubmitField('Confirm')
     def __init__(self, myParam: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.targetId = myParam
         self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
-                                                                   not Complaint.processed).all()
+                                                                   Complaint.processed == 0).all()
+
+class GraduationForm(FlaskForm):
+    submit1=SubmitField('Apply for Graduation')
 
 class SystemForm(FlaskForm):
     taboo_list = TextAreaField('Taboo List')
@@ -155,3 +159,26 @@ class ReviewForm(FlaskForm):
 
 
 
+class InstructorComplaintForm(FlaskForm):
+    target = QuerySelectMultipleField(
+        'Choose a Student',
+        query_factory = lambda: Student.query,
+        widget=widgets.Select(multiple=False),
+        get_label= lambda student: f"{student.ownerId} -- {student.firstname} {student.lastname}"
+    )
+    reason = RadioField('Reason', choices=[('Warning','Warn the student'),('De-Register','De-Register the student'), ('Other', 'Other')], default='Warning', validators=[DataRequired()])
+    message = TextAreaField('Detail', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class StudentComplaintForm(FlaskForm):
+    target = QuerySelectMultipleField(
+        'Choose a Student or Instructor',
+        query_factory= lambda: User.query.filter((User.role!="Visitor")&(User.role!="Admin")&(User.id!=current_user.id)),
+        widget=widgets.Select(multiple=False),
+        get_label=lambda user: f'{user.role}, {user.ownerId}, '
+                               f'{user.studentOwner.firstname + " " + user.studentOwner.lastname if user.role == "Student" else user.instructorOwner.firstname + " " + user.instructorOwner.lastname}'
+    )
+
+    message = TextAreaField('Detail', validators=[DataRequired()])
+    submit = SubmitField('Submit')

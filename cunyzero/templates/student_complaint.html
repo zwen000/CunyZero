@@ -1,0 +1,79 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<div class="content-section">
+    <form method="POST", action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+            <legend class="h2">File a Complaint</legend>
+            <div class="content-section">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <strong>{{ form.target.label }}{{ form.target(class="form-control form-control-lg") }} </strong>
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <strong>
+                            {{ form.message.label }}
+                        </strong>
+                        {{ form.message(class="form-control form-control-lg") }}
+                    </div>
+
+
+                </div>
+
+            </div>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+
+{% if history %}
+<div class="content-section">
+    <table class="table table-striped table-hover bg-light text-center">
+        <thead>
+            <tr class="thead-secondary">
+                <th class="course_header">Complaint History</th>
+                <th> </th>
+                <th> </th>
+                <th> </th>
+                <th> </th>
+            </tr>
+            <tr class="thead-secondary text-muted">
+                <th>EMPLID</th>
+                <th>Target</th>
+                <th>Target Role</th>
+                <th>Message</th>
+                <th>Progress</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in history %}
+                <tr>
+                    <td>{{ complaint.targetId }}</td>
+                    {% if targets[complaint.targetId].role == "Student" %}
+                        <td>{{ targets[complaint.targetId].studentOwner.firstname }} {{ targets[complaint.targetId].studentOwner.lastname }}</td>
+                    {% else %}
+                        <td>{{ targets[complaint.targetId].instructorOwner.firstname }} {{ targets[complaint.targetId].instructorOwner.lastname }}
+                    {% endif %}
+
+                    <td>{{ targets[complaint.targetId].role }}</td>
+                    <td>{{ complaint.message[:10] + "..." if complaint.message|length >10 else complaint.message }}</td>
+                    {% if complaint.processed %}
+                        <td>Done</td>
+                    {%  else %}
+                        <td>In Progress</td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock content %}

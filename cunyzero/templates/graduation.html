@@ -1,0 +1,12 @@
+{% extends "layout.html"%}
+{% block content %}
+    <div class ="content-section">
+        <div class = "media">
+         <div class="media-body">
+             <h2 class="Student-heading">{{current_user.firstname}}{{current_user.lastname}}</h2>
+             <p class="text-secondary">{{current_user.gpa}}</p>
+         </div>   
+        </div>
+
+    </div>
+{% endblock content %}

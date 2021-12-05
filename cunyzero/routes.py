@@ -1,5 +1,6 @@
+
 from operator import truediv
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from cunyzero import app, db, bcrypt
 from cunyzero.forms import *
 from cunyzero.models import *
@@ -176,7 +177,6 @@ def application_manage():
     applications = Application.query.filter_by(approval=None)
     return render_template("application-manage.html", title="Application-List", applications=applications)
 
-
 @login_required
 @app.route('/application/<int:application_id>', methods=['GET', 'POST'])
 def application_confirm(application_id):
@@ -224,7 +224,6 @@ def application_confirm(application_id):
                 flash(f'Please provide your reason!', 'danger')
     return render_template("application-confirm.html", title="Application-Confirm", form=form,
                            application=application)
-
 
 # Student only
 #@login_required
@@ -330,9 +329,23 @@ def instructor_manage():
 @login_required
 @app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def individual_review(role, owner_id):
+    graduation_form=GraduationForm()
+    if graduation_form.submit1.data and graduation_form.validate():
+        graduation_application = GraduationApplication.query.filter_by(approval=None, studentId=owner_id).first()
+        if graduation_application:
+            flash(f'You have an graduation application processing!', 'danger')
+
+        else:
+            application=GraduationApplication(studentId=owner_id)
+            db.session.add(application)
+            db.session.commit()
+            flash(f'Applcation test!','success')
+
+
+    # Admin able to warning/deregister student or instructor base on complaint
     warning_form = WarningForm(owner_id)
     deregister_form = DeregisterForm(owner_id)
-    if warning_form.validate_on_submit():
+    if warning_form.submit2.data and warning_form.validate():
         warning = Warning(userId=owner_id, message=warning_form.message.data[0].message)
         complaint = Complaint.query.get(warning_form.message.data[0].id)
         complaint.processed = True
@@ -340,7 +353,7 @@ def individual_review(role, owner_id):
         db.session.commit()
         flash(f'The warning for Student id: {warning.userId} is submitted, reason is {warning_form.message.data[0].message}!', 'success')
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
-    if deregister_form.validate_on_submit():
+    if deregister_form.submit3.data and deregister_form.validate():
         period = Period.query.all()[0].getPeriodName()
         if period == "Grading Period":
             flash("Too late to join the course!", 'danger')
@@ -348,8 +361,8 @@ def individual_review(role, owner_id):
         else:
             complaint = Complaint.query.get(warning_form.message.data[0].id)
             complaint.processed = True
-            studentCourse = StudentCourse.query.filtir_by(courseId=deregister_form.courseId.data, studentId=owner_id).first()
-            studentCourse.delete()
+            studentCourse = StudentCourse.query.filter_by(courseId=deregister_form.courseId.data, studentId=owner_id).first()
+            db.session.delete(studentCourse)
             db.session.commit()
             flash("Student has been deregister from the course!", 'danger')
             return redirect(url_for("individual_review", role=role, owner_id=owner_id))
@@ -370,7 +383,7 @@ def individual_review(role, owner_id):
                     past_courses.append(course)
         return render_template("individual-review.html", title="Student Review", person_be_reviewed=student,
                                program=program, current_courses=courses, past_courses=past_courses,
-                               warning_form=warning_form, deregister_form=deregister_form)
+                               warning_form=warning_form, deregister_form=deregister_form, graduation_form=graduation_form)
     if role == "Instructor":
         instructor = Instructor.query.get(owner_id)
         all_courses = Course.query.filter_by(instructorId=owner_id)
@@ -413,6 +426,15 @@ def course_manage():
 def complaint_manage():
     unprocessed_comp = Complaint.query.filter_by(processed=False)
     processed_comp = Complaint.query.filter_by(processed=True)
+    complaint_id = request.form.get("Complaint")
+    if complaint_id:
+        complaint_id = int(complaint_id)
+        print(complaint_id)
+        complaint_reviewed = Complaint.query.get(complaint_id)
+        complaint_reviewed.processed = True
+        db.session.commit()
+        flash(f'The complaint #{complaint_id} has been reviewed and taken no action.', 'success')
+        return redirect(url_for("complaint_manage"))
     return render_template("complaint-manage.html", title="Complaint Management", unprocessed_comp=unprocessed_comp,
                            processed_comp=processed_comp)
 
@@ -426,9 +448,11 @@ def course_review(course_Id):
     period = Period.query.all()[0]
     course = Course.query.get(course_Id)
     programs = Program.query.all()
+
     students = db.session.query(Student, StudentCourse)\
-        .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
-                                                                                StudentCourse.waiting == False).all()
+        .join(StudentCourse, StudentCourse.studentId == Student.ownerId)\
+        .filter(StudentCourse.courseId == course_Id,
+        StudentCourse.waiting == False).all()
     students_waitlist = db.session.query(Student, StudentCourse)\
         .join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == course_Id,
                                                                                 StudentCourse.waiting == True).all()
@@ -454,9 +478,13 @@ def course_review(course_Id):
             flash(f'{student.Student.firstname} {student.Student.lastname} has been added to the course!', 'success')
             return redirect(url_for("course_review", course_Id=course_Id))
 
+
     return render_template("course-review.html", title="Course Detail Review", course=course, students=students,
                            programs=programs, students_waitlist=students_waitlist, period=period)
 
+    student = db.session.query(Student, StudentCourse).join(StudentCourse, StudentCourse.studentId == Student.ownerId).filter(StudentCourse.courseId == 38239413).all()
+    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
+    return student[0].Student.firstname + student[0].Student.lastname + str(student[0].StudentCourse.courseId)
 
 # Admin only
 #@login_required
@@ -599,3 +627,66 @@ def update_rating(courseId, studentId):#show specific rating
         return render_template("rating.html", form=form, review=review, owner=owner, user=user)
     else:
         return redirect(url_for('course_rating',courseId=courseId))
+    warnings = Warning.query.filter_by()
+    return render_template("review-warning-page.html", warnings=warnings)
+
+@app.route('/graduation',methods=['GET', 'POST'])
+def graduation():
+    form=GraduationForm()
+        
+    return render_template("graduation.html")
+
+@login_required
+@app.route('/instructor/complaint', methods=['GET', 'POST'])
+def instructor_file_complaint():
+    form = InstructorComplaintForm()
+    history = current_user.instructorOwner.complaints
+    targets = dict()
+    for complaint in history:
+        student = Student.query.filter_by(ownerId=complaint.targetId).first()
+        targets[complaint.targetId] = f"{student.firstname} {student.lastname}"
+
+    if current_user.role != "Instructor":
+        abort(403)
+    if form.validate_on_submit():
+        targetId = None
+        for i in form.target.data:
+            targetId = i.ownerId
+        complaint = InstructorComplaint(complainerId=current_user.ownerId,
+                                targetId=targetId,
+                                reason = form.reason.data,
+                                message=form.message.data)
+        db.session.add(complaint)
+        db.session.commit()
+
+        flash(f'Your complaint to {form.target.data} is submitted', 'success')
+        return redirect(url_for("instructor_file_complaint"))
+
+    return render_template("instructor_complaint.html", title="Instructor Complaint", form=form, history=history, targets=targets)
+
+@login_required
+@app.route('/student/complaint', methods=['GET', 'POST'])
+def student_file_complaint():
+    form = StudentComplaintForm()
+    history = current_user.studentOwner.complaints
+    targets = dict()
+    for complaint in history:
+        target = User.query.filter_by(ownerId=complaint.targetId).first()
+        targets[complaint.targetId] = target
+
+    if current_user.role != "Student":
+        abort(403)
+    if form.validate_on_submit():
+        targetId = None
+        for i in form.target.data:
+            targetId = i.ownerId
+        complaint = Complaint(complainerId=current_user.ownerId,
+                              targetId=targetId,
+                              message=form.message.data)
+        db.session.add(complaint)
+        db.session.commit()
+
+        flash(f'Your complaint to {form.target.data} is submitted', 'success')
+
+    return render_template("student_complaint.html", title="Student Complaint", form=form, history=history, targets=targets)
+

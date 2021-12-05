@@ -13,7 +13,18 @@
                     <div>Program: {{ program.name }}</div>
                     <div>Current GPA: {{ person_be_reviewed.gpa }}</div>
                 {% endif %}
+
                 <div>Status: {{ person_be_reviewed.status }}</div>
+
+                {% if current_user.role == "Student"%}
+                     <form method="POST", action="">
+                        {{ graduation_form.hidden_tag() }} <!--CSRF token-->
+                        <div class="form-group mb-0">
+                            {{ graduation_form.submit1(class="btn btn-outline-info") }}
+                        </div>
+                     </form>
+                {% endif %}
+
                 {% if current_user.role == "Admin" %}
                     <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
                         warning
@@ -32,7 +43,7 @@
                     </div>
                 </fieldset>
                 <div class="form-group mb-0">
-                    {{ warning_form.submit(class="btn btn-outline-info") }}
+                    {{ warning_form.submit2(class="btn btn-outline-info") }}
                 </div>
             </form>
         </div>
@@ -142,7 +153,7 @@
                     </div>
                 </fieldset>
                 <div class="form-group mb-0">
-                    {{ deregister_form.submit(class="btn btn-outline-info") }}
+                    {{ deregister_form.submit3(class="btn btn-outline-info") }}
                 </div>
             </form>
         </div>

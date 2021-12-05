@@ -1,0 +1,245 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <div class="media content-section">
+            <div class="media-body" style="position: relative">
+                <div class="lead border-bottom">
+                    <strong>{{ person_be_reviewed.firstname }}, {{ person_be_reviewed.lastname }}</strong>
+                    <small>/{{ person_be_reviewed.user[0].role }}</small>
+                </div>
+                <div>Employee ID: {{ person_be_reviewed.ownerId }}</div>
+                <div>Username: {{ person_be_reviewed.user[0].username }}</div>
+                {% if person_be_reviewed.user[0].role == "Student"%}
+                    <div>Program: {{ program.name }}</div>
+                    <div>Current GPA: {{ person_be_reviewed.gpa }}</div>
+                {% endif %}
+
+                <div>Status: {{ person_be_reviewed.status }}</div>
+
+                {% if current_user.role == "Student"%}
+                     <form method="POST", action="">
+                        {{ graduation_form.hidden_tag() }} <!--CSRF token-->
+                        <div class="form-group mb-0">
+                            {{ graduation_form.submit1(class="btn btn-outline-info") }}
+                        </div>
+                     </form>
+                {% endif %}
+
+                {% if current_user.role == "Admin" %}
+                    <button class="btn btn-outline-info" style="position: absolute; right:10px; top:40px" onclick="display()">
+                        warning
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="content-section" id="warning-form" style="display: none">
+            <form method="POST", action="">
+                {{ warning_form.hidden_tag() }} <!--CSRF token-->
+                <fieldset class="form-group">
+                    <div class="form-group mb-0">
+                        <strong>{{ warning_form.message.label(class="form-control-label") }}</strong>
+                        {{ warning_form.message(class="form-control form-control-lg") }}
+                    </div>
+                </fieldset>
+                <div class="form-group mb-0">
+                    {{ warning_form.submit2(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
+
+        <div class="content-section">
+            <div class="lead border-bottom">
+                <strong>Current Course</strong>
+            </div>
+
+            <table class="table table-condensed">
+                <thead class="thead-light">
+                    <tr>
+                        {% if current_user.role == "Admin" %}
+                            {% if person_be_reviewed.user[0].role == "Instructor" %}
+                                <th>Course Name</th>
+                                <th>Days/Times</th>
+                                <th>Enroll total</th>
+                                <th>Rating</th>
+                            {% elif person_be_reviewed.user[0].role == "Student" %}
+                                <th>Course Name</th>
+                                <th>Instructor</th>
+                                <th>Days/Times</th>
+                                <th>Enroll total</th>
+                                <th>Deregister</th>
+                            {% endif %}
+                        {% elif current_user.role == "Instructor" %}
+                            <th>Course Name</th>
+                            <th>Days/Times</th>
+                            <th>Enroll total</th>
+                            <th>Rating</th>
+                        {% elif current_user.role == "Student" %}
+                            <th>Course Name</th>
+                            <th>Instructor</th>
+                            <th>Days/Times</th>
+                            <th>Give Rating</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in current_courses %}
+                        <tr>
+                            {% if current_user.role == "Admin" %}
+                                {% if person_be_reviewed.user[0].role == "Instructor" %}
+                                    <td>
+                                        <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                            {{ course.coursename }}
+                                        </a>
+                                    </td>
+                                    <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                    <td> {{ course.getEnrolledTotal() }} </td>
+                                     <td> {{ course.getAvgRating() }} </td>
+                                {% elif person_be_reviewed.user[0].role == "Student" %}
+                                    <td>
+                                        <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                            {{ course.coursename }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('individual_review',role='Instructor',owner_id=course.instructorId)}}">
+                                            {{ course.getInstructorName() }}
+                                        </a>
+                                    </td>
+                                    <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                    <td> {{ course.getEnrolledTotal() }} </td>
+                                    <td>
+                                        <button class="btn btn-outline-info" onclick="deregister({{ course.id }})">
+                                            De-register
+                                        </button>
+                                    </td>
+                                {% endif %}
+                            {% elif current_user.role == "Instructor" %}
+                                <td>
+                                    <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                        {{ course.coursename }}
+                                    </a>
+                                </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                <td> {{ course.getEnrolledTotal() }} </td>
+                                <td> rating </td>
+                            {% elif current_user.role == "Student" %}
+                                <td> {{ course.coursename }} </td>
+                                <td> {{ course.getInstructorName() }} </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="content-section" id="deregister-form" style="display: none">
+            <form method="POST", action="">
+                {{ deregister_form.hidden_tag() }} <!--CSRF token-->
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        <strong>{{ deregister_form.courseId.label(class="form-control-label") }}</strong>
+                            {{ deregister_form.courseId(class="form-control form-control-lg", id="deregister-course")}}
+                    </div>
+                    <div class="form-group mb-0">
+                        <strong>{{ deregister_form.message.label(class="form-control-label") }}</strong>
+                            {{ deregister_form.message(class="form-control form-control-lg") }}
+                    </div>
+                </fieldset>
+                <div class="form-group mb-0">
+                    {{ deregister_form.submit3(class="btn btn-outline-info") }}
+                </div>
+            </form>
+        </div>
+
+        <div class="content-section">
+            <div class="lead border-bottom">
+                <strong>Previous Course</strong>
+            </div>
+            <table class="table table-condensed">
+                <thead class="thead-light">
+                    <tr>
+                        {% if person_be_reviewed.user[0].role == "Instructor" %}
+                            <th>Course Name</th>
+                            <th>Days/Times</th>
+                            <th>Enroll total</th>
+                            <th>Rating</th>
+                            <th>Average GPA</th>
+                            <th>Reviews</th>
+                        {% elif person_be_reviewed.user[0].role == "Student" %}
+                            <th>Course Name</th>
+                            <th>Instructor</th>
+                            <th>Days/Times</th>
+                            <th>Grade</th>
+                            <th>Reviews</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in past_courses%}
+                        <tr>
+                            {% if person_be_reviewed.user[0].role == "Instructor" %}
+                                <td>
+                                    <a href="{{ url_for('course_review', course_Id=course.id) }}">
+                                        {{ course.coursename }}
+                                    </a>
+                                </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
+                                <td> {{ course.getEnrolledTotal() }} </td>
+                                <td> {{ course.getAvgRating() }} </td>
+                                <td> {{ course.getClassGpa() }}</td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
+                            {% elif person_be_reviewed.user[0].role == "Student" %}
+                                <td> {{ course.coursename }} </td>
+                                <td> {{ course.getInstructorName() }} </td>
+                                <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
+                                <td> {{ course.getStudentGrade(person_be_reviewed.ownerId) }}</td>
+                                <td>
+                                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('course_rating',courseId=course.id)}}">
+                                        Reviews
+                                    </a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        var warningForm = document.getElementById("warning-form");
+        function display(){
+            if(warningForm.style.display=="none"){
+                warningForm.style.display="";
+            }
+            else{
+                warningForm.style.display="none";
+            }
+        }
+
+        function deregister(course_id){
+            var deregisterForm = document.getElementById("deregister-form");
+            var courseid = document.getElementById("deregister-course")
+            if(deregisterForm.style.display=="" && courseid.value == course_id ){
+                deregisterForm.style.display="none";
+            }
+            else{
+                deregisterForm.style.display="";
+                courseid.setAttribute('value', course_id)
+            }
+        }
+
+    </script>
+{% endblock content %}
+

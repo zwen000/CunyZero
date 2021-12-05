@@ -106,5 +106,7 @@ db.session.commit()
 # db.session.commit()
 
 complaint1 = Complaint(complainerId=user2.ownerId, targetId=user3.ownerId, message="Too bad")
+complaint2 = Complaint(complainerId=user3.ownerId, targetId=user2.ownerId, message="Deregister test")
 db.session.add(complaint1)
+db.session.add(complaint2)
 db.session.commit()

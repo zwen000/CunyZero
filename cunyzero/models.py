@@ -509,6 +509,12 @@ class Complaint(db.Model):
 
     def __repr__(self):
         return '<complainer: %r, complainee: %r>' % (self.complainerId, self.targetId)
+    def getComplainer(self):
+        user = User.query.filter(User.ownerId==self.complainerId).first()
+        return user
+    def getTarget(self):
+        user = User.query.filter(User.ownerId==self.targetId).first()
+        return user
 
 
 class Warning(db.Model):

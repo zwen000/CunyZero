@@ -112,7 +112,7 @@ class WarningForm(FlaskForm):
         widget=widgets.Select(multiple=False),
         get_label='message'
     )
-    submit = SubmitField('Confirm')
+    submit2 = SubmitField('Confirm')
     def __init__(self, myParam: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.targetId = myParam
@@ -128,12 +128,15 @@ class DeregisterForm(FlaskForm):
         widget=widgets.Select(multiple=False),
         get_label='message',
     )
-    submit = SubmitField('Confirm')
+    submit3 = SubmitField('Confirm')
     def __init__(self, myParam: int, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.targetId = myParam
         self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
                                                                    Complaint.processed == 0).all()
+
+class GraduationForm(FlaskForm):
+    submit1=SubmitField('Apply for Graduation')
 
 class SystemForm(FlaskForm):
     taboo_list = TextAreaField('Taboo List')
@@ -155,5 +158,4 @@ class ReviewForm(FlaskForm):
     submit = SubmitField('Update')
 
 
-class GraduationForm(FlaskForm):
-    submit=SubmitField('Apply for Graduation')
+

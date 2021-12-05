@@ -558,13 +558,15 @@ def warning_page(userId, warningId):# show specific warning
                 elif form.reject.data:
                     warning.result = "Justification Rejected"
                     flash("Justification Rejected",'success')
-                return redirect(url_for('review_warning_page'))
             else:
                 flash("Already Processed",'danger')
+            db.session.commit()
+            return redirect(url_for('review_warning_page'))
         else:
             warning.justification=form.justification.data
             flash("Justification Updated",'success')
-        db.session.commit()
+            db.session.commit()
+            return redirect(url_for('user_warning_page',userId=userId))
     elif request.method=='GET': 
         form.justification.data = warning.justification
 
@@ -592,11 +594,14 @@ def update_rating(courseId, studentId):#show specific rating
     owner = Student.query.filter_by(ownerId=studentId).first()
     review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
     if not review.visible:
-        flash("Taboo Words>3 Review is not invisible!", 'danger')
+        flash("Taboo Words>3 Review is not visible!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
     period = Period.query.all()[0].getPeriodName()
     if review.waiting==True:
         flash("cannot leave review for waitlisted course!",'danger')
+        return redirect(url_for('course_rating',courseId=courseId))
+    if review.rating:
+        flash("review already posted for this course!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
     if form.submit.data:
         if period=="Course Running Period" or period=="Grading Period":

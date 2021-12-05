@@ -104,3 +104,7 @@ db.session.commit()
 #     for i in range(10):
 #         warnings[i].justification="some justification"
 # db.session.commit()
+
+complaint1 = Complaint(complainerId=user2.ownerId, targetId=user3.ownerId, message="Too bad")
+db.session.add(complaint1)
+db.session.commit()

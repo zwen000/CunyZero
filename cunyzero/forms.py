@@ -112,3 +112,26 @@ class WarningForm(FlaskForm):
     message = TextAreaField('Warning message', validators=[DataRequired()])
     submit = SubmitField('Confirm')
 
+class InstructorComplaintForm(FlaskForm):
+    target = QuerySelectMultipleField(
+        'Choose a Student',
+        query_factory = lambda: Student.query,
+        widget=widgets.Select(multiple=False),
+        get_label= lambda student: f"{student.ownerId} -- {student.firstname} {student.lastname}"
+    )
+    reason = RadioField('Reason', choices=[('Warning','Warn the student'),('De-Register','De-Register the student'), ('Other', 'Other')], default='Warning', validators=[DataRequired()])
+    message = TextAreaField('Detail', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class StudentComplaintForm(FlaskForm):
+    target = QuerySelectMultipleField(
+        'Choose a Student or Instructor',
+        query_factory= lambda: User.query.filter((User.role!="Visitor")&(User.role!="Admin")&(User.id!=current_user.id)),
+        widget=widgets.Select(multiple=False),
+        get_label=lambda user: f'{user.role}, {user.ownerId}, '
+                               f'{user.studentOwner.firstname + " " + user.studentOwner.lastname if user.role == "Student" else user.instructorOwner.firstname + " " + user.instructorOwner.lastname}'
+    )
+
+    message = TextAreaField('Detail', validators=[DataRequired()])
+    submit = SubmitField('Submit')

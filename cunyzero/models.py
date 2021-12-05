@@ -58,10 +58,10 @@ class Student(db.Model):
     application = db.relationship('GraduationApplication', backref='applicant', lazy=True)
     warnings = db.relationship('Warning', backref='targetStudent', lazy=True)
     #wait_list = db.relationship('StudentCourse', backref='student', lazy=True)
-    #complaints = db.relationship('Complaint', backref='target', lazy=True)
+    complaints = db.relationship('Complaint', backref='owner', lazy=True)
 
     def __repr__(self):
-        return '<studentid: %r>' % self.ownerId
+        return f"Student({self.ownerId} -- {self.firstname} {self.lastname})"
     def getWaitList(self):#return studentcourse that student is waiting for
         return StudentCourse.query.filter_by(studentId=self.ownerId, waiting=True)
     def enrolled(self):
@@ -89,7 +89,8 @@ class Instructor(db.Model):
 
     user = db.relationship('User', backref='instructorOwner', lazy=True)
     warnings = db.relationship('Warning', backref='targetInstructor', lazy=True)
-    complaints = db.relationship('Complaint', backref='target', lazy=True)
+    complaints = db.relationship('InstructorComplaint', backref='owner', lazy=True)
+
     def __repr__(self):
         return '<instructorid: %r>' % self.ownerId
 
@@ -199,15 +200,31 @@ class Period(db.Model):
         return '<period: %r>' % self.period
 
 
+
+
+
 class Complaint(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     complainerId = db.Column(db.Integer,db.ForeignKey('student.ownerId'), nullable=False)
-    targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), db.ForeignKey('instructor.ownerId'))
+    targetId = db.Column(db.Integer, db.ForeignKey('user.ownerId'))
     message = db.Column(db.Text, nullable=False, default='')
     processed = db.Column(db.Boolean, nullable=False, default=False) #check the complaint is processed by admin or not
 
+   # owner = db.relationship
+
     def __repr__(self):
         return '<complainer: %r, complainee: %r>' % (self.complainerId, self.targetId)
+
+class InstructorComplaint(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
+    complainerId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'), nullable=False)
+    targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), nullable=False)
+    reason = db.Column(db.Enum("Warning", "De-Register", "Other"), nullable=False)
+    message = db.Column(db.Text, nullable=False, default='')
+    processed = db.Column(db.Boolean, nullable=False, default=False)  # check the complaint is processed by admin or not
+    #result = ????
+    def __repr__(self):
+        return f"InstructorComplaint('{self.id}, {self.reason},  {self.complainerId}, {self.targetId}, {self.processed}')"
 
 
 class Warning(db.Model):

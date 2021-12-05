@@ -103,15 +103,36 @@ class CreateCourseForm(FlaskForm):
 
 
 class WarningForm(FlaskForm):
-    # message = QuerySelectMultipleField(
-    #     'Complaint message',
-    #     validators=[DataRequired()],
-    #     query_factory = lambda: Complaint.query,
-    #     widget=widgets.Select(multiple=False),
-    #     get_label='message'
-    # )
-    message = TextAreaField('Warning message', validators=[DataRequired()])
+    # the targetId will change to current reviewed people id by get method when first time open the routes
+    message = QuerySelectMultipleField(
+        'Complaint message',
+        validators=[DataRequired()],
+        query_factory = lambda: Complaint.query,
+        widget=widgets.Select(multiple=False),
+        get_label='message'
+    )
     submit = SubmitField('Confirm')
+    def __init__(self, myParam: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.targetId = myParam
+        self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
+                                                                   not Complaint.processed).all()
+
+class DeregisterForm(FlaskForm):
+    courseId = IntegerField('Course', validators=[DataRequired()], render_kw={'readonly': True})
+    message = QuerySelectMultipleField(
+        'Complaint message',
+        validators=[DataRequired()],
+        query_factory = lambda : Complaint.query,
+        widget=widgets.Select(multiple=False),
+        get_label='message',
+    )
+    submit = SubmitField('Confirm')
+    def __init__(self, myParam: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.targetId = myParam
+        self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
+                                                                   not Complaint.processed).all()
 
 class SystemForm(FlaskForm):
     taboo_list = TextAreaField('Taboo List')

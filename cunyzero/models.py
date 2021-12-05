@@ -103,7 +103,7 @@ class Student(db.Model):
         total = 0.0
         period = Period.query.all()[0]
         for sc in self.courses:
-            if sc.gpa and sc.creationSemester()==period-1:
+            if sc.gpa and sc.creationSemester()==period.period-1:
                 if sc.getFloat()!='W':
                     count+=1
                     total+=sc.getFloat()

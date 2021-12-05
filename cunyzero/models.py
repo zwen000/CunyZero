@@ -1,3 +1,4 @@
+from flask.helpers import flash
 from wtforms.fields.core import DecimalField
 from cunyzero import db, login_manager
 from datetime import datetime
@@ -37,6 +38,8 @@ class Admin(db.Model): #Admin.user, User.adminOwner
 
     def __repr__(self):
         return f"Admin('{self.ownerId}')"
+    def getTabooList(self):
+        return self.taboo_list.split(" ")
 
 class Visitor(db.Model): 
     ownerId = db.Column(db.Integer, primary_key=True, unique=True, nullable=False)
@@ -278,6 +281,7 @@ class StudentCourse(db.Model):
     gpa = db.Column(db.Text,nullable = True)
     rating = db.Column(db.Integer, nullable = True)
     review = db.Column(db.Text, nullable = True)
+    visible = db.Column(db.Boolean, nullable = False, default=True)#if too many taboo words hide review
     waiting = db.Column(db.Boolean,nullable = False, default=False)
 
     def __repr__(self):
@@ -309,6 +313,32 @@ class StudentCourse(db.Model):
     def getCourseName(self):
         course = Course.query.get(self.courseId)
         return course.coursename
+    def checkTabooWords(self):#check if review has taboowords and removes them and flags review accordingly
+        review= self.review
+        tempReview = self.review
+        tabooList = Admin.query.all()[0].getTabooList()
+        count = 0
+        for tabooWord in tabooList:
+            temp = review
+            while(tabooWord in temp):
+                count+=1
+                temp = temp[temp.find(tabooWord)+1:]
+                tempReview=tempReview.replace(tabooWord, "*")
+        #1-2 taboo words replace with *, +1 to warning
+        if count==1 or count==2:
+            self.review=tempReview
+            self.student.warning+=1
+            warning = Warning(userId=self.studentId, message="Review has 1-2 Taboo Words, Warning +1")
+            db.session.add(warning)
+            flash("1-2 Taboo Words! Warning +1", 'danger')
+        #>=3 taboo words reviews invisible, +2 to warning
+        elif count>=3:
+            self.visible=False
+            self.student.warning+=2
+            warning = Warning(userId=self.studentId, message="Review has >=3 Taboo Words, Warning +2")
+            db.session.add(warning)
+            flash("3 of more Taboo Words! Review is now invisible, Warning+2!", 'danger')
+        db.session.commit()
 
 class Period(db.Model):#set-up, registration, running, or grading period
     id = db.Column(db.Integer, primary_key=True)

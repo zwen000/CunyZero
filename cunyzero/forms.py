@@ -89,7 +89,7 @@ class CreateCourseForm(FlaskForm):
         validators=[DataRequired()], 
         query_factory = lambda: Instructor.query,
         widget=widgets.Select(multiple=False),
-        get_label='user.username'
+        get_label='firstname'
     )                                
     startPeriod = IntegerField('Start Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
     endPeriod = IntegerField('End Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
@@ -117,7 +117,7 @@ class WarningForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.targetId = myParam
         self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
-                                                                   not Complaint.processed).all()
+                                                                   Complaint.processed == 0).all()
 
 class DeregisterForm(FlaskForm):
     courseId = IntegerField('Course', validators=[DataRequired()], render_kw={'readonly': True})
@@ -129,11 +129,11 @@ class DeregisterForm(FlaskForm):
         get_label='message',
     )
     submit = SubmitField('Confirm')
-    # def __init__(self, myParam: int, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.targetId = myParam
-    #     self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
-    #                                                                not Complaint.processed).all()
+    def __init__(self, myParam: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.targetId = myParam
+        self.message.query_factory = lambda:Complaint.query.filter(Complaint.targetId == self.targetId,
+                                                                   Complaint.processed == 0).all()
 
 class SystemForm(FlaskForm):
     taboo_list = TextAreaField('Taboo List')
@@ -157,6 +157,3 @@ class ReviewForm(FlaskForm):
 
 class GraduationForm(FlaskForm):
     submit=SubmitField('Apply for Graduation')
-    accept=SubmitField('Accept Application')
-    reject=SubmitField('Reject Application')
-

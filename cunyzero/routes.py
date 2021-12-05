@@ -330,28 +330,20 @@ def instructor_manage():
 @login_required
 @app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def individual_review(role, owner_id):
-    form2=GraduationForm()
-    form = WarningForm()
-    
-    if form2.validate_on_submit():
-        if current_user.role == "Admin":
-            if form2.accept.data:
-                application=GraduationApplication.query.filter_by(studentId=owner_id).first()
-                application.approval= True
-                db.session.commit()
-            elif form2.reject.data:
-                application=GraduationApplication.query.filter_by(studentId=owner_id).first()
-                application.approval= False
-                db.session.commit()
-        elif current_user.role == "Student":
-            if form2.submit.data:
-                application=GraduationApplication(studentId=owner_id)
-                db.session.add(application)
-                db.seesion.commit(application)    
+    graduation_form=GraduationForm()
+    if graduation_form.validate_on_submit():
+        graduation_application = GraduationApplication.query.filter_by(approval=None, studentId=owner_id).first()
+        if graduation_application:
+            flash(f'You have an graduation application processing!', 'danger')
+            return redirect(url_for("individual_review", role=role, owner_id=owner_id))
+        else:
+            application=GraduationApplication(studentId=owner_id)
+            db.session.add(application)
+            db.session.commit()
+            flash(f'Applcation test!','success')
+            return redirect(url_for("individual_review", role=role, owner_id=owner_id))
 
-
-    if form.validate_on_submit():
-        warning = Warning(userId=owner_id, message=form.message.data)
+    # Admin able to warning/deregister student or instructor base on complaint
     warning_form = WarningForm(owner_id)
     deregister_form = DeregisterForm(owner_id)
     if warning_form.validate_on_submit():
@@ -392,7 +384,7 @@ def individual_review(role, owner_id):
                     past_courses.append(course)
         return render_template("individual-review.html", title="Student Review", person_be_reviewed=student,
                                program=program, current_courses=courses, past_courses=past_courses,
-                               warning_form=warning_form, deregister_form=deregister_form,form2=form2)
+                               warning_form=warning_form, deregister_form=deregister_form, graduation_form=graduation_form)
     if role == "Instructor":
         instructor = Instructor.query.get(owner_id)
         all_courses = Course.query.filter_by(instructorId=owner_id)
@@ -405,7 +397,7 @@ def individual_review(role, owner_id):
                 past_courses.append(course)
         return render_template("individual-review.html", title="Instructor Review", person_be_reviewed=instructor,
                                current_courses=courses, past_courses=past_courses, warning_form=warning_form,
-                               deregister_form=deregister_form)
+                               deregister_form=deregister_form, graduation_form=graduation_form)
 
 
 @login_required

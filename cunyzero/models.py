@@ -323,6 +323,7 @@ class StudentCourse(db.Model):
         review= self.review
         tempReview = self.review
         tabooList = Admin.query.all()[0].getTabooList()
+        tabooList = [word for word in tabooList if word!='']
         count = 0
         for tabooWord in tabooList:
             temp = review

@@ -611,7 +611,7 @@ def update_rating(courseId, studentId):#show specific rating
                 review.checkTabooWords()#check taboo words and performs task logic accordingly
                 db.session.commit()
                 # automate update the course avg rating
-                course = Course.query.get(review.courseId)
+                course = Course.query.filter_by(id=review.courseId).first()
                 course.rating = course.getAvgRating()
                 db.session.commit()
                 flash("Review Updated", "success")

@@ -16,6 +16,7 @@
 
                 <div>Status: {{ person_be_reviewed.status }}</div>
 
+                {# check if user is student, then student can apply for graduation #}
                 {% if current_user.role == "Student"%}
                      <form method="POST", action="">
                         {{ graduation_form.hidden_tag() }} <!--CSRF token-->

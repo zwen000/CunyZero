@@ -134,4 +134,6 @@ class ReviewForm(FlaskForm):
     submit = SubmitField('Update')
 
 
+class GraduationForm(FlaskForm):
+    submit=SubmitField('Apply for Graduation')
 

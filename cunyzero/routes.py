@@ -327,6 +327,7 @@ def instructor_manage():
 @login_required
 @app.route('/<string:role>/<int:owner_id>', methods=['GET', 'POST'])
 def individual_review(role, owner_id):
+    form2=GraduationForm()
     form = WarningForm()
     if form.validate_on_submit():
         warning = Warning(userId=owner_id, message=form.message.data)
@@ -350,7 +351,9 @@ def individual_review(role, owner_id):
                 else:
                     past_courses.append(course)
         return render_template("individual-review.html", title="Student Review", person_be_reviewed=student,
-                               program=program, current_courses=courses, past_courses=past_courses, form=form)
+                               program=program, current_courses=courses, past_courses=past_courses, form=form,form2=form2)
+            
+        
     if role == "Instructor":
         instructor = Instructor.query.get(owner_id)
         all_courses = Course.query.filter_by(instructorId=owner_id)
@@ -567,3 +570,13 @@ def update_rating(courseId, studentId):#show specific rating
         return render_template("rating.html", form=form, review=review, owner=owner, user=user)
     else:
         return redirect(url_for('course_rating',courseId=courseId))
+    warnings = Warning.query.filter_by()
+    return render_template("review-warning-page.html", warnings=warnings)
+
+@app.route('/graduation',methods=['GET', 'POST'])
+def graduation():
+    form=GraduationForm()
+        
+    return render_template("graduation.html")
+    
+    

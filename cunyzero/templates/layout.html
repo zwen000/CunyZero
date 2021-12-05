@@ -11,9 +11,9 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='uicons-regular-rounded.css') }}">
 
     {% if title %}
-        <title>Cuny Zero - {{ title }}</title>
+        <title>Grad School Zero - {{ title }}</title>
     {% else %}
-        <title>Cuny Zero</title>
+        <title>Grad School Zero</title>
     {% endif %}
 </head>
 <body id="bootstrap-overrides">
@@ -44,21 +44,27 @@
                             {% elif current_user.role == 'Instructor' %}
                                 <a class="nav-item nav-link" href="{{ url_for('course_manage') }}">Course</a>
                                 <a class="nav-item nav-link" href="{{ url_for('individual_review',role='Instructor',owner_id=current_user.ownerId)}}">Instructor</a>
+
                                 <a class="nav-item nav-link" href="{{url_for('user_warning_page', userId=current_user.ownerId)}}">Warning</a>
+
+                                <a class="nav-item nav-link" href= {{ url_for('instructor_file_complaint') }}>Complaint</a>
+
                             {% elif current_user.role == 'Student' %}
                                 <a class="nav-item nav-link" href="{{url_for('register_course')}}">Course</a>
                                 <!-- <a class="nav-item nav-link" href="#">Current Course</a>
                                 <a class="nav-item nav-link" href="#">Course History</a> -->
                                 <a class="nav-item nav-link" href="{{ url_for('individual_review',role='Student',owner_id=current_user.ownerId)}}">Student</a>
+
                                 <a class="nav-item nav-link" href="{{url_for('user_warning_page', userId=current_user.ownerId)}}">Warning</a>
-                                <a class="nav-item nav-link" href="#">Complaint</a>
+                                <a class="nav-item nav-link" href="{{ url_for('student_file_complaint') }}">Complaint</a>
+
                             {% endif %}
                                 <a class="nav-item nav-link">{{current_user.getPeriodName()}}</a>
                         {% endif %}
                     </div>
                     <!-- Navbar Right Side -->
                     <div class="navbar-nav">
-                        <span class="nav-item nav-link" id="split"> | </span>
+<!--                        <span class="nav-item nav-link" id="split"> | </span>-->
                         {% if current_user.is_authenticated %}
                             {% if current_user.role == 'Visitor' %}
                                 <a class="nav-item nav-link" href="{{ url_for('enrollment_application') }}">Enrollment</a>

@@ -79,14 +79,14 @@ period = Period(period=2)#course grading period
 db.session.add(period)
 
 #testing review
-studentCourse2.review="testing review"
-studentCourse2.rating=2
-studentCourse3.review="testing review again"
-studentCourse3.rating=3
-studentCourse4.review="testing review still"
-studentCourse4.rating=4
-studentCourse5.review="testing review done"
-studentCourse5.rating=5
+# studentCourse2.review="testing review"
+# studentCourse2.rating=2
+# studentCourse3.review="testing review again"
+# studentCourse3.rating=3
+# studentCourse4.review="testing review still"
+# studentCourse4.rating=4
+# studentCourse5.review="testing review done"
+# studentCourse5.rating=5
 
 db.session.commit()
 

@@ -37,7 +37,7 @@
                         <li> Enrollment Total: {{ course.getEnrolledTotal() }} </li>
                     </ul>
                     <ul style="list-style-type: none">
-                        <li> Wait List Capacity: {{ course.waitlist_capacity }} </li>
+                        <li> Wait List Capacity: {{ course.waitListCapacity }} </li>
                         <li> Wait List Total: {{ course.getWaitlistTotal() }} </li>
                     </ul>
                 </div>
@@ -65,7 +65,7 @@
                         <tr>
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
-                            <td> {{ programs[student.Student.programId].name }} </td>
+                            <td> {{ programs[student.Student.programId - 1].name }} </td>
                             {% if current_user.role == "Instructor" and period.getPeriodName() == "Grading Period"%}
                                 <td>
                                     <form method="post">
@@ -126,7 +126,7 @@
                         <tr>
                             <td> {{ student.Student.firstname }} {{ student.Student.lastname }}</td>
                             <td> {{ student.Student.ownerId }}</td>
-                            <td> {{ programs[student.Student.programId].name }} </td>
+                            <td> {{ programs[student.Student.programId - 1].name }} </td>
                             <td>
                                 {% if current_user.role == "Instructor"%}
                                     <form method="post">

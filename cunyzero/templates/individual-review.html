@@ -17,7 +17,7 @@
                 <div>Status: {{ person_be_reviewed.status }}</div>
 
                 {# check if user is student, then student can apply for graduation #}
-                {% if current_user.role == "Student"%}
+                {% if current_user.role == "Student" and person_be_reviewed.status !="Graduated"%}
                      <form method="POST", action="">
                         {{ graduation_form.hidden_tag() }} <!--CSRF token-->
                         <div class="form-group mb-0">
@@ -123,7 +123,7 @@
                                 </td>
                                 <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }}</td>
                                 <td> {{ course.getEnrolledTotal() }} </td>
-                                <td> rating </td>
+                                <td> {{ course.rating }} </td>
                             {% elif current_user.role == "Student" %}
                                 <td> {{ course.coursename }} </td>
                                 <td> {{ course.getInstructorName() }} </td>

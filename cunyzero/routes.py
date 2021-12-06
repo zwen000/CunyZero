@@ -294,7 +294,8 @@ def create_course():
     if current_user.role != "Admin":
         return redirect(url_for('home'))
     form = CreateCourseForm()
-    if form.validate_on_submit():
+    period = Period.query.all()[0].getPeriodName()
+    if form.validate_on_submit() and period == "Course Set-up Period":
         if form.instructor.data[0].status!="Employed":
             flash('Instructor not available!','danger')
         else:
@@ -303,11 +304,13 @@ def create_course():
                 dayofweek+=i
             course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data,
                             startPeriod=form.startPeriod.data, endPeriod=form.endPeriod.data,
-                            capacity=form.capacity.data, waitlist_capacity=form.waitListCapacity.data)
+                            capacity=form.capacity.data, waitListCapacity=form.waitListCapacity.data)
             db.session.add(course)
             db.session.commit()
             flash(f'You have successfully created new course {course.coursename}', 'success')
         return redirect(url_for("course_manage"))
+    else:
+        flash(f'The current period is {period}', 'danger')
     return render_template("create-course.html", form=form)
 
 
@@ -405,18 +408,24 @@ def course_manage():
     current_courses = Course.query.filter_by(status="Open")
     past_courses = Course.query.filter_by(status="Finished")
     courseId = request.form.get("Cancel")
+    period = Period.query.all()[0].getPeriodName()
     if courseId:
-        courseId = int(courseId)
-        course = Course.query.get(courseId)
-        # course can only safe delete when the it don't have any students,
-        if course.getEnrolledTotal() == 0:
-            db.session.delete(course)
-            db.session.commit()
-            flash(f'The course {course.coursename} is deleted successfully', 'success')
-            return redirect(url_for("course_manage"))
+        if period != "Course Set-up Period":
+            flash(f'The course can\'t be canceled during {period}!', 'danger')
         else:
-            flash(f'The course {course.coursename} can\'t be deleted since there are students registered!', 'danger')
-            return redirect(url_for("course_manage"))
+            courseId = int(courseId)
+            course = Course.query.get(courseId)
+            # course can only safe delete when the it don't have any students,
+            if course.getEnrolledTotal() == 0:
+                db.session.delete(course)
+                db.session.commit()
+                flash(f'The course {course.coursename} is deleted successfully', 'success')
+                return redirect(url_for("course_manage"))
+            else:
+                flash(f'The course {course.coursename} can\'t be deleted since there are students registered!',
+                      'danger')
+                return redirect(url_for("course_manage"))
+
     return render_template("course-manage.html", title="Course Management", current_courses=current_courses,
                            past_courses=past_courses)
 
@@ -558,13 +567,15 @@ def warning_page(userId, warningId):# show specific warning
                 elif form.reject.data:
                     warning.result = "Justification Rejected"
                     flash("Justification Rejected",'success')
-                return redirect(url_for('review_warning_page'))
             else:
                 flash("Already Processed",'danger')
+            db.session.commit()
+            return redirect(url_for('review_warning_page'))
         else:
             warning.justification=form.justification.data
             flash("Justification Updated",'success')
-        db.session.commit()
+            db.session.commit()
+            return redirect(url_for('user_warning_page',userId=userId))
     elif request.method=='GET': 
         form.justification.data = warning.justification
 
@@ -592,11 +603,14 @@ def update_rating(courseId, studentId):#show specific rating
     owner = Student.query.filter_by(ownerId=studentId).first()
     review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
     if not review.visible:
-        flash("Taboo Words>3 Review is not invisible!", 'danger')
+        flash("Taboo Words>3 Review is not visible!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
     period = Period.query.all()[0].getPeriodName()
     if review.waiting==True:
         flash("cannot leave review for waitlisted course!",'danger')
+        return redirect(url_for('course_rating',courseId=courseId))
+    if review.rating:
+        flash("review already posted for this course!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
     if form.submit.data:
         if period=="Course Running Period" or period=="Grading Period":
@@ -606,7 +620,7 @@ def update_rating(courseId, studentId):#show specific rating
                 review.checkTabooWords()#check taboo words and performs task logic accordingly
                 db.session.commit()
                 # automate update the course avg rating
-                course = Course.query.get(review.courseId)
+                course = Course.query.filter_by(id=review.courseId).first()
                 course.rating = course.getAvgRating()
                 db.session.commit()
                 flash("Review Updated", "success")

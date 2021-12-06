@@ -89,7 +89,7 @@ class CreateCourseForm(FlaskForm):
         validators=[DataRequired()], 
         query_factory = lambda: Instructor.query,
         widget=widgets.Select(multiple=False),
-        get_label='firstname'
+        get_label=lambda instructor: f"{instructor.ownerId}: {instructor.firstname} {instructor.lastname}"
     )                                
     startPeriod = IntegerField('Start Period', validators=[DataRequired(), NumberRange(min=1,max=9)])
     endPeriod = IntegerField('End Period', validators=[DataRequired(), NumberRange(min=1,max=9)])

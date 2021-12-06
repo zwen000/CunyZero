@@ -31,8 +31,8 @@
                         <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
                         {% if current_user.is_authenticated %}
                             {% if current_user.role == 'Visitor' %}
-                                <a class="nav-item nav-link" href="#">Course</a>
-                                <a class="nav-item nav-link" href="#">Instructor</a>
+                                <a class="nav-item nav-link" href="{{ url_for('course_manage') }}">Course</a>
+                                <a class="nav-item nav-link" href="{{ url_for('instructor_manage') }}">Instructor</a>
                             {% elif current_user.role == 'Admin' %}
                                 <a class="nav-item nav-link" href="{{ url_for('course_manage') }}">Course</a>
                                 <a class="nav-item nav-link" href="{{ url_for('student_manage') }}">Student</a>
@@ -40,7 +40,6 @@
                                 <a class="nav-item nav-link" href="{{ url_for('complaint_manage') }}">Complaint</a>
                                 <a class="nav-item nav-link" href="{{ url_for('application_manage') }}">Application</a>
                                 <a class="nav-item nav-link" href="{{ url_for('review_warning_page') }}">Warning</a>
-                                <a class="nav-item nav-link" href="{{ url_for('change_period') }}">System</a>
                             {% elif current_user.role == 'Instructor' %}
                                 <a class="nav-item nav-link" href="{{ url_for('course_manage') }}">Course</a>
                                 <a class="nav-item nav-link" href="{{ url_for('individual_review',role='Instructor',owner_id=current_user.ownerId)}}">Instructor</a>
@@ -57,19 +56,22 @@
 
                                 <a class="nav-item nav-link" href="{{url_for('user_warning_page', userId=current_user.ownerId)}}">Warning</a>
                                 <a class="nav-item nav-link" href="{{ url_for('student_file_complaint') }}">Complaint</a>
-
                             {% endif %}
-                                <a class="nav-item nav-link">{{current_user.getPeriodName()}}</a>
                         {% endif %}
                     </div>
                     <!-- Navbar Right Side -->
-                    <div class="navbar-nav">
+                    <div class="border-left navbar-nav">
 <!--                        <span class="nav-item nav-link" id="split"> | </span>-->
                         {% if current_user.is_authenticated %}
                             {% if current_user.role == 'Visitor' %}
                                 <a class="nav-item nav-link" href="{{ url_for('enrollment_application') }}">Enrollment</a>
                                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                             {% else %}
+                                {% if current_user.role == "Admin" %}
+                                    <a class="nav-item nav-link" href="{{ url_for('change_period') }}">{{current_user.getPeriodName()}}</a>
+                                {% else %}
+                                     <a class="nav-item nav-link">{{current_user.getPeriodName()}}</a>
+                                {% endif %}
                                 <a class="nav-item nav-link" href="{{ url_for('account') }}">Account</a>
                                 <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                             {% endif %}

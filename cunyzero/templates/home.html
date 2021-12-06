@@ -1,5 +1,10 @@
 {% extends "layout.html"%}
 {% block content %}
+    <div class="content-section">
+        <div class="h3">
+            Welcome to GradSchoolZero!
+        </div>
+    </div>
     {% if courses %}
         {% with course = courses[-1] %}
             <article class="media content-section">
@@ -10,7 +15,7 @@
                     <p class="article-content"><strong>Course Name:</strong> {{ course.coursename }}</p>
                     <p class="article-content"><strong>Instructor:</strong> {{ course.getInstructorName() }}</p>
                     <p class="article-content"><strong>Status:</strong> {{ course.status }}</p>
-                    <p class="article-content"><strong>Rate:</strong> {{ course.rating }}</p>
+                    <p class="article-content"><strong>Rate:</strong> {{ "%.2f"|format(course.rating) }}</p>
                 </div>
             </article>
         {% endwith %}
@@ -23,7 +28,7 @@
             <p class="article-content"><strong>Course Name:</strong> {{ course.coursename }}</p>
             <p class="article-content"><strong>Instructor:</strong> {{ course.getInstructorName() }}</p>
             <p class="article-content"><strong>Status:</strong> {{ course.status }}</p>
-            <p class="article-content"><strong>Rate:</strong> {{ course.rating }}</p>
+            <p class="article-content"><strong>Rate:</strong> {{ "%.2f"|format(course.rating) }}</p>
             </div>
             </article>
         {% endwith %}
@@ -46,7 +51,7 @@
                 <p class="article-content"><strong>Student Name:</strong> {{ student.Student.firstname }} {{ student.Student.lastname }}</p>
                 <p class="article-content"><strong>Major:</strong> {{ student.Program.name }}</p>
                 <p class="article-content"><strong>Status:</strong> {{ student.Student.status }}</p>
-                <p class="article-content"><strong>GPA:</strong> {{ student.Student.gpa }}</p>
+                <p class="article-content"><strong>GPA:</strong> {{ "%.2f"|format(student.Student.gpa) }}</p>
             </div>
         </article>
         {% endwith %}

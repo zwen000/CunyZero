@@ -234,13 +234,13 @@ def graduation_application_confirm(application_id):
     form = ApplicationReviewForm()
     application = GraduationApplication.query.filter_by(id=application_id).first()
     student = application.applicant
-    past_course = student.courses
+    past_courses = student.courses
     program_name = Program.query.filter_by(id=student.programId).first().name
     if form.validate_on_submit():
         if form.accept.data:
             application.approval = True
             application.justification = form.justification.data
-            student.status = "graduated"
+            student.status = "Graduated"
             db.session.commit()
             flash(f'Graduation Application for student ({student.firstname}'
                   f' {student.lastname}) has been accepted!', 'success')
@@ -249,6 +249,7 @@ def graduation_application_confirm(application_id):
             if form.justification.data != '':
                 application.approval = False
                 application.justification = form.justification.data
+                db.session.delete(application)
                 warning = Warning(userId=student.ownerId, message="Apply for graduation before meeting requirement.")
                 student.warning += 1
                 db.session.add(warning)
@@ -259,7 +260,7 @@ def graduation_application_confirm(application_id):
             else:
                 flash(f'Please provide your reason!', 'danger')
     return render_template("graduation-application-confirm.html", title="Graduation-Application-Confirm", form=form,
-                           student=student, past_course=past_course, program_name=program_name,
+                           student=student, past_courses=past_courses, program_name=program_name,
                            application=application)
 
 
@@ -268,6 +269,9 @@ def graduation_application_confirm(application_id):
 @app.route('/course/register', methods=['GET', 'POST'])
 def register_course():
     if current_user.role != "Student":
+        return redirect(url_for('home'))
+    if current_user.studentOwner.status=='Graduated':
+        flash("No access, You are graduated!", 'danger')
         return redirect(url_for('home'))
     if current_user.studentOwner.status=='Suspended':
         flash("No access, You are suspended!", 'danger')
@@ -279,14 +283,14 @@ def register_course():
         course = Course.query.filter_by(id=courseId).first()
         courseSize = StudentCourse.query.filter_by(courseId=courseId, waiting=False).count()
         enrolledCourseCount = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId, waiting=False).count()
-        if period.getPeriodName!= "" and not current_user.studentOwner.enrollmentPermission:
+        if period.getPeriodName() != "Course Registration Period" and not current_user.studentOwner.enrollmentPermission:
             flash('Not course registration period and no special permission to enroll!', 'danger')
         else:
             if enrolledCourseCount == 4:
                 flash('Already enrolled in 4, the maximum number of courses!', 'danger')
             else:
                 prevCourse = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).first()
-                if prevCourse.gpa and prevCourse.gpa!='F':# if student already has a non f grade
+                if prevCourse and prevCourse.gpa!='F':# if student already has a non f grade
                     flash(f'Course {course.coursename} already taken with grade {prevCourse.gpa}!','danger')
                 else:
                     if course.courseConflict(current_user.ownerId): 
@@ -331,9 +335,12 @@ def register_course():
 def create_course():
     if current_user.role != "Admin":
         return redirect(url_for('home'))
-    form = CreateCourseForm()
     period = Period.query.all()[0].getPeriodName()
-    if form.validate_on_submit() and period == "Course Set-up Period":
+    if period != "Course Set-up Period":
+        flash(f'The current period is {period}', 'danger')
+        return redirect(url_for('course_manage'))
+    form = CreateCourseForm(Period.query.all()[0].period)
+    if form.validate_on_submit():
         if form.instructor.data[0].status!="Employed":
             flash('Instructor not available!','danger')
         else:
@@ -342,13 +349,12 @@ def create_course():
                 dayofweek+=i
             course = Course(instructorId=form.instructor.data[0].ownerId, dayofweek=dayofweek, coursename=form.coursename.data,
                             startPeriod=form.startPeriod.data, endPeriod=form.endPeriod.data,
-                            capacity=form.capacity.data, waitListCapacity=form.waitListCapacity.data)
+                            capacity=form.capacity.data, waitListCapacity=form.waitListCapacity.data, creationPeriod=Period.query.all()[0].period)
             db.session.add(course)
             db.session.commit()
             flash(f'You have successfully created new course {course.coursename}', 'success')
         return redirect(url_for("course_manage"))
-    else:
-        flash(f'The current period is {period}', 'danger')
+
     return render_template("create-course.html", form=form)
 
 
@@ -372,15 +378,15 @@ def instructor_manage():
 def individual_review(role, owner_id):
     graduation_form=GraduationForm()
     if graduation_form.submit1.data and graduation_form.validate():
-        graduation_application = GraduationApplication.query.filter_by(approval=None, studentId=owner_id).first()
+        student = Student.query.filter_by(ownerId = owner_id).first()
+        graduation_application = GraduationApplication.query.filter_by(studentId=owner_id).first()
         if graduation_application:
             flash(f'You have an graduation application processing!', 'danger')
-
         else:
             application=GraduationApplication(studentId=owner_id)
             db.session.add(application)
             db.session.commit()
-            flash(f'Applcation test!','success')
+            flash(f'Graduation Application send!','success')
 
 
     # Admin able to warning/deregister student or instructor base on complaint
@@ -513,9 +519,13 @@ def course_review(course_Id):
         letter_grade = request.form.get(studentId)
         studentId = int(studentId) #change studentId from string to int
         student = [student for student in students if student.Student.ownerId == studentId][0]
-        student.StudentCourse.gpa = letter_grade
-        db.session.commit()
-        flash(f'{student.Student.firstname} {student.Student.lastname}\'s grade has been updated!', 'success')
+        if student.StudentCourse.gpa == "W":
+            flash(f'{student.Student.firstname} {student.Student.lastname} had been withdrawn from the class!', 'danger')
+
+        else:
+            student.StudentCourse.gpa = letter_grade
+            db.session.commit()
+            flash(f'{student.Student.firstname} {student.Student.lastname}\'s grade has been updated!', 'success')
     studentId_waiting = request.form.get("Approve")
     if studentId_waiting:
         studentId_waiting = int(studentId_waiting)
@@ -658,15 +668,18 @@ def update_rating(courseId, studentId):#show specific rating
     if form.submit.data:
         if period=="Course Running Period" or period=="Grading Period":
             if not review.gpa:
-                review.review=form.content.data
-                review.rating=form.rating.data
-                review.checkTabooWords()#check taboo words and performs task logic accordingly
-                db.session.commit()
-                # automate update the course avg rating
-                course = Course.query.filter_by(id=review.courseId).first()
-                course.rating = course.getAvgRating()
-                db.session.commit()
-                flash("Review Updated", "success")
+                if (not form.rating.data) or form.rating.data<1 or form.rating.data>5:
+                    flash("Rating should be integer, range 1-5", "danger")
+                else:
+                    review.review=form.content.data
+                    review.rating=form.rating.data
+                    review.checkTabooWords()#check taboo words and performs task logic accordingly
+                    db.session.commit()
+                    # automate update the course avg rating
+                    course = Course.query.filter_by(id=review.courseId).first()
+                    course.rating = course.getAvgRating()
+                    db.session.commit()
+                    flash("Review Updated", "success")
             else:
                 flash("GPA is out, reviews can no longer be written!", 'danger')
         else:

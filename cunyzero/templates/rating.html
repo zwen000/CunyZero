@@ -8,12 +8,12 @@
                     <div class="media-body">
                       <div class="article-metadata">
                         <a class="mr-2" href="#">{{ owner.firstname }}, {{ owner.lastname }}</a>
-                        <small class="text-muted">/{{ user.role }}, username: {{ user.username }}</small>
+                        <small class="text-muted">/student</small>
                       </div>
                       <form method="POST">
-                        <h2>
+
                             <div class="form-group col-md-5">
-                                <strong>{{ form.rating.label(class="form-control-label") }}</strong>
+                                <h2><strong>{{ form.rating.label(class="form-control-label") }}</strong></h2>
                                 {% if form.rating.errors %}
                                     {{ form.rating(class="form-control form-control-lg is-invalid") }}
                                     <div class="invalid-feedback">
@@ -25,7 +25,7 @@
                                     {{ form.rating(class="form-control form-control-lg") }}
                                 {% endif %}
                             </div>
-                        </h2>
+
                         <div class="form-group col-md-5">
                             <strong>{{ form.content.label(class="form-control-label") }}</strong>
                             {% if form.content.errors %}

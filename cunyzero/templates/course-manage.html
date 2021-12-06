@@ -12,14 +12,28 @@
         {% for current_course in current_courses %}
             <article class="media content-section col-md-12">
                 <div class="media-body row" style="position: relative; align-items: center">
-                <a class="col-md-3 border-left" href="{{ url_for('course_review',course_Id=current_course.id)}}">
-                    Name: {{ current_course.coursename}}
-                </a>
-                <a class="col-md-3 border-left" href="{{ url_for('individual_review',role='Instructor',owner_id=current_course.instructorId)}}">
-                    Instructor:  {{ current_course.getInstructorName() }}
-                </a>
+                {% if current_user.role == "Admin" %}
+                    <a class="col-md-3 border-left" href="{{ url_for('course_review',course_Id=current_course.id)}}">
+                        Name: {{ current_course.coursename}}
+                    </a>
+                    <a class="col-md-3 border-left" href="{{ url_for('individual_review',role='Instructor',owner_id=current_course.instructorId)}}">
+                        Instructor:  {{ current_course.getInstructorName() }}
+                    </a>
+                {% else %}
+                    <div class="col-md-3 border-left">
+                        Name: {{ current_course.coursename}}
+                    </div>
+                    <div class="col-md-3 border-left">
+                        Instructor:  {{ current_course.getInstructorName() }}
+                    </div>
+                {% endif %}
+
                 <div class="col-md-2 border-left">
                     Day: {{ current_course.dayofweek }}
+                    {{ current_course.startPeriod }} - {{ current_course.endPeriod }}
+                </div>
+                <div class="col-md-2 border-left">
+                    Enrolled: {{ current_course.getEnrolledTotal()}}
                 </div>
                 {% if current_user.role == "Admin" %}
                     <form method="POST">

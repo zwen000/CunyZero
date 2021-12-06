@@ -1,41 +1,44 @@
 {% extends "layout.html"%}
 {% block content %}
-{% for warning in warnings%}
-<article class="media content-section">
-    <div class="media-body">
-      <div class="article-metadata">
-        <a class="mr-2" >Warning# {{warning.id}}</a>
-        <small class="text-muted">Issued on Period# {{warning.semesterWarned}}</small>
-      </div>
-        <div class="container">
-            <strong><p class="article-content">Warning Info: </p></strong>
-            <div class=container><p class="article-content">{{warning.message}}</p></div>
-            <strong><p class="article-content">User Justification: </p></strong>
-            {% if warning.justification %}
-                <div class="container"><p class="article-content">{{warning.justification}}</p></div>
-            {% else %}
-                <div class="container"><p class="article-content">None</p></div>
-            {% endif %}
-            {% if warning.result== '' %}
-            <!-- if admin has not reviewed  -->
-                {% if current_user.role == 'Instructor' or current_user.role == 'Student' %}
-                    <strong><p>Admin Ruling</p></strong>
-                    <div class="container"><p>Pending</p></div>
-                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{url_for('warning_page',userId=warning.userId,warningId=warning.id)}}">
-                        Update Justification
-                    </a>
-                {% elif current_user.role == 'Admin' %}
-                    <a class="btn btn-outline-info" style="text-decoration: none;" href="{{url_for('warning_page',userId=warning.userId,warningId=warning.id)}}">
-                        Review
-                    </a>
-                {% endif %}
-            {% else %}
-            <!-- if admin already reviewed -->
-                <strong><p>Admin Ruling</p></strong>
-                <div class="container"><p>{{warning.result}}</p></div>
-            {% endif %}
-        </div>
-      </div>
-  </article>
-{% endfor %}
+    <div class="content-section">
+        <legend class="border-bottom mb-4"> Warning List </legend>
+        {% for warning in warnings%}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                <a class="mr-2" >Warning# {{warning.id}}</a>
+                <small class="text-muted">Issued on Period# {{warning.semesterWarned}}</small>
+                </div>
+                <div class="container">
+                    <strong><p class="article-content">Warning Info: </p></strong>
+                    <div class=container><p class="article-content">{{warning.message}}</p></div>
+                    <strong><p class="article-content">User Justification: </p></strong>
+                    {% if warning.justification %}
+                        <div class="container"><p class="article-content">{{warning.justification}}</p></div>
+                    {% else %}
+                        <div class="container"><p class="article-content">None</p></div>
+                    {% endif %}
+                    {% if warning.result== '' %}
+                    <!-- if admin has not reviewed  -->
+                        {% if current_user.role == 'Instructor' or current_user.role == 'Student' %}
+                            <strong><p>Admin Ruling</p></strong>
+                            <div class="container"><p>Pending</p></div>
+                            <a class="btn btn-outline-info" style="text-decoration: none;" href="{{url_for('warning_page',userId=warning.userId,warningId=warning.id)}}">
+                                Update Justification
+                            </a>
+                        {% elif current_user.role == 'Admin' %}
+                            <a class="btn btn-outline-info" style="text-decoration: none;" href="{{url_for('warning_page',userId=warning.userId,warningId=warning.id)}}">
+                                Review
+                            </a>
+                        {% endif %}
+                    {% else %}
+                    <!-- if admin already reviewed -->
+                        <strong><p>Admin Ruling</p></strong>
+                        <div class="container"><p>{{warning.result}}</p></div>
+                    {% endif %}
+                </div>
+              </div>
+      </article>
+    {% endfor %}
+    </div>
 {% endblock content %}

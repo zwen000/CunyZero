@@ -175,7 +175,9 @@ def instructor_application():
 @app.route('/application/list', methods=['GET', 'POST'])
 def application_manage():
     applications = Application.query.filter_by(approval=None)
-    return render_template("application-manage.html", title="Application-List", applications=applications)
+    graduation_applications = GraduationApplication.query.filter_by(approval=None)
+    return render_template("application-manage.html", title="Application-List", applications=applications,
+                           graduation_applications=graduation_applications)
 
 @login_required
 @app.route('/application/<int:application_id>', methods=['GET', 'POST'])
@@ -224,6 +226,42 @@ def application_confirm(application_id):
                 flash(f'Please provide your reason!', 'danger')
     return render_template("application-confirm.html", title="Application-Confirm", form=form,
                            application=application)
+
+
+@login_required
+@app.route('/graduation_application/<int:application_id>', methods=['GET', 'POST'])
+def graduation_application_confirm(application_id):
+    form = ApplicationReviewForm()
+    application = GraduationApplication.query.filter_by(id=application_id).first()
+    student = application.applicant
+    past_course = student.courses
+    program_name = Program.query.filter_by(id=student.programId).first().name
+    if form.validate_on_submit():
+        if form.accept.data:
+            application.approval = True
+            application.justification = form.justification.data
+            student.status = "graduated"
+            db.session.commit()
+            flash(f'Graduation Application for student ({student.firstname}'
+                  f' {student.lastname}) has been accepted!', 'success')
+            return redirect(url_for('application_manage'))
+        if form.reject.data:
+            if form.justification.data != '':
+                application.approval = False
+                application.justification = form.justification.data
+                warning = Warning(userId=student.ownerId, message="Apply for graduation before meeting requirement.")
+                student.warning += 1
+                db.session.add(warning)
+                db.session.commit()
+                flash(f'Graduation Application for student ({student.firstname}'
+                      f' {student.lastname}) has been rejected!One warning send to student!', 'danger')
+                return redirect(url_for('application_manage'))
+            else:
+                flash(f'Please provide your reason!', 'danger')
+    return render_template("graduation-application-confirm.html", title="Graduation-Application-Confirm", form=form,
+                           student=student, past_course=past_course, program_name=program_name,
+                           application=application)
+
 
 # Student only
 #@login_required
@@ -350,11 +388,16 @@ def individual_review(role, owner_id):
     deregister_form = DeregisterForm(owner_id)
     if warning_form.submit2.data and warning_form.validate():
         warning = Warning(userId=owner_id, message=warning_form.message.data[0].message)
-        complaint = Complaint.query.get(warning_form.message.data[0].id)
-        complaint.processed = True
         db.session.add(warning)
         db.session.commit()
-        flash(f'The warning for Student id: {warning.userId} is submitted, reason is {warning_form.message.data[0].message}!', 'success')
+        if role == "Student":
+            warning.targetStudent.warning += 1
+        if role == "Instructor":
+            warning.targetInstructor.warning += 1
+        complaint = Complaint.query.get(warning_form.message.data[0].id)
+        complaint.processed = True
+        db.session.commit()
+        flash(f'The warning for {role} id: {warning.userId} is submitted, reason is {warning_form.message.data[0].message}!', 'success')
         return redirect(url_for("individual_review", role=role, owner_id=owner_id))
     if deregister_form.submit3.data and deregister_form.validate():
         period = Period.query.all()[0].getPeriodName()
@@ -639,11 +682,7 @@ def update_rating(courseId, studentId):#show specific rating
     warnings = Warning.query.filter_by()
     return render_template("review-warning-page.html", warnings=warnings)
 
-@app.route('/graduation',methods=['GET', 'POST'])
-def graduation():
-    form=GraduationForm()
-        
-    return render_template("graduation.html")
+
 
 @login_required
 @app.route('/instructor/complaint', methods=['GET', 'POST'])

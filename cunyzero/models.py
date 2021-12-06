@@ -385,7 +385,8 @@ class Period(db.Model):#set-up, registration, running, or grading period
                 instructor.status = "Employed"
             db.session.commit()
             # student whose semester gpa>3.75 or overall gpa>3.5 + 1 to honor
-            #student whose gpa <2 or failed same course twice terminated
+            # student whose gpa <2 or failed same course twice terminated
+            # student whose 2 < gpa < 2.25 + 1 to warning
             for student in Student.query.all():
                 overAllGpa = student.gpa
                 semesterGpa = student.getSemesterGpa()
@@ -394,6 +395,11 @@ class Period(db.Model):#set-up, registration, running, or grading period
                         student.honor+=1
                     elif overAllGpa<2:
                         student.terminate()
+                    elif overAllGpa>2 and overAllGpa<2.25:
+                        student.warning+=1
+                        warning = Warning(userId=student.ownerId, 
+                                        message="Gpa < 2.5 or >2, warning +1",
+                                        semesterWarned=self.period+1)
                 if semesterGpa:
                     if semesterGpa>3.75:
                         student.honor+=1
@@ -416,7 +422,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
                                                 message="Average class rating <2, warning +1",
                                                 semesterWarned=self.period+1)
                         db.session.add(warning)
-            #student failed same course twice terminated
+            # student failed same course twice terminated
             for student in Student.query.all():
                 dict={}#key,value: coursename,gpa ('F', 'A', etc.)
                 for sc in student.courses:

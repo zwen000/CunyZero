@@ -51,7 +51,7 @@ class ApplicationForm(FlaskForm):
     firstname = StringField('Firstname', validators=[DataRequired()])
     lastname = StringField('Lastname', validators=[DataRequired()])
     intro = TextAreaField('Self-Description', default="", validators=[Length(0, 300)])
-    GPA = DecimalField('GPA', validators=[DataRequired()])
+    GPA = DecimalField('GPA', validators=[DataRequired(), NumberRange(min=0,max=4.0)])
     program = QuerySelectMultipleField(
         'Program',
         allow_blank=True,
@@ -97,8 +97,12 @@ class CreateCourseForm(FlaskForm):
     waitListCapacity = IntegerField('Wait List Capacity', validators=[DataRequired(), NumberRange(min=0,max=100)])
     submit = SubmitField('Create')
 
+    def __init__(self, myParam: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.period = myParam
+
     def validate_coursename(self, coursename):
-            course = Course.query.filter_by(coursename=coursename.data).first()
+            course = Course.query.filter_by(coursename=coursename.data, creationPeriod=self.period).first()
             if course:
                 raise ValidationError("That coursename is taken, Please choose a different one.")
 
@@ -152,11 +156,11 @@ class JustifyWarningForm(FlaskForm):
     accept = SubmitField('Accept')
     reject = SubmitField('Reject') 
 
+
 class ReviewForm(FlaskForm):
-    rating = FloatField('Rating', validators=[DataRequired(), NumberRange(min=1,max=5)])
+    rating = IntegerField('Rating', validators=[DataRequired(), NumberRange(min=1,max=5)])
     content = TextAreaField('Review', validators=[DataRequired()])
     submit = SubmitField('Update')
-
 
 
 class InstructorComplaintForm(FlaskForm):

@@ -3,17 +3,16 @@
 {% block content %}
 <div class="row">
     <!-- <div class="content-section"> -->
-        <div class="col-7">
+        <div class="col-md-6">
             <table class="table table-primary">
                 <strong><label>Available Courses</label></strong>
                 <thead class="thead-blue">
                     <tr>
-                    <th scope="col">Course Name</th>
-                    <th scope="col">Start Period</th>
-                    <th scope="col">End Period</th>
-                    <th scope="col">Days of Week</th>
+                    <th scope="col-2">Course Name</th>
+                    <th scope="col">Days of week</th>
+                    <th scope="col">Time</th>
                     <th scope="col">Capacity</th>
-                    <th scope="col">Wait List Capacity</th>
+                    <th scope="col">Enrolled</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -21,11 +20,10 @@
                     {% for course in student.notEnrolled() %}
                         <tr>
                         <td>{{course.coursename}}</td>
-                        <td>{{course.startPeriod}}</td>
-                        <td>{{course.endPeriod}}</td>
                         <td>{{course.dayofweek}}</td>
+                        <td>{{course.startPeriod}}-{{course.endPeriod}}</td>
                         <td>{{course.capacity}}</td>
-                        <td>{{course.waitListCapacity}}</td>
+                        <td>{{course.getEnrolledTotal() }}</td>
                         <td>
                             <form method="POST">
                                 <button type="submit" name="Enroll" value="{{course.id}}" class="btn btn-success">Register</button>
@@ -36,17 +34,16 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-5" >
+        <div class="col-6" >
             <table class="table table-success">
                 <strong><label>My Courses</label></strong>
                 <thead class="thead-green">
                     <tr>
-                    <th scope="col">Course Name</th>
-                    <th scope="col">Start Period</th>
-                    <th scope="col">End Period</th>
-                    <th scope="col">Days of Week</th>
+                    <th scope="col-2">Course Name</th>
+                    <th scope="col">Days of week</th>
+                    <th scope="col">Time</th>
                     <th scope="col">Capacity</th>
-                    <th scope="col">Wait List Capacity</th>
+                    <th scope="col">Enrolled</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -54,11 +51,10 @@
                     {% for course in student.enrolled() %}
                         <tr>
                         <td>{{course.coursename}}</td>
-                        <td>{{course.startPeriod}}</td>
-                        <td>{{course.endPeriod}}</td>
                         <td>{{course.dayofweek}}</td>
+                        <td>{{course.startPeriod}}-{{course.endPeriod}}</td>
                         <td>{{course.capacity}}</td>
-                        <td>{{course.waitListCapacity}}</td>
+                        <td>{{course.getEnrolledTotal() }}</td>
                         <td>
                             <form method="POST">
                                 <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>
@@ -72,12 +68,11 @@
                 <strong><label>Wait Listed Courses</label></strong>
                 <thead class="thead-red">
                     <tr>
-                    <th scope="col">Course Name</th>
-                    <th scope="col">Start Period</th>
-                    <th scope="col">End Period</th>
-                    <th scope="col">Days of Week</th>
+                    <th scope="col-2">Course Name</th>
+                    <th scope="col">Days of week</th>
+                    <th scope="col">Time</th>
                     <th scope="col">Capacity</th>
-                    <th scope="col">Wait List Capacity</th>
+                    <th scope="col">Enrolled</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -85,10 +80,10 @@
                     {% for course in student.waitListed() %}
                         <tr>
                         <td>{{course.coursename}}</td>
-                        <td>{{course.startPeriod}}</td>
-                        <td>{{course.endPeriod}}</td>
                         <td>{{course.dayofweek}}</td>
+                        <td>{{course.startPeriod}}-{{course.endPeriod}}</td>
                         <td>{{course.capacity}}</td>
+                        <td>{{course.getEnrolledTotal() }}</td>
                         <th scope="col">Wait List Capacity</th>
                         <td>
                             <form method="POST">

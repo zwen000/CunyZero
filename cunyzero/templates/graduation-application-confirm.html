@@ -33,23 +33,22 @@
             <div class="lead border-bottom">
                 <strong>Previous Course</strong>
             </div>
-            <table class="table table-condensed">
+            <table class="table">
                 <thead class="thead-light">
                     <tr>
                         <th>Course Name</th>
                         <th>Instructor</th>
-                        <th>Days/Times</th>
+                        <th>Period</th>
                         <th>Grade</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for course in past_courses%}
                         <tr>
-                            <td> {{ course.coursename }} </td>
+                            <td> {{ course.getCourseName() }} </td>
                             <td> {{ course.getInstructorName() }} </td>
-                            <td> {{ course.dayofweek }} {{ course.startPeriod }} - {{ course.endPeriod }} </td>
-                            <td> {{ course.getStudentGrade(person_be_reviewed.ownerId) }}</td>
-                            <td>
+                            <td> {{ course.getTakingPeriod() }}</td>
+                            <td> {{ course.gpa }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

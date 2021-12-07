@@ -52,12 +52,10 @@
                 <th> </th>
                 <th> </th>
                 <th> </th>
-                <th> </th>
             </tr>
             <tr class="thead-secondary text-muted">
                 <th>EMPLID</th>
                 <th>Target</th>
-                <th>Reason</th>
                 <th>Message</th>
                 <th>Progress</th>
             </tr>
@@ -67,7 +65,6 @@
                 <tr>
                     <td>{{ complaint.targetId }}</td>
                     <td>{{ targets[complaint.targetId] }}</td>
-                    <td>{{ complaint.reason }}</td>
                     <td>{{ complaint.message[:10] + "..." if complaint.message|length >10 else complaint.message }}</td>
                     {% if complaint.processed %}
                         <td>Done</td>

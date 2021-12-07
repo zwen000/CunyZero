@@ -663,7 +663,7 @@ def instructor_file_complaint():
             targetId = i.ownerId
         complaint = InstructorComplaint(complainerId=current_user.ownerId,
                                 targetId=targetId,
-                                reason = form.reason.data,
+                                reason=form.reason.data,
                                 message=form.message.data)
         db.session.add(complaint)
         db.session.commit()
@@ -694,8 +694,8 @@ def student_file_complaint():
                               message=form.message.data)
         db.session.add(complaint)
         db.session.commit()
-
         flash(f'Your complaint to {form.target.data} is submitted', 'success')
+        return redirect(url_for("student_file_complaint"))
 
     return render_template("student_complaint.html", title="Student Complaint", form=form, history=history, targets=targets)
 

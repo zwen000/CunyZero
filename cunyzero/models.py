@@ -55,16 +55,16 @@ class Student(db.Model):
     lastname = db.Column(db.String(30), nullable=False)
     programId = db.Column(db.Integer, db.ForeignKey('program.id'), nullable=False)
     honor = db.Column(db.Integer, nullable = False, default=0)
-    status = db.Column(db.String(20), default='Employed')#suspended, graduated, etc.
+    status = db.Column(db.String(20), default='Employed') # suspended, graduated, etc.
     fine = db.Column(db.Float, nullable = False, default=0)
     gpa = db.Column(db.Float, nullable = False, default=0.0)
-    warning = db.Column(db.Integer, nullable = False, default=0)
+    warning = db.Column(db.Integer, nullable = False, default=0) # ???????????
     enrollmentPermission = db.Column(db.Boolean, nullable=False, default=False)#special enrollment permission
 
     user = db.relationship('User', backref='studentOwner', lazy=True)
     courses = db.relationship('StudentCourse', backref='student', lazy=True)
     application = db.relationship('GraduationApplication', backref='applicant', lazy=True)
-    warnings = db.relationship('Warning', backref='targetStudent', lazy=True)
+    warnings = db.relationship('Warning', backref='targetStudent', lazy=True) # get length by len(Student.warnings)
 
     #wait_list = db.relationship('StudentCourse', backref='student', lazy=True)
     complaints = db.relationship('Complaint', backref='owner', lazy=True)
@@ -543,13 +543,13 @@ class Complaint(db.Model):
         return user
 
 class InstructorComplaint(db.Model):
-    id = db.Column(db.Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True)
     complainerId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'), nullable=False)
     targetId = db.Column(db.Integer, db.ForeignKey('student.ownerId'), nullable=False)
     reason = db.Column(db.Enum("Warning", "De-Register", "Other"), nullable=False)
     message = db.Column(db.Text, nullable=False, default='')
     processed = db.Column(db.Boolean, nullable=False, default=False)  # check the complaint is processed by admin or not
-    #result = ????
+
     def __repr__(self):
         return f"InstructorComplaint('{self.id}, {self.reason},  {self.complainerId}, {self.targetId}, {self.processed}')"
 

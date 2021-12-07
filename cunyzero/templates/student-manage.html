@@ -13,7 +13,7 @@
                         Employ ID:  {{ student.ownerId }}
                     </div>
                     <div class="col-md-4 border-left">
-                        Program: {{ programs[student.programId].name }}
+                        Program: {{ programs[student.programId - 1].name }}
                     </div>
                     <div class="col-md-3 border-left border-right">
                         Status: {{ student.status }}

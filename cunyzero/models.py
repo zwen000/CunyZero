@@ -104,7 +104,7 @@ class Student(db.Model):
         period = Period.query.all()[0]
         for sc in self.courses:
             if sc.gpa and sc.creationSemester()==period.period-1:
-                if sc.getFloat()!='W':
+                if sc.gpa!='W':
                     count+=1
                     total+=sc.getFloat()
         if count == 0:
@@ -116,7 +116,7 @@ class Student(db.Model):
         total = 0.0
         for sc in self.courses:
             if sc.gpa:
-                if sc.getFloat()!='W':
+                if sc.gpa!='W':
                     count+=1
                     total+=sc.getFloat()
         if count == 0:
@@ -134,7 +134,7 @@ class Student(db.Model):
         #delete graduation application
         GraduationApplication.query.filter_by(studentId=self.ownerId).delete()
         #delete user
-        User.query.filter_by(ownerId=self.ownerId)
+        User.query.filter_by(ownerId=self.ownerId).delete()
         #delete student
         Student.query.filter_by(ownerId=self.ownerId).delete()
         db.session.commit()
@@ -200,7 +200,7 @@ class Program(db.Model):
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     instructorId = db.Column(db.Integer, db.ForeignKey('instructor.ownerId'))
-    coursename = db.Column(db.String(20), nullable = False, unique = True)
+    coursename = db.Column(db.String(20), nullable = False)
 
     creationPeriod = db.Column(db.Integer, nullable = True)#for period/semester task logic
     startPeriod = db.Column(db.Integer, nullable = False)#1-9
@@ -296,6 +296,12 @@ class StudentCourse(db.Model):
         return self.course.creationPeriod
     def getCourseName(self):
         return self.course.coursename
+    def getInstructorName(self):
+        course = Course.query.filter_by(id=self.courseId).first()
+        return course.getInstructorName()
+    def getTakingPeriod(self):
+        course = Course.query.filter_by(id=self.courseId).first()
+        return course.creationPeriod
 
     # The function will return a float grade base the the grade scale
     def getFloat(self):
@@ -400,6 +406,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
                         warning = Warning(userId=student.ownerId, 
                                         message="Gpa < 2.5 or >2, warning +1",
                                         semesterWarned=self.period+1)
+                        db.session.add(warning)
                 if semesterGpa:
                     if semesterGpa>3.75:
                         student.honor+=1
@@ -410,7 +417,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
                 if classGpa:
                     if classGpa<2.5 or classGpa>3.5:
                         course.instructor.warning+=1
-                        warning = Warning(userId=instructor.ownerId, 
+                        warning = Warning(userId=course.instructor.ownerId,
                                                 message="Class Gpa >3.5 or <2.5, until further justification, warning +1",
                                                 semesterWarned=self.period+1)
                         db.session.add(warning)
@@ -418,7 +425,7 @@ class Period(db.Model):#set-up, registration, running, or grading period
                 if avgRating:
                     if avgRating<2:
                         course.instructor.warning+=1
-                        warning = Warning(userId=instructor.ownerId, 
+                        warning = Warning(userId=course.instructor.ownerId,
                                                 message="Average class rating <2, warning +1",
                                                 semesterWarned=self.period+1)
                         db.session.add(warning)
@@ -499,6 +506,8 @@ class Period(db.Model):#set-up, registration, running, or grading period
                     db.session.add(warning)
                     for studentcourse in studentcourses:
                         studentcourse.student.enrollmentPermission = True
+                        db.session.delete(studentcourse)
+                    db.session.delete(course)
             # warn student with < 2 courses if no special permission
             for student in Student.query.all():
                 if not student.enrollmentPermission:

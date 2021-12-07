@@ -170,7 +170,7 @@ class InstructorComplaintForm(FlaskForm):
         widget=widgets.Select(multiple=False),
         get_label= lambda student: f"{student.ownerId} -- {student.firstname} {student.lastname}"
     )
-    reason = RadioField('Reason', choices=[('Warning','Warn the student'),('De-Register','De-Register the student'), ('Other', 'Other')], default='Warning', validators=[DataRequired()])
+    # reason = RadioField('Reason', choices=[('Warning','Warn the student'),('De-Register','De-Register the student'), ('Other', 'Other')], default='Warning', validators=[DataRequired()])
     message = TextAreaField('Detail', validators=[DataRequired()])
     submit = SubmitField('Submit')
 

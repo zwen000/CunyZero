@@ -701,7 +701,7 @@ def update_rating(courseId, studentId):#show specific rating
 @app.route('/instructor/complaint', methods=['GET', 'POST'])
 def instructor_file_complaint():
     form = InstructorComplaintForm()
-    history = current_user.instructorOwner.complaints
+    history = Complaint.query.filter_by(complainerId=current_user.ownerId).all()
     targets = dict()
     for complaint in history:
         student = Student.query.filter_by(ownerId=complaint.targetId).first()
@@ -713,9 +713,8 @@ def instructor_file_complaint():
         targetId = None
         for i in form.target.data:
             targetId = i.ownerId
-        complaint = InstructorComplaint(complainerId=current_user.ownerId,
+        complaint = Complaint(complainerId=current_user.ownerId,
                                 targetId=targetId,
-                                reason = form.reason.data,
                                 message=form.message.data)
         db.session.add(complaint)
         db.session.commit()
@@ -729,7 +728,7 @@ def instructor_file_complaint():
 @app.route('/student/complaint', methods=['GET', 'POST'])
 def student_file_complaint():
     form = StudentComplaintForm()
-    history = current_user.studentOwner.complaints
+    history = Complaint.query.filter_by(complainerId=current_user.ownerId).all()
     targets = dict()
     for complaint in history:
         target = User.query.filter_by(ownerId=complaint.targetId).first()
@@ -746,8 +745,8 @@ def student_file_complaint():
                               message=form.message.data)
         db.session.add(complaint)
         db.session.commit()
-
         flash(f'Your complaint to {form.target.data} is submitted', 'success')
+        return redirect(url_for("student_file_complaint"))
 
     return render_template("student_complaint.html", title="Student Complaint", form=form, history=history, targets=targets)
 

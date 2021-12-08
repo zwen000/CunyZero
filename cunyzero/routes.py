@@ -289,9 +289,10 @@ def register_course():
             if enrolledCourseCount == 4:
                 flash('Already enrolled in 4, the maximum number of courses!', 'danger')
             else:
-                prevCourse = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId).first()
-                if prevCourse and prevCourse.gpa!='F':# if student already has a non f grade
-                    flash(f'Course {course.coursename} already taken with grade {prevCourse.gpa}!','danger')
+                prevCourse = db.session.query(StudentCourse, Course)\
+                            .join(Course, Course.id == StudentCourse.courseId).filter(Course.coursename == course.coursename,StudentCourse.studentId == current_user.ownerId).first()
+                if prevCourse and prevCourse.StudentCourse.gpa!='F' and prevCourse.StudentCourse.gpa!='W':# if student already has a non f grade
+                    flash(f'Course {course.coursename} already taken with grade {prevCourse.StudentCourse.gpa}!','danger')
                 else:
                     if course.courseConflict(current_user.ownerId): 
                         flash(f'Course {course.coursename}, has conflict with enrolled course!','danger')

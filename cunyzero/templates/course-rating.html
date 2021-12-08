@@ -1,6 +1,36 @@
 {% extends 'layout.html' %}
 {% block content %}
 <div class="container">
+  <div class="content-section">
+    <article class="media content-section">
+      <div class="media-body">
+          <legend class="pb-2 border-bottom">
+              <strong>{{ course.coursename }}</strong>
+          </legend>
+          <div>
+              <strong>Instructor Name: </strong>
+              <span>{{ course.getInstructorName() }}</span>
+              <strong class="ml-2">Course Rate: </strong>
+              <span> {{ course.getAvgRating() }} </span>
+          </div>
+          <div>
+              <strong>Course ID: </strong>
+              <span>{{ course.id }}</span>
+              <strong class="ml-2">Course Status: </strong>
+              <span>{{ course.status }}</span>
+          </div>
+
+          <div>
+              <strong>Course Schedule: </strong>
+              <span>
+                  {{ course.dayofweek }}
+                  {{ course.startPeriod }} - {{ course.endPeriod }}
+              </span>
+          </div>
+
+      </div>
+  </article>
+  </div>
     {% if current_user.role=='Student' %}
         <a class="btn btn-outline-info" style="text-decoration: none;" href="{{ url_for('update_rating', courseId=courseId, studentId=current_user.ownerId) }}">
             Write Review

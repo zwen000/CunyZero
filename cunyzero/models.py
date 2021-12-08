@@ -208,7 +208,8 @@ class Course(db.Model):
     dayofweek = db.Column(db.String(30), nullable = False)#mo,tu,we,th,fr,sa,su if missing use -- 
     capacity = db.Column(db.Integer, default=30)
     status = db.Column(db.String(20), nullable = False, default="Open")#status like open, finished, cancelled, etc.
-    
+    credits = db.Column(db.Integer, default=3)
+
     #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
     waitListCapacity = db.Column(db.Integer, default=30)
     #gpa = db.Column(db.Float, nullable = True) # can be calculated with StudentCourse

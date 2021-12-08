@@ -319,7 +319,7 @@ def register_course():
         if periodName == "Course Registration Period" or sc.first().waiting==True:# registration period or waitlisted class, delete class
             sc.delete()
             flash(f'You have successfully dropped a course','success')
-        elif periodName == "Course Running Period" or period =="Grading Period":# running-grading period, drop with grade w
+        elif periodName == "Course Running Period" or periodName =="Grading Period":# running-grading period, drop with grade w
             StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId, waiting=False).first().gpa = 'W'
             flash(f'You have dropped a course with grade W','success')
         else:
@@ -640,7 +640,8 @@ def course_rating(courseId):#show all ratings for the course
     if not current_user.is_authenticated:
         return redirect(url_for('home'))
     reviews = StudentCourse.query.filter_by(courseId=courseId, visible=True)
-    return render_template("course-rating.html", reviews=reviews, courseId=courseId)
+    course = Course.query.filter_by(id=courseId).first()
+    return render_template("course-rating.html", reviews=reviews, courseId=courseId, course=course)
 
 #only for user who posted review
 #@login_required
@@ -655,6 +656,9 @@ def update_rating(courseId, studentId):#show specific rating
     user = User.query.filter_by(ownerId=studentId).first()
     owner = Student.query.filter_by(ownerId=studentId).first()
     review = StudentCourse.query.filter_by(courseId=courseId, studentId=studentId).first()
+    if review.course.status!="Open":
+        flash("Course already finished!", 'danger')
+        return redirect(url_for('course_rating',courseId=courseId))
     if not review.visible:
         flash("Taboo Words>3 Review is not visible!", 'danger')
         return redirect(url_for('course_rating',courseId=courseId))
@@ -680,6 +684,7 @@ def update_rating(courseId, studentId):#show specific rating
                     course.rating = course.getAvgRating()
                     db.session.commit()
                     flash("Review Updated", "success")
+                    return redirect(url_for('course_rating',courseId=courseId))
             else:
                 flash("GPA is out, reviews can no longer be written!", 'danger')
         else:

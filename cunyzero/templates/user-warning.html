@@ -10,19 +10,16 @@
                 <small class="text-muted">Issued on Period# {{warning.semesterWarned}}</small>
                 </div>
                 <div class="container">
-                    <strong><p class="article-content">Warning Info: </p></strong>
-                    <div class=container><p class="article-content">{{warning.message}}</p></div>
-                    <strong><p class="article-content">User Justification: </p></strong>
+                    <p class="article-content"><strong>Warning Info: </strong>{{warning.message}}</p>
                     {% if warning.justification %}
-                        <div class="container"><p class="article-content">{{warning.justification}}</p></div>
+                    <p class="article-content"><strong>User Justification: </strong> {{warning.justification}} </p>
                     {% else %}
-                        <div class="container"><p class="article-content">None</p></div>
+                    <p class="article-content"><strong>User Justification: </strong> none </p>
                     {% endif %}
                     {% if warning.result== '' %}
                     <!-- if admin has not reviewed  -->
                         {% if current_user.role == 'Instructor' or current_user.role == 'Student' %}
-                            <strong><p>Admin Ruling</p></strong>
-                            <div class="container"><p>Pending</p></div>
+                            <p class="article-content"><strong>Admin Ruling: </strong> pending </p>
                             <a class="btn btn-outline-info" style="text-decoration: none;" href="{{url_for('warning_page',userId=warning.userId,warningId=warning.id)}}">
                                 Update Justification
                             </a>
@@ -33,8 +30,7 @@
                         {% endif %}
                     {% else %}
                     <!-- if admin already reviewed -->
-                        <strong><p>Admin Ruling</p></strong>
-                        <div class="container"><p>{{warning.result}}</p></div>
+                        <p class="article-content"><strong>Admin Ruling: </strong> {{warning.result}} </p>
                     {% endif %}
                 </div>
               </div>

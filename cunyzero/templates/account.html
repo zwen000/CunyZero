@@ -19,7 +19,11 @@
                     <div>Username: {{ current_user.username }}</div>
                     {% if current_user.role != 'Admin' %}
                         <div class="row ml-0">
+                            {% if owner.status== 'Employed' %}
+                            <div class="mr-3">Status: Active</div>
+                            {% else %}
                             <div class="mr-3">Status: {{ owner.status }}</div>
+                            {% endif %}
                             <div class="mr-3">Warning: {{ owner.warning }}</div>
                         </div>
                         {% if current_user.role == 'Student' %}

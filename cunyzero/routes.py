@@ -23,7 +23,10 @@ def home():
             continue
     students = db.session.query(Student, Program)\
         .join(Program, Program.id == Student.programId).order_by(Student.gpa)
-    return render_template("home.html", courses=courses_without_null, students=students)
+    studentCount = students.count()
+    if studentCount>3:
+        studentCount=3
+    return render_template("home.html", courses=courses_without_null, students=students, studentCount = studentCount)
 
 
 @app.route('/register/', methods=['GET', 'POST'])
@@ -316,9 +319,16 @@ def register_course():
     if courseId:# Dropping a Course
         periodName = period.getPeriodName()
         courseId = int(courseId)
+        course = Course.query.filter_by(id=courseId).first()
         sc = StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId)
         if periodName == "Course Registration Period" or sc.first().waiting==True:# registration period or waitlisted class, delete class
             sc.delete()
+            waitListedStudents = StudentCourse.query.filter_by(waiting=True)
+            for sc in waitListedStudents:
+                if sc.course.coursename==course.coursename:
+                    sc.waiting=False
+                    break
+            db.session.commit()
             flash(f'You have successfully dropped a course','success')
         elif periodName == "Course Running Period" or periodName =="Grading Period":# running-grading period, drop with grade w
             StudentCourse.query.filter_by(courseId=courseId, studentId=current_user.ownerId, waiting=False).first().gpa = 'W'

@@ -415,7 +415,8 @@ class Period(db.Model):#set-up, registration, running, or grading period
             #instructor whose avgclass rating<2 receive 1 warning
             for course in Course.query.all():
                 classGpa = course.getClassGpa()
-                if classGpa:
+                print(f"Gpa, {classGpa}")
+                if classGpa!=None:
                     if classGpa<2.5 or classGpa>3.5:
                         course.instructor.warning+=1
                         warning = Warning(userId=course.instructor.ownerId,

@@ -36,18 +36,19 @@
         <article class="media content-section">
             <div class="media-body">
                 <div class="article-metadata">
-                    <H4>None Rated Course In the List</H4>
+                    <H4>No Rated Courses Yet</H4>
                 </div>
             </div>
         </article>
     {% endif %}
     {% if students %}
-        {% with student = students[-1] %}
+        <div class="article-metadata">
+            <H4>Top GPA Students</H4>
+        </div>
+        {% for i in range(studentCount) %}
+        {% with student = students[studentCount-1-i] %}
         <article class="media content-section">
             <div class="media-body">
-                <div class="article-metadata">
-                    <H4>Highest GPA Student</H4>
-                </div>
                 <p class="article-content"><strong>Student Name:</strong> {{ student.Student.firstname }} {{ student.Student.lastname }}</p>
                 <p class="article-content"><strong>Major:</strong> {{ student.Program.name }}</p>
                 <p class="article-content"><strong>Status:</strong> {{ student.Student.status }}</p>
@@ -55,6 +56,7 @@
             </div>
         </article>
         {% endwith %}
+        {% endfor %}
     {% else %}
         <article class="media content-section">
             <div class="media-body">

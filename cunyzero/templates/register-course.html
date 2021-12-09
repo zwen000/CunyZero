@@ -44,6 +44,7 @@
                     <th scope="col">Time</th>
                     <th scope="col">Capacity</th>
                     <th scope="col">Enrolled</th>
+                    <th scope="col">Credits</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -55,6 +56,7 @@
                         <td>{{course.startPeriod}}-{{course.endPeriod}}</td>
                         <td>{{course.capacity}}</td>
                         <td>{{course.getEnrolledTotal() }}</td>
+                        <td>{{course.credits}}</td>
                         <td>
                             <form method="POST">
                                 <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>
@@ -73,6 +75,7 @@
                     <th scope="col">Time</th>
                     <th scope="col">Capacity</th>
                     <th scope="col">Enrolled</th>
+                    <th scope="col">Credits</th>
                     <th scope="col">Options</th>
                     </tr>
                 </thead>
@@ -84,7 +87,7 @@
                         <td>{{course.startPeriod}}-{{course.endPeriod}}</td>
                         <td>{{course.capacity}}</td>
                         <td>{{course.getEnrolledTotal() }}</td>
-                        <th scope="col">Wait List Capacity</th>
+                        <td>{{course.credits}}</td>
                         <td>
                             <form method="POST">
                                 <button type="submit" name="Drop" value="{{course.id}}" class="btn btn-danger">Drop</button>

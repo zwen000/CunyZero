@@ -208,7 +208,8 @@ class Course(db.Model):
     dayofweek = db.Column(db.String(30), nullable = False)#mo,tu,we,th,fr,sa,su if missing use -- 
     capacity = db.Column(db.Integer, default=30)
     status = db.Column(db.String(20), nullable = False, default="Open")#status like open, finished, cancelled, etc.
-    
+    credits = db.Column(db.Integer, default=3)
+
     #wait_list = db.relationship('Waitlist', backref='course', lazy=True)
     waitListCapacity = db.Column(db.Integer, default=30)
     #gpa = db.Column(db.Float, nullable = True) # can be calculated with StudentCourse
@@ -414,7 +415,8 @@ class Period(db.Model):#set-up, registration, running, or grading period
             #instructor whose avgclass rating<2 receive 1 warning
             for course in Course.query.all():
                 classGpa = course.getClassGpa()
-                if classGpa:
+                print(f"Gpa, {classGpa}")
+                if classGpa!=None:
                     if classGpa<2.5 or classGpa>3.5:
                         course.instructor.warning+=1
                         warning = Warning(userId=course.instructor.ownerId,
